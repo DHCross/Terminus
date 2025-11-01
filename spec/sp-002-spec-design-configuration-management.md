@@ -115,12 +115,6 @@ This specification defines the configuration management requirements for Agent V
           "default": "gpt-4o-realtime-preview",
           "description": "Azure OpenAI Realtime model deployment name"
         },
-        "agentvoice.azureOpenAI.region": {
-          "type": "string",
-          "default": "eastus2",
-          "enum": ["eastus2", "swedencentral"],
-          "description": "Azure region for OpenAI service"
-        },
         "agentvoice.azureOpenAI.endpoint": {
           "type": "string",
           "default": "",

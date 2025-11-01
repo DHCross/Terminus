@@ -88,24 +88,10 @@
           "default": "gpt-4o-realtime-preview",
           "description": "Azure OpenAI Realtime model deployment name"
         },
-        "agentvoice.azureOpenAI.region": {
-          "type": "string",
-          "default": "eastus2",
-          "enum": [
-            "eastus2",
-            "swedencentral"
-          ],
-          "description": "Azure region for OpenAI service"
-        },
         "agentvoice.azureOpenAI.apiVersion": {
           "type": "string",
           "default": "2025-04-01-preview",
           "description": "Azure OpenAI API version used for realtime sessions"
-        },
-        "agentvoice.azureRealtime.model": {
-          "type": "string",
-          "default": "gpt-realtime",
-          "description": "Azure OpenAI realtime model identifier"
         },
         "agentvoice.azureRealtime.apiVersion": {
           "type": "string",

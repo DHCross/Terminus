@@ -300,7 +300,6 @@ export class ConfigurationManager implements ServiceInitializable {
     const criticalKeys = new Set([
       "azureOpenAI.endpoint",
       "azureOpenAI.deploymentName",
-      "azureOpenAI.region",
     ]);
     const changes: ConfigurationChange[] = [];
     for (const k of keys) {

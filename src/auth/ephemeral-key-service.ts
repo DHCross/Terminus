@@ -5,24 +5,24 @@ import { Logger } from "../core/logger";
 import { withRecovery } from "../helpers/error/envelope";
 import { AzureOpenAIConfig } from "../types/configuration";
 import {
-  AuthenticationError,
-  AuthenticationErrorHandler,
-  AuthenticationTestResult,
-  AzureSessionRequest,
-  AzureSessionResponse,
-  EphemeralKeyInfo,
-  EphemeralKeyResult,
-  EphemeralKeyService,
-  EphemeralKeyServiceConfig,
-  KeyExpirationHandler,
-  KeyRenewalHandler,
-  RealtimeSessionInfo,
+    AuthenticationError,
+    AuthenticationErrorHandler,
+    AuthenticationTestResult,
+    AzureSessionRequest,
+    AzureSessionResponse,
+    EphemeralKeyInfo,
+    EphemeralKeyResult,
+    EphemeralKeyService,
+    EphemeralKeyServiceConfig,
+    KeyExpirationHandler,
+    KeyRenewalHandler,
+    RealtimeSessionInfo,
 } from "../types/ephemeral";
 import type {
-  RecoveryExecutionOptions,
-  RecoveryExecutor,
-  RecoveryPlan,
-  AgentVoiceError,
+    AgentVoiceError,
+    RecoveryExecutionOptions,
+    RecoveryExecutor,
+    RecoveryPlan,
 } from "../types/error/agent-voice-error";
 import { CredentialManagerImpl } from "./credential-manager";
 
@@ -238,7 +238,6 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
           operation: "requestEphemeralKey",
           metadata: {
             endpoint: config.endpoint,
-            region: config.region,
             deployment: config.deploymentName,
           },
           retry: {
@@ -410,8 +409,8 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       }
     }
 
-    const config = this.configManager.getAzureOpenAIConfig();
-    const webrtcUrl = `https://${config.region}.realtimeapi-preview.ai.azure.com/v1/realtimertc`;
+    // WebRTC URL uses auto-selected region (defaults to eastus2)
+    const webrtcUrl = `https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc`;
     const keyInfo = this.getCurrentKey();
 
     if (!keyInfo) {
@@ -505,7 +504,6 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
     const result: AuthenticationTestResult = {
       success: false,
       endpoint: config.endpoint,
-      region: config.region,
       hasValidCredentials: !!apiKey,
       canCreateSessions: false,
     };

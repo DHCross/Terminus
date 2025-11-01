@@ -68,12 +68,10 @@ class MockConfigurationManager extends ConfigurationManager {
   private mockConfig: AzureOpenAIConfig = {
     endpoint: 'https://test.openai.azure.com',
     deploymentName: 'gpt-4o-realtime-preview',
-    region: 'eastus2',
     apiVersion: '2025-04-01-preview'
   };
 
   private mockRealtimeConfig: AzureRealtimeConfig = {
-    model: 'gpt-realtime-preview',
     apiVersion: '2025-08-28',
     transcriptionModel: 'whisper-1',
     inputAudioFormat: 'pcm16',
@@ -523,7 +521,6 @@ describe('EphemeralKeyService Tests', () => {
       assert.strictEqual(result.hasValidCredentials, true);
       assert.strictEqual(result.canCreateSessions, true);
       assert.strictEqual(result.endpoint, 'https://test.openai.azure.com');
-      assert.strictEqual(result.region, 'eastus2');
       assert.ok(typeof result.latencyMs === 'number');
     });
 

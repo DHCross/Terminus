@@ -12,8 +12,6 @@ export interface AzureOpenAIConfig {
   endpoint: string;
   /** Deployment name that maps to the targeted Azure OpenAI model. */
   deploymentName: string;
-  /** Geographic region the Azure OpenAI resource is provisioned in. */
-  region: "eastus2" | "swedencentral";
   /** Optional API version override; defaults to 2025-04-01-preview when omitted. */
   apiVersion?: string;
   /** Optional API key retrieved from secret storage for key-based auth flows. */
@@ -24,8 +22,6 @@ export interface AzureOpenAIConfig {
  * Configuration contract for Azure OpenAI Realtime (audio) sessions.
  */
 export interface AzureRealtimeConfig {
-  /** Default model identifier used for realtime conversations. */
-  model: string;
   /** API version applied when negotiating realtime sessions. */
   apiVersion: string;
   /** Secondary model used for transcription fallbacks or hybrid flows. */
@@ -254,3 +250,4 @@ export interface ConfigurationAccessors {
 export type { AudioFeedbackConfig } from "./audio-feedback";
 export type { PrivacyPolicyConfig } from "./privacy";
 export type { RetryConfig } from "./retry";
+

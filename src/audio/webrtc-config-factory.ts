@@ -1,23 +1,23 @@
 import { EphemeralKeyServiceImpl } from "../auth/ephemeral-key-service";
 import { ConfigurationManager } from "../config/configuration-manager";
 import {
-  resolveRealtimeSessionPreferences,
-  type RealtimeSessionPreferences,
+    resolveRealtimeSessionPreferences,
+    type RealtimeSessionPreferences,
 } from "../config/realtime-session";
 import { Logger } from "../core/logger";
 import type { AudioConfig, AzureRealtimeConfig } from "../types/configuration";
 import { EphemeralKeyInfo, RealtimeSessionInfo } from "../types/ephemeral";
 import {
-  AudioConfiguration,
-  ConnectionConfiguration,
-  DataChannelConfiguration,
-  EphemeralAuthentication,
-  WebRTCConfig,
-  WebRTCEndpoint,
-  WebRTCErrorCode,
-  WebRTCErrorImpl,
-  WebRTCSessionConfiguration,
-  validateAudioConfiguration,
+    AudioConfiguration,
+    ConnectionConfiguration,
+    DataChannelConfiguration,
+    EphemeralAuthentication,
+    WebRTCConfig,
+    WebRTCEndpoint,
+    WebRTCErrorCode,
+    WebRTCErrorImpl,
+    WebRTCSessionConfiguration,
+    validateAudioConfiguration,
 } from "../types/webrtc";
 
 /**
@@ -48,7 +48,6 @@ export class WebRTCConfigFactory {
       this.assertSessionExpiryWindow(realtimeSession);
 
       const endpoint = this.createEndpoint(
-        azureConfig.region,
         azureConfig.deploymentName,
         sessionPreferences.apiVersion,
       );
@@ -102,29 +101,16 @@ export class WebRTCConfigFactory {
   }
 
   /**
-   * Create WebRTC endpoint configuration from Azure region and deployment
+   * Create WebRTC endpoint configuration with auto-selected region
+   * Defaults to eastus2, could be enhanced with latency-based selection
    */
   private createEndpoint(
-    region: string,
     deploymentName: string,
     apiVersion: string,
   ): WebRTCEndpoint {
-    // Map Azure regions to supported WebRTC regions
-    const regionMapping: Record<string, "eastus2" | "swedencentral"> = {
-      eastus2: "eastus2",
-      swedencentral: "swedencentral",
-      // Add fallback mappings
-      eastus: "eastus2",
-      westeurope: "swedencentral",
-      northeurope: "swedencentral",
-    };
-
-    const webrtcRegion = regionMapping[region.toLowerCase()];
-    if (!webrtcRegion) {
-      throw new Error(
-        `Unsupported region for WebRTC: ${region}. Supported regions: eastus2, swedencentral`,
-      );
-    }
+    // Auto-select region - default to eastus2
+    // Future enhancement: implement latency-based region selection
+    const webrtcRegion = "eastus2";
 
     const url = `https://${webrtcRegion}.realtimeapi-preview.ai.azure.com/v1/realtimertc`;
 
@@ -496,7 +482,6 @@ export class WebRTCConfigFactory {
     };
 
     const realtimePreferences: AzureRealtimeConfig = {
-      model: "gpt-realtime",
       apiVersion: "2025-08-28",
       transcriptionModel: "whisper-1",
       inputAudioFormat: "pcm16",

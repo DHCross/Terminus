@@ -175,8 +175,6 @@ export interface AuthenticationTestResult {
   success: boolean;
   /** Azure OpenAI endpoint used for validation. */
   endpoint: string;
-  /** Azure region associated with the endpoint. */
-  region: string;
   /** True when credentials are present and valid. */
   hasValidCredentials: boolean;
   /** True when the service can successfully create sessions. */

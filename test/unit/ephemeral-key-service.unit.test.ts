@@ -2,9 +2,9 @@ import { EphemeralKeyServiceImpl } from '../../src/auth/ephemeral-key-service';
 import { resolveRealtimeSessionPreferences } from '../../src/config/realtime-session';
 import { Logger } from '../../src/core/logger';
 import {
-  AudioConfig,
-  AzureOpenAIConfig,
-  AzureRealtimeConfig,
+    AudioConfig,
+    AzureOpenAIConfig,
+    AzureRealtimeConfig,
 } from '../../src/types/configuration';
 import { expect } from "../helpers/chai-setup";
 import { afterEach, suite, test } from '../mocha-globals';
@@ -52,12 +52,10 @@ function okSessionResponse() {
 const baseConfig: AzureOpenAIConfig = {
   endpoint: 'https://unit.openai.azure.com',
   deploymentName: 'gpt-4o-realtime-preview',
-  region: 'eastus2',
   apiVersion: '2025-04-01-preview'
 };
 
 const baseRealtimeConfig: AzureRealtimeConfig = {
-  model: 'gpt-4o-realtime-preview',
   apiVersion: '2025-08-28',
   transcriptionModel: 'whisper-large-v3',
   inputAudioFormat: 'pcm16',

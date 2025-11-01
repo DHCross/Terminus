@@ -3,15 +3,15 @@ import type { ConfigurationManager } from "../../../src/config/configuration-man
 import { resolveRealtimeSessionPreferences } from "../../../src/config/realtime-session";
 import type { Logger } from "../../../src/core/logger";
 import type {
-  AudioConfig,
-  AzureOpenAIConfig,
-  AzureRealtimeConfig,
+    AudioConfig,
+    AzureOpenAIConfig,
+    AzureRealtimeConfig,
 } from "../../../src/types/configuration";
 import type { RealtimeSessionInfo } from "../../../src/types/ephemeral";
 import {
-  WebRTCErrorCode,
-  WebRTCErrorImpl,
-  type WebRTCConfig,
+    WebRTCErrorCode,
+    WebRTCErrorImpl,
+    type WebRTCConfig,
 } from "../../../src/types/webrtc";
 import { expect } from "../../helpers/chai-setup";
 import { suite, test } from "../../mocha-globals";
@@ -86,15 +86,14 @@ function createRealtimeSession(
 }
 
 function createAzureConfig(
-  overrides: Partial<AzureOpenAIConfig> & { region?: string } = {},
+  overrides: Partial<AzureOpenAIConfig> = {},
 ): AzureOpenAIConfig {
   return {
     endpoint: "https://example.openai.azure.com",
     deploymentName: "gpt-4o-realtime-preview",
-    region: "eastus2",
     apiVersion: "2025-04-01-preview",
     ...overrides,
-  } as unknown as AzureOpenAIConfig;
+  };
 }
 
 function createAudioConfig(
@@ -144,7 +143,6 @@ function createRealtimeConfig(
   overrides: Partial<AzureRealtimeConfig> = {},
 ): AzureRealtimeConfig {
   return {
-    model: "gpt-realtime",
     apiVersion: "2025-08-28",
     transcriptionModel: "whisper-1",
     inputAudioFormat: "pcm16",
@@ -255,14 +253,10 @@ suite("Unit: WebRTCConfigFactory", () => {
     expect(debugEntry, "should emit a debug log when config is created").to.exist;
   });
 
-  test("maps known Azure regions to supported WebRTC regions", async () => {
+  test("uses default eastus2 region for WebRTC endpoint", async () => {
     const { logger } = createTestLogger();
     const factory = new WebRTCConfigFactory(logger);
-    const { manager } = createConfigManagerStub({
-      azure: {
-        region: "eastus",
-      } as Partial<AzureOpenAIConfig> & { region: string },
-    });
+    const { manager } = createConfigManagerStub({});
 
     const keyService = new EphemeralKeyServiceStub(createRealtimeSession());
     const config = await factory.createConfig(manager, keyService as any);
@@ -271,27 +265,6 @@ suite("Unit: WebRTCConfigFactory", () => {
     expect(config.endpoint.url).to.equal(
       "https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc",
     );
-  });
-
-  test("rejects creation when the region is unsupported", async () => {
-    const { logger } = createTestLogger();
-    const factory = new WebRTCConfigFactory(logger);
-    const { manager } = createConfigManagerStub({
-      azure: {
-        region: "antarctica" as unknown as "eastus2",
-      },
-    });
-    const keyService = new EphemeralKeyServiceStub(createRealtimeSession());
-
-    try {
-      await factory.createConfig(manager, keyService as any);
-      expect.fail("Expected createConfig to reject for unsupported region");
-    } catch (error) {
-      const webrtcError = error as WebRTCErrorImpl;
-      expect(webrtcError).to.be.instanceOf(WebRTCErrorImpl);
-      expect(webrtcError.code).to.equal(WebRTCErrorCode.ConfigurationInvalid);
-      expect(webrtcError.message).to.match(/Unsupported region/i);
-    }
   });
 
   test("fails fast when session expiry window is unsafe", async () => {

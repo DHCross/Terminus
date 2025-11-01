@@ -29,7 +29,6 @@ describe('Configuration Sections', () => {
     const azureOpenAI = mgr.getAzureOpenAIConfig();
     assert.strictEqual(azureOpenAI.apiVersion, '2025-04-01-preview');
     const realtime = mgr.getAzureRealtimeConfig();
-    assert.strictEqual(realtime.model.length > 0, true, 'model default');
     assert.ok(['pcm16','pcm24','pcm32'].includes(realtime.inputAudioFormat), 'inputAudioFormat enum');
     assert.strictEqual(realtime.transcriptionModel, 'whisper-1');
     assert.strictEqual(realtime.profanityFilter, 'medium');

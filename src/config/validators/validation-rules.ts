@@ -30,14 +30,7 @@ export const endpointRule: ValidationRule = ({ azureOpenAI }) => {
   return { errors, warnings };
 };
 
-export const regionRule: ValidationRule = ({ azureOpenAI }) => {
-  const allowed = ['eastus2','swedencentral'];
-  const errors: ValidationError[] = []; const warnings: ValidationWarning[] = [];
-  if (!allowed.includes(azureOpenAI.region)) {
-    errors.push(err('agentvoice.azureOpenAI.region','Unsupported Azure OpenAI region','UNSUPPORTED_REGION',`Choose one of: ${allowed.join(', ')}`));
-  }
-  return { errors, warnings };
-};
+// regionRule removed - region is now auto-detected from WebRTC endpoint availability
 
 export const numericRangesRule: ValidationRule = ({ commands }) => {
   const errors: ValidationError[] = []; const warnings: ValidationWarning[] = [];
@@ -325,4 +318,4 @@ export const retryGuardrailsRule: ValidationRule = ({ retry }) => {
   return { errors, warnings };
 };
 
-export const allRules: ValidationRule[] = [endpointRule, regionRule, numericRangesRule, repoFormatRule, turnDetectionRule, azureRealtimeRule, conversationPolicyRule, privacyRetentionRule, audioFeedbackRule, retryGuardrailsRule, audioDevicesRule, networkReachabilityRule];
+export const allRules: ValidationRule[] = [endpointRule, numericRangesRule, repoFormatRule, turnDetectionRule, azureRealtimeRule, conversationPolicyRule, privacyRetentionRule, audioFeedbackRule, retryGuardrailsRule, audioDevicesRule, networkReachabilityRule];

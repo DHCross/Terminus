@@ -747,13 +747,12 @@ graph TD
 
 - `agentvoice.azureOpenAI.endpoint`: Azure OpenAI resource endpoint (required)
 - `agentvoice.azureOpenAI.deploymentName`: Realtime model deployment name (required)
-- `agentvoice.azureOpenAI.region`: Azure region (eastus2 or swedencentral)
 - `agentvoice.azureOpenAI.apiVersion`: API version for REST calls (default: 2025-04-01-preview)
 - **Authentication**: Keyless via `DefaultAzureCredential` or API key in VS Code secret storage
+- **WebRTC Region**: Auto-selected (defaults to eastus2, could be enhanced with latency-based selection)
 
 ### Azure Realtime Settings
 
-- `agentvoice.azureRealtime.model`: Model identifier (default: gpt-realtime)
 - `agentvoice.azureRealtime.apiVersion`: Realtime API version (default: 2025-08-28)
 - `agentvoice.azureRealtime.transcriptionModel`: Transcription model (default: whisper-1)
 - `agentvoice.azureRealtime.inputAudioFormat`: Input PCM format (pcm16/pcm24/pcm32)
