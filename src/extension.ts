@@ -13,6 +13,7 @@ import { lifecycleTelemetry } from './telemetry/lifecycle-telemetry';
 import { VoiceControlPanel } from './ui/voice-control-panel';
 
 let controller: ExtensionController | undefined;
+let isActivated = false;
 
 /**
  * Activates the Agent Voice extension following the documented configuration → auth → session → UI boot order.
@@ -27,7 +28,12 @@ let controller: ExtensionController | undefined;
  * @returns A promise that resolves once activation has completed or an error has been handled.
  */
 export async function activate(context: vscode.ExtensionContext) {
+  if (isActivated) {
+    throw new Error('Extension is already activated');
+  }
+
   const start = performance.now();
+  isActivated = true;
   lifecycleTelemetry.reset();
   const logger = new Logger();
   context.subscriptions.push(logger);
@@ -36,6 +42,21 @@ export async function activate(context: vscode.ExtensionContext) {
   const intentProcessor = new IntentProcessorImpl(logger);
   const voicePanel = new VoiceControlPanel(context);
   const privacyController = new PrivacyController(configurationManager, logger);
+
+  // Register the webview view provider before creating the controller
+  logger.info('Registering webview view provider for agentvoice.voiceControl');
+  const registration = vscode.window.registerWebviewViewProvider(
+    "agentvoice.voiceControl",
+    voicePanel,
+    {
+      webviewOptions: {
+        retainContextWhenHidden: true,
+      },
+    },
+  );
+  context.subscriptions.push(registration);
+  logger.info('Webview view provider registered successfully');
+
   controller = new ExtensionController(
     context,
     configurationManager,
@@ -78,6 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.showErrorMessage(`Agent Voice activation failed: ${error.message}`);
     controller?.dispose();
     controller = undefined;
+    isActivated = false;
     throw error;
   }
 }
@@ -92,5 +114,6 @@ export async function deactivate(): Promise<void> {
     controller?.dispose();
   } finally {
     controller = undefined;
+    isActivated = false;
   }
 }

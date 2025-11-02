@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import * as panelTemplate from "../../../src/ui/templates/voice-control-panel.html";
 import { VoiceControlPanel } from "../../../src/ui/voice-control-panel";
 import type {
-  PanelOutboundMessage,
-  TranscriptEntry,
-  VoiceControlPanelState,
+    PanelOutboundMessage,
+    TranscriptEntry,
+    VoiceControlPanelState,
 } from "../../../src/ui/voice-control-state";
 import { MAX_TRANSCRIPT_ENTRIES } from "../../../src/ui/voice-control-state";
 import { expect } from "../../helpers/chai-setup";
@@ -153,7 +153,7 @@ suite("Unit: VoiceControlPanel", () => {
     (vscode.commands as unknown as { executeCommand: typeof vscode.commands.executeCommand }).executeCommand = originalExecuteCommand;
   });
 
-  test("initialize registers the panel provider exactly once", async () => {
+  test("initialize sets the initialized flag without registering provider", async () => {
     const context = createExtensionContextStub();
     const panel = new VoiceControlPanel(context);
 
@@ -161,8 +161,8 @@ suite("Unit: VoiceControlPanel", () => {
     await panel.initialize();
 
     expect(panel.isInitialized()).to.equal(true);
-    expect(registerInvocations).to.have.length(1);
-    expect(registerInvocations[0]?.viewType).to.equal(VoiceControlPanel.viewType);
+    // Registration now happens in extension.ts, not in initialize()
+    expect(registerInvocations).to.have.length(0);
 
     panel.dispose();
     expect(panel.isInitialized()).to.equal(false);
@@ -240,7 +240,7 @@ suite("Unit: VoiceControlPanel", () => {
     const { view, postMessages } = createWebviewViewStub();
 
     panel.setFallbackState(true, "Network issue");
-    panel.resolveWebviewView(view);
+    panel.resolveWebviewView(view, {} as vscode.WebviewViewResolveContext, {} as vscode.CancellationToken);
 
     panel.updateSession({ sessionId: null, status: "ready" });
 
@@ -271,7 +271,7 @@ suite("Unit: VoiceControlPanel", () => {
     }));
     internal.state.truncated = false;
 
-    panel.resolveWebviewView(stub.view);
+    panel.resolveWebviewView(stub.view, {} as vscode.WebviewViewResolveContext, {} as vscode.CancellationToken);
 
     const pendingEntry = {
       speaker: "agentvoice",
@@ -304,7 +304,7 @@ suite("Unit: VoiceControlPanel", () => {
       actions.push(action);
     });
 
-    panel.resolveWebviewView(stub.view);
+    panel.resolveWebviewView(stub.view, {} as vscode.WebviewViewResolveContext, {} as vscode.CancellationToken);
 
     stub.triggerMessage({ type: "panel.action", action: "start" });
 
@@ -324,7 +324,7 @@ suite("Unit: VoiceControlPanel", () => {
       throw new Error("boom");
     });
 
-    panel.resolveWebviewView(stub.view);
+    panel.resolveWebviewView(stub.view, {} as vscode.WebviewViewResolveContext, {} as vscode.CancellationToken);
 
     stub.triggerMessage({ type: "panel.action", action: "stop" });
 

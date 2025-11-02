@@ -424,7 +424,7 @@
         {
           "id": "agentvoice.voiceControl",
           "name": "Voice Control",
-          "when": "agentvoice.activated",
+          "type": "webview",
           "icon": "assets/icon.svg"
         }
       ]

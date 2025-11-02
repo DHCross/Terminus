@@ -109,30 +109,40 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
         flex-direction: column;
         height: 100vh;
         box-sizing: border-box;
-        padding: 12px;
-        gap: 12px;
+        padding: 0;
+        gap: 0;
       }
       .vp-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
+        padding: 8px 12px;
+        background: var(--vscode-sideBarSectionHeader-background);
+        border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border);
+        min-height: 35px;
       }
       .vp-title {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-weight: 600;
-        font-size: 1.1rem;
+        font-weight: 400;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--vscode-sideBarTitle-foreground);
+      }
+      .vp-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
       .vp-status {
         display: flex;
         flex-direction: column;
         gap: 4px;
         padding: 8px 12px;
-        border-radius: 8px;
         background: var(--vscode-editorWidget-background);
-        border: 1px solid var(--vscode-editorWidget-border);
+        border-bottom: 1px solid var(--vscode-panel-border);
       }
       .vp-status[data-state="listening"] {
         border-color: var(--vscode-testing-iconQueued);
@@ -159,9 +169,9 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
         justify-content: space-between;
         gap: 12px;
         padding: 8px 12px;
-        border-radius: 6px;
         background: var(--vscode-statusBarItem-warningBackground);
         color: var(--vscode-statusBarItem-warningForeground);
+        border-bottom: 1px solid var(--vscode-panel-border);
       }
       .vp-banner[hidden] {
         display: none;
@@ -169,10 +179,9 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
       .vp-transcript-container {
         flex: 1 1 auto;
         overflow-y: auto;
-        border-radius: 8px;
-        border: 1px solid var(--vscode-panel-border);
         background: var(--vscode-editor-background);
-        padding: 12px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--vscode-panel-border);
       }
       .vp-transcript {
         list-style: none;
@@ -202,14 +211,14 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
       .vp-footer {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 0;
+        padding: 8px 12px;
       }
       .vp-primary {
-        padding: 10px 16px;
-        border-radius: 6px;
+        padding: 8px 12px;
         border: none;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 500;
         cursor: pointer;
         background: var(--vscode-button-background);
         color: var(--vscode-button-foreground);
@@ -222,8 +231,11 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 0.85rem;
+        font-size: 11px;
         color: var(--vscode-descriptionForeground);
+        padding: 6px 12px;
+        background: var(--vscode-sideBar-background);
+        border-bottom: 1px solid var(--vscode-panel-border);
       }
       .vp-mic-indicator[data-state="capturing"]::before {
         content: '●';
@@ -257,22 +269,28 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
         border: 0;
       }
       .vp-hint {
-        font-size: 0.8rem;
+        font-size: 11px;
         color: var(--vscode-descriptionForeground);
+        padding: 4px 0;
       }
       button.vp-icon-button {
-        background: none;
+        background: transparent;
         border: none;
         cursor: pointer;
-        color: inherit;
-        padding: 4px;
+        color: var(--vscode-icon-foreground);
+        padding: 4px 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 4px;
+        opacity: 0.8;
+        font-size: 14px;
       }
       button.vp-icon-button:hover {
         background: var(--vscode-toolbar-hoverBackground);
+        opacity: 1;
+      }
+      button.vp-icon-button:active {
+        background: var(--vscode-toolbar-activeBackground);
       }
     </style>
   </head>
@@ -280,11 +298,11 @@ export function renderVoiceControlPanelHtml(options: RenderOptions): string {
     <div class="vp-root" data-status="${state.status}">
       <div class="vp-header">
         <div class="vp-title" aria-live="off">
-          <span role="img" aria-hidden="true">🎤</span>
-          <span>Agent Voice</span>
+          <span>SESSION</span>
         </div>
-        <div>
+        <div class="vp-header-actions">
           <button id="vp-settings" class="vp-icon-button" title="Open Agent Voice settings" aria-label="Open Agent Voice settings">⚙️</button>
+          <button id="vp-more" class="vp-icon-button" title="More actions" aria-label="More actions">⋯</button>
         </div>
       </div>
       <section id="vp-status" class="vp-status" data-state="${state.status}" aria-live="polite">

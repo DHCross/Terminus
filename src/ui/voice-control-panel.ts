@@ -100,16 +100,8 @@ export class VoiceControlPanel
       return;
     }
 
-    this.registration = vscode.window.registerWebviewViewProvider(
-      VoiceControlPanel.viewType,
-      this,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
-      },
-    );
-    this.trackDisposable("voice-control-panel.registration", this.registration);
+    // Registration is now handled in extension.ts activation
+    // to ensure it happens before other initialization
     this.initialized = true;
   }
 
@@ -605,7 +597,12 @@ export class VoiceControlPanel
    *
    * @param webviewView - The webview host that renders the panel UI.
    */
-  resolveWebviewView(webviewView: vscode.WebviewView): void {
+  resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    context: vscode.WebviewViewResolveContext,
+    token: vscode.CancellationToken,
+  ): void | Thenable<void> {
+    console.log('Agent Voice: resolveWebviewView called');
     this.currentView = webviewView;
     this.visible = webviewView.visible || this.visible;
 

@@ -115,6 +115,9 @@ export const window = {
   showErrorMessage: (message: string) => Promise.resolve(undefined),
   showWarningMessage: (message: string) => Promise.resolve(undefined),
   showInformationMessage: (message: string) => Promise.resolve(undefined),
+  registerWebviewViewProvider: (viewId: string, provider: any, options?: any) => ({
+    dispose: () => {},
+  }),
 };
 
 export const workspace = {
