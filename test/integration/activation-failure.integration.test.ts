@@ -106,6 +106,8 @@ suite("Integration: Activation failure regressions", () => {
     }
     lifecycleTelemetry.reset();
     await deactivate();
+    // Add a small delay to ensure VS Code completes cleanup
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   test("cleans up when authentication upstream is unavailable", async function () {
@@ -116,6 +118,8 @@ suite("Integration: Activation failure regressions", () => {
 
     (vscode.window as any).showInformationMessage = async () => undefined;
     (vscode.window as any).showErrorMessage = async () => undefined;
+    // Stub registerWebviewViewProvider to avoid "already registered" errors
+    (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     const outageFixturePath = path.join(
       FIXTURE_ROOT,
@@ -174,6 +178,8 @@ suite("Integration: Activation failure regressions", () => {
 
     (vscode.window as any).showInformationMessage = async () => undefined;
     (vscode.window as any).showErrorMessage = async () => undefined;
+    // Stub registerWebviewViewProvider to avoid "already registered" errors
+    (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     const hintPath = path.join(FIXTURE_ROOT, "no-credentials-hint.json");
     const hintFixture = JSON.parse(await fs.readFile(hintPath, "utf8")) as {

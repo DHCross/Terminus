@@ -91,6 +91,8 @@ suite("Integration: Activation lifecycle telemetry", () => {
     }
     lifecycleTelemetry.reset();
     await deactivate();
+    // Add a small delay to ensure VS Code completes cleanup
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   test("emits configuration → authentication → session → UI order", async function () {
@@ -100,6 +102,8 @@ suite("Integration: Activation lifecycle telemetry", () => {
     await deactivate();
 
     (vscode.window as any).showInformationMessage = async () => undefined;
+    // Stub registerWebviewViewProvider to avoid "already registered" errors
+    (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     // Mock credentials and ephemeral key service
     CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {

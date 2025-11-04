@@ -14,6 +14,7 @@ import { VoiceControlPanel } from './ui/voice-control-panel';
 
 let controller: ExtensionController | undefined;
 let isActivated = false;
+let webviewProviderRegistered = false;
 
 /**
  * Activates the Agent Voice extension following the documented configuration → auth → session → UI boot order.
@@ -44,18 +45,24 @@ export async function activate(context: vscode.ExtensionContext) {
   const privacyController = new PrivacyController(configurationManager, logger);
 
   // Register the webview view provider before creating the controller
-  logger.info('Registering webview view provider for agentvoice.voiceControl');
-  const registration = vscode.window.registerWebviewViewProvider(
-    "agentvoice.voiceControl",
-    voicePanel,
-    {
-      webviewOptions: {
-        retainContextWhenHidden: true,
+  // Only register once per extension host lifetime to avoid "already registered" errors in tests
+  if (!webviewProviderRegistered) {
+    logger.info('Registering webview view provider for agentvoice.voiceControl');
+    const registration = vscode.window.registerWebviewViewProvider(
+      "agentvoice.voiceControl",
+      voicePanel,
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
       },
-    },
-  );
-  context.subscriptions.push(registration);
-  logger.info('Webview view provider registered successfully');
+    );
+    context.subscriptions.push(registration);
+    webviewProviderRegistered = true;
+    logger.info('Webview view provider registered successfully');
+  } else {
+    logger.info('Webview view provider already registered, skipping registration');
+  }
 
   controller = new ExtensionController(
     context,
@@ -115,5 +122,6 @@ export async function deactivate(): Promise<void> {
   } finally {
     controller = undefined;
     isActivated = false;
+    webviewProviderRegistered = false;
   }
 }

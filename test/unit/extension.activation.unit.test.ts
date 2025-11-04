@@ -34,7 +34,9 @@ function createStubRegistry() {
 suite('Unit: extension activation lifecycle', () => {
   let registry: ReturnType<typeof createStubRegistry>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Ensure clean state before each test
+    await deactivate();
     registry = createStubRegistry();
     class StubStatusBar {
       showReady(): void {}
@@ -43,11 +45,18 @@ suite('Unit: extension activation lifecycle', () => {
       dispose(): void {}
     }
     registry.stub(statusBarModule as any, 'StatusBar', StubStatusBar);
+
+    // Stub registerWebviewViewProvider to avoid "already registered" errors in tests
+    registry.stub(vscode.window as any, 'registerWebviewViewProvider', function(...args: any[]) {
+      return { dispose: () => {} } as vscode.Disposable;
+    });
   });
 
   afterEach(async () => {
     await deactivate();
     await registry.dispose();
+    // Add a small delay to ensure VS Code completes cleanup
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   test('activates extension and updates contexts when Copilot is available', async () => {

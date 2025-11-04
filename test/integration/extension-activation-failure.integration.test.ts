@@ -29,7 +29,9 @@ suite("Integration: Activation Failure Handling", () => {
     | CredentialManagerImpl["testCredentialAccess"]
     | undefined;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Ensure clean state before each test
+    await deactivate();
     captured.length = 0;
 
     const secretsStore = new Map<string, string>();
@@ -68,6 +70,9 @@ suite("Integration: Activation Failure Handling", () => {
       captured.push(sanitizeLogEntry(entry));
     });
     disposables.push(loggerDisposable);
+
+    // Stub registerWebviewViewProvider to avoid "already registered" errors
+    (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     originalFetch = globalThis.fetch;
     globalThis.fetch = async () => ({
@@ -132,6 +137,8 @@ suite("Integration: Activation Failure Handling", () => {
       CredentialManagerImpl.prototype.testCredentialAccess =
         originalTestCredentialAccess;
     }
+    // Add a small delay to ensure VS Code completes cleanup
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   test("cleans up services when configuration initialization fails", async function () {

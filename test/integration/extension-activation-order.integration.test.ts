@@ -23,7 +23,9 @@ suite("Integration: Activation Telemetry", () => {
     | CredentialManagerImpl["testCredentialAccess"]
     | undefined;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Ensure clean state before each test
+    await deactivate();
     captured.length = 0;
     capturedWarnings.length = 0;
 
@@ -69,6 +71,9 @@ suite("Integration: Activation Telemetry", () => {
       }
     });
     disposables.push(logDisposable);
+
+    // Stub registerWebviewViewProvider to avoid "already registered" errors
+    (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     originalFetch = globalThis.fetch;
     globalThis.fetch = async () => ({
@@ -122,6 +127,8 @@ suite("Integration: Activation Telemetry", () => {
       CredentialManagerImpl.prototype.testCredentialAccess =
         originalTestCredentialAccess;
     }
+    // Add a small delay to ensure VS Code completes cleanup
+    await new Promise(resolve => setTimeout(resolve, 50));
   });
 
   test("emits initialization telemetry in dependency order", async function () {
