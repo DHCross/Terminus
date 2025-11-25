@@ -141,12 +141,13 @@ jobs:
 
       - name: Run ESLint security scan (SARIF)
         run: |
-          npx eslint --ext .ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif . || true
+          npx eslint --config eslint.config.js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif src || true
 
       - name: Upload ESLint SARIF
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: eslint-results.sarif
+          category: eslint-security-scan
 
       - name: Run Trivy dependency scan
         uses: aquasecurity/trivy-action@0.33.1
@@ -156,12 +157,14 @@ jobs:
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
           exit-code: '1'
+          skip-files: '.git/**,.vscode-test/**,out/**,node_modules/**'
 
       - name: Upload Trivy SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
+          category: trivy-dependency-scan
 
       - name: Dependency review (pull requests only)
         if: github.event_name == 'pull_request'
