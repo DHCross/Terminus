@@ -2,9 +2,6 @@
  * Secret storage key schema with namespaced identifiers
  */
 export interface SecretKeySchema {
-  // Azure service keys
-  AZURE_OPENAI_API_KEY: "agentvoice.azure-openai.apikey";
-
   // GitHub authentication
   GITHUB_PERSONAL_TOKEN: "agentvoice.github.token";
 
@@ -16,8 +13,6 @@ export interface SecretKeySchema {
  * Const implementation for type safety and consistency
  */
 export const SECRET_KEYS: SecretKeySchema = {
-  AZURE_OPENAI_API_KEY: "agentvoice.azure-openai.apikey",
-  // Azure Speech removed: keep only Azure OpenAI and GitHub
   GITHUB_PERSONAL_TOKEN: "agentvoice.github.token",
 } as const;
 
@@ -25,7 +20,6 @@ export const SECRET_KEYS: SecretKeySchema = {
  * Legacy credential keys for migration purposes
  */
 export const LEGACY_KEYS = {
-  AZURE_OLD: "agentvoice.azure.key",
   GITHUB_OLD: "agentvoice.github.pat",
 } as const;
 
@@ -41,7 +35,5 @@ export const VALIDATION_TIMEOUTS = {
  * Validation endpoints for credential testing
  */
 export const VALIDATION_ENDPOINTS = {
-  AZURE_OPENAI: "https://api.openai.azure.com/openai/deployments",
-  // AZURE_SPEECH endpoint removed (migrated to Realtime API)
   GITHUB_API: "https://api.github.com/user",
 } as const;

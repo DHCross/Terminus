@@ -905,6 +905,32 @@ export class ExtensionController implements ServiceInitializable {
     });
     this.controllerDisposables.push(hooksDisposable);
 
+    // Register panel action handler
+    const panelActionDisposable = this.voicePanel.onAction(async (action) => {
+      try {
+        this.logger.info('Panel action received', { action });
+        switch (action) {
+          case 'start':
+            await this.sessionManager.startSession();
+            break;
+          case 'stop':
+            await this.sessionManager.endSession();
+            break;
+          case 'configure':
+            await vscode.commands.executeCommand('agentvoice.openSettings');
+            break;
+          default:
+            this.logger.warn('Unknown panel action', { action });
+        }
+      } catch (error: any) {
+        const message = error?.message ?? String(error);
+        this.logger.error('Panel action failed', { action, error: message });
+        // Re-throw with a proper message so the panel can display it
+        throw new Error(message);
+      }
+    });
+    this.controllerDisposables.push(panelActionDisposable);
+
     const stateSubscription = this.conversationMachine.onStateChanged(
       (event) => {
         void this.handleConversationStateChange(event);

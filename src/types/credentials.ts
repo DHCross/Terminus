@@ -54,14 +54,6 @@ export interface CredentialValidationResult {
  * Main credential manager interface for secure storage and retrieval
  */
 export interface CredentialManager extends ServiceInitializable {
-  // Azure OpenAI credentials
-  storeAzureOpenAIKey(key: string): Promise<void>;
-  getAzureOpenAIKey(): Promise<string | undefined>;
-  clearAzureOpenAIKey(): Promise<void>;
-
-  // Azure Speech credentials
-  // Azure Speech removed: use Azure OpenAI Realtime instead
-
   // GitHub credentials
   storeGitHubToken(token: string): Promise<void>;
   getGitHubToken(): Promise<string | undefined>;
@@ -86,6 +78,5 @@ export interface CredentialManager extends ServiceInitializable {
  * Interface for credential validation
  */
 export interface CredentialValidator {
-  validateAzureOpenAIKey(key: string): Promise<CredentialValidationResult>;
   validateGitHubToken(token: string): Promise<CredentialValidationResult>;
 }

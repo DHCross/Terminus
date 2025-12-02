@@ -34,9 +34,6 @@ const createMockContext = (): vscode.ExtensionContext => ({
 
 // Mock CredentialManager
 class MockCredentialManager extends CredentialManagerImpl {
-  private mockApiKey = 'test-api-key';
-  private shouldReturnKey = true;
-
   constructor() {
     super(createMockContext(), new Logger('MockCredentialManager'));
   }
@@ -47,19 +44,6 @@ class MockCredentialManager extends CredentialManagerImpl {
 
   isInitialized(): boolean {
     return true;
-  }
-
-  async getAzureOpenAIKey(): Promise<string | undefined> {
-    return this.shouldReturnKey ? this.mockApiKey : undefined;
-  }
-
-  setMockApiKey(key: string | undefined): void {
-    if (key) {
-      this.mockApiKey = key;
-      this.shouldReturnKey = true;
-    } else {
-      this.shouldReturnKey = false;
-    }
   }
 }
 
@@ -325,15 +309,14 @@ describe('EphemeralKeyService Tests', () => {
       assert.ok(renewalEvent.refreshAt instanceof Date);
     });
 
-  it('should handle missing credentials', async () => {
-      mockCredentialManager.setMockApiKey(undefined);
-
-      const result = await service.requestEphemeralKey();
-
-      assert.strictEqual(result.success, false);
-      assert.strictEqual(result.error?.code, 'MISSING_CREDENTIALS');
-      assert.strictEqual(result.error?.isRetryable, false);
-    });
+  // Test removed: API key support was removed in favor of keyless authentication
+  // it('should handle missing credentials', async () => {
+  //     mockCredentialManager.setMockApiKey(undefined);
+  //     const result = await service.requestEphemeralKey();
+  //     assert.strictEqual(result.success, false);
+  //     assert.strictEqual(result.error?.code, 'MISSING_CREDENTIALS');
+  //     assert.strictEqual(result.error?.isRetryable, false);
+  //   });
 
   it('should handle Azure API errors', async () => {
       setMockFetch({ error: { message: 'Invalid API key' } }, 401);
@@ -524,16 +507,15 @@ describe('EphemeralKeyService Tests', () => {
       assert.ok(typeof result.latencyMs === 'number');
     });
 
-  it('should handle authentication test with missing credentials', async () => {
-      mockCredentialManager.setMockApiKey(undefined);
-
-      const result = await service.testAuthentication();
-
-      assert.strictEqual(result.success, false);
-      assert.strictEqual(result.hasValidCredentials, false);
-      assert.strictEqual(result.canCreateSessions, false);
-      assert.strictEqual(result.error, 'No Azure OpenAI API key configured');
-    });
+  // Test removed: API key support was removed in favor of keyless authentication
+  // it('should handle authentication test with missing credentials', async () => {
+  //     mockCredentialManager.setMockApiKey(undefined);
+  //     const result = await service.testAuthentication();
+  //     assert.strictEqual(result.success, false);
+  //     assert.strictEqual(result.hasValidCredentials, false);
+  //     assert.strictEqual(result.canCreateSessions, false);
+  //     assert.strictEqual(result.error, 'No Azure OpenAI API key configured');
+  //   });
 
   it('should handle authentication test with invalid credentials', async () => {
       setMockFetch({ error: { message: 'Invalid API key' } }, 401);

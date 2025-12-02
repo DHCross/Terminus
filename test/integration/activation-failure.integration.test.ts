@@ -36,17 +36,17 @@ const createTestContext = (namespace: string): vscode.ExtensionContext => {
       delete: async (key: string) => {
         secretsStore.delete(key);
       },
-    },
+    } as any,
     workspaceState: {
       get: () => undefined,
       update: async () => undefined,
       keys: () => [],
-    },
+    } as any,
     globalState: {
       get: () => undefined,
       update: async () => undefined,
       keys: () => [],
-    },
+    } as any,
     asAbsolutePath: (p: string) => p,
   } as unknown as vscode.ExtensionContext;
 };
@@ -54,9 +54,6 @@ const createTestContext = (namespace: string): vscode.ExtensionContext => {
 suite("Integration: Activation failure regressions", () => {
   let originalEphemeralInitialize:
     | EphemeralKeyServiceImpl["initialize"]
-    | undefined;
-  let originalGetAzureKey:
-    | ((this: CredentialManagerImpl) => Promise<string | undefined>)
     | undefined;
   let originalTestCredentialAccess:
     | ((
@@ -77,8 +74,6 @@ suite("Integration: Activation failure regressions", () => {
   before(() => {
     originalEphemeralInitialize =
       EphemeralKeyServiceImpl.prototype.initialize;
-    originalGetAzureKey =
-      CredentialManagerImpl.prototype.getAzureOpenAIKey;
     originalTestCredentialAccess =
       CredentialManagerImpl.prototype.testCredentialAccess;
     originalShowInformationMessage = vscode.window.showInformationMessage;
@@ -89,9 +84,6 @@ suite("Integration: Activation failure regressions", () => {
     if (originalEphemeralInitialize) {
       EphemeralKeyServiceImpl.prototype.initialize =
         originalEphemeralInitialize;
-    }
-    if (originalGetAzureKey) {
-      CredentialManagerImpl.prototype.getAzureOpenAIKey = originalGetAzureKey;
     }
     if (originalTestCredentialAccess) {
       CredentialManagerImpl.prototype.testCredentialAccess =
@@ -133,10 +125,6 @@ suite("Integration: Activation failure regressions", () => {
       throw new Error(
         `Authentication initialization failed: ${outageFixture.status}: ${outageFixture.error.message}`,
       );
-    };
-
-    CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {
-      return "fake-key-for-regression";
     };
 
     CredentialManagerImpl.prototype.testCredentialAccess = async function () {
@@ -192,10 +180,6 @@ suite("Integration: Activation failure regressions", () => {
       throw new Error(
         `Authentication initialization failed: ${hintFixture.expectedErrorSnippet}`,
       );
-    };
-
-    CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {
-      return undefined;
     };
 
     CredentialManagerImpl.prototype.testCredentialAccess = async function () {

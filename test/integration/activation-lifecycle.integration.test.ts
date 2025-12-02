@@ -42,9 +42,6 @@ const createTestContext = (namespace: string): vscode.ExtensionContext => {
 };
 
 suite("Integration: Activation lifecycle telemetry", () => {
-  let originalGetAzureKey:
-    | ((this: CredentialManagerImpl) => Promise<string | undefined>)
-    | undefined;
   let originalTestCredentialAccess:
     | ((
         this: CredentialManagerImpl,
@@ -62,7 +59,6 @@ suite("Integration: Activation lifecycle telemetry", () => {
     | undefined;
 
   before(() => {
-    originalGetAzureKey = CredentialManagerImpl.prototype.getAzureOpenAIKey;
     originalTestCredentialAccess =
       CredentialManagerImpl.prototype.testCredentialAccess;
     originalEphemeralInitialize = EphemeralKeyServiceImpl.prototype.initialize;
@@ -70,9 +66,6 @@ suite("Integration: Activation lifecycle telemetry", () => {
   });
 
   afterEach(async () => {
-    if (originalGetAzureKey) {
-      CredentialManagerImpl.prototype.getAzureOpenAIKey = originalGetAzureKey;
-    }
     if (originalTestCredentialAccess) {
       CredentialManagerImpl.prototype.testCredentialAccess =
         originalTestCredentialAccess;
@@ -106,10 +99,6 @@ suite("Integration: Activation lifecycle telemetry", () => {
     (vscode.window as any).registerWebviewViewProvider = () => ({ dispose: () => {} });
 
     // Mock credentials and ephemeral key service
-    CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {
-      return "azure-openai-test-key";
-    };
-
     CredentialManagerImpl.prototype.testCredentialAccess = async function () {
       return {
         secretStorageAvailable: true,

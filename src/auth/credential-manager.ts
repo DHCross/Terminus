@@ -71,67 +71,8 @@ export class CredentialManagerImpl implements CredentialManager {
     this.logger.info("CredentialManager disposed");
   }
 
-  // Azure OpenAI credential operations
-  async storeAzureOpenAIKey(key: string): Promise<void> {
-    this.ensureInitialized();
-
-    // Validate key format before storage
-    const validation = await this.validator.validateAzureOpenAIKey(key);
-    if (!validation.isValid) {
-      const error = validation.errors[0];
-      this.logger.error("Invalid Azure OpenAI key format", {
-        code: error.code,
-      });
-      throw new Error(`Invalid Azure OpenAI key: ${error.message}`);
-    }
-
-    try {
-      await this.context.secrets.store(SECRET_KEYS.AZURE_OPENAI_API_KEY, key);
-      this.logger.info("Azure OpenAI key stored successfully");
-    } catch (error: any) {
-      this.logger.error("Failed to store Azure OpenAI key", {
-        error: error.message,
-      });
-      throw new Error("Failed to store credential securely");
-    }
-  }
-
-  async getAzureOpenAIKey(): Promise<string | undefined> {
-    this.ensureInitialized();
-
-    try {
-      const key = await this.context.secrets.get(
-        SECRET_KEYS.AZURE_OPENAI_API_KEY,
-      );
-      if (key) {
-        this.logger.debug("Azure OpenAI key retrieved");
-      }
-      return key;
-    } catch (error: any) {
-      this.logger.error("Failed to retrieve Azure OpenAI key", {
-        error: error.message,
-      });
-      return undefined;
-    }
-  }
-
-  async clearAzureOpenAIKey(): Promise<void> {
-    this.ensureInitialized();
-
-    try {
-      await this.context.secrets.delete(SECRET_KEYS.AZURE_OPENAI_API_KEY);
-      this.logger.info("Azure OpenAI key cleared successfully");
-    } catch (error: any) {
-      this.logger.error("Failed to clear Azure OpenAI key", {
-        error: error.message,
-      });
-      throw new Error("Failed to clear credential");
-    }
-  }
-
-  // Azure Speech credential operations
-  // Azure Speech credential operations removed: using Azure OpenAI Realtime
-  // model and keyless authentication via @azure/identity instead.
+  // Azure OpenAI credential operations removed: using keyless authentication
+  // via @azure/identity (DefaultAzureCredential) instead.
 
   // GitHub credential operations
   async storeGitHubToken(token: string): Promise<void> {
@@ -200,8 +141,6 @@ export class CredentialManagerImpl implements CredentialManager {
     this.ensureInitialized();
 
     switch (type) {
-      case CredentialType.AzureOpenAI:
-        return this.validator.validateAzureOpenAIKey(value);
       case CredentialType.GitHub:
         return this.validator.validateGitHubToken(value);
       default:
@@ -216,10 +155,6 @@ export class CredentialManagerImpl implements CredentialManager {
 
     // Check each credential type
     const credentialChecks = [
-      {
-        type: CredentialType.AzureOpenAI,
-        key: SECRET_KEYS.AZURE_OPENAI_API_KEY,
-      },
       { type: CredentialType.GitHub, key: SECRET_KEYS.GITHUB_PERSONAL_TOKEN },
     ];
 
@@ -263,7 +198,6 @@ export class CredentialManagerImpl implements CredentialManager {
 
     // Clear all known credentials
     const clearOperations = [
-      { name: "Azure OpenAI", operation: () => this.clearAzureOpenAIKey() },
       { name: "GitHub", operation: () => this.clearGitHubToken() },
     ];
 
@@ -333,11 +267,6 @@ export class CredentialManagerImpl implements CredentialManager {
     // Handle migration from old credential format to new format
     const legacyMigrations = [
       {
-        legacyKey: LEGACY_KEYS.AZURE_OLD,
-        migrationAction: (value: string) => this.storeAzureOpenAIKey(value),
-        name: "Azure OpenAI",
-      },
-      {
         legacyKey: LEGACY_KEYS.GITHUB_OLD,
         migrationAction: (value: string) => this.storeGitHubToken(value),
         name: "GitHub",
@@ -387,11 +316,6 @@ export class CredentialManagerImpl implements CredentialManager {
     let actionButton: string | undefined;
 
     switch (credentialType) {
-      case CredentialType.AzureOpenAI:
-        userMessage =
-          "Azure OpenAI credentials are required but not configured.";
-        actionButton = "Configure Azure Credentials";
-        break;
       case CredentialType.GitHub:
         userMessage =
           "GitHub access token is required for repository operations.";

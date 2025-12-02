@@ -22,9 +22,6 @@ suite("Integration: Activation Failure Handling", () => {
   let originalShowErrorMessage:
     | typeof vscode.window.showErrorMessage
     | undefined;
-  let originalGetAzureKey:
-    | CredentialManagerImpl["getAzureOpenAIKey"]
-    | undefined;
   let originalTestCredentialAccess:
     | CredentialManagerImpl["testCredentialAccess"]
     | undefined;
@@ -98,11 +95,6 @@ suite("Integration: Activation Failure Handling", () => {
     originalShowErrorMessage = vscode.window.showErrorMessage;
     (vscode.window as any).showErrorMessage = async () => undefined;
 
-    originalGetAzureKey = CredentialManagerImpl.prototype.getAzureOpenAIKey;
-    CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {
-      return "azure-openai-integration-test-key";
-    };
-
     originalTestCredentialAccess =
       CredentialManagerImpl.prototype.testCredentialAccess;
     CredentialManagerImpl.prototype.testCredentialAccess = async function () {
@@ -129,9 +121,6 @@ suite("Integration: Activation Failure Handling", () => {
     }
     if (originalShowErrorMessage) {
       (vscode.window as any).showErrorMessage = originalShowErrorMessage;
-    }
-    if (originalGetAzureKey) {
-      CredentialManagerImpl.prototype.getAzureOpenAIKey = originalGetAzureKey;
     }
     if (originalTestCredentialAccess) {
       CredentialManagerImpl.prototype.testCredentialAccess =

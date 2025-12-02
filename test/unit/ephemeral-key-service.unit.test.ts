@@ -11,10 +11,7 @@ import { afterEach, suite, test } from '../mocha-globals';
 
 // Minimal mock credential manager implementing only required surface
 class MockCredMgr {
-  private key?: string;
-  constructor(key?: string) { this.key = key; }
   isInitialized() { return true; }
-  async getAzureOpenAIKey() { return this.key; }
 }
 
 class MockConfigMgr {
@@ -105,7 +102,7 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
   test('initializes successfully with valid key and session creation', async () => {
     (global as any).fetch = async () => ({ ok: true, status: 200, json: async () => okSessionResponse() });
     const svc = new EphemeralKeyServiceImpl(
-      new MockCredMgr('abc123') as any,
+      new MockCredMgr() as any,
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );
@@ -116,7 +113,7 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
   test('initializes in degraded mode when authentication test cannot create session', async () => {
     (global as any).fetch = async () => ({ ok: false, status: 401, json: async () => ({ error: { message: 'Unauthorized' }}) });
     const svc = new EphemeralKeyServiceImpl(
-      new MockCredMgr('bad') as any,
+      new MockCredMgr() as any,
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );
@@ -125,24 +122,25 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
     expect(svc.isInitialized()).to.equal(true);
   });
 
-  test('requestEphemeralKey returns error when missing key', async () => {
-    (global as any).fetch = async () => ({ ok: true, status: 200, json: async () => okSessionResponse() });
-    const svc = new EphemeralKeyServiceImpl(
-      new MockCredMgr(undefined) as any,
-      new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
-      new Logger('Test'),
-    );
-    // Manually set initialized to bypass initialize path for this focused unit check
-    (svc as any).initialized = true;
-    const result = await svc.requestEphemeralKey();
-    expect(result.success).to.equal(false);
-    expect(result.error?.code).to.equal('MISSING_CREDENTIALS');
-  });
+  // Test removed: API key support was removed in favor of keyless authentication
+  // The service now always uses DefaultAzureCredential, so there's no "missing key" scenario
+  // test('requestEphemeralKey returns error when missing key', async () => {
+  //   (global as any).fetch = async () => ({ ok: true, status: 200, json: async () => okSessionResponse() });
+  //   const svc = new EphemeralKeyServiceImpl(
+  //     new MockCredMgr() as any,
+  //     new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
+  //     new Logger('Test'),
+  //   );
+  //   (svc as any).initialized = true;
+  //   const result = await svc.requestEphemeralKey();
+  //   expect(result.success).to.equal(false);
+  //   expect(result.error?.code).to.equal('MISSING_CREDENTIALS');
+  // });
 
   test('maps 429 to RATE_LIMITED', async () => {
     (global as any).fetch = async () => ({ ok: false, status: 429, json: async () => ({ error: { message: 'Too many' }}) });
     const svc = new EphemeralKeyServiceImpl(
-      new MockCredMgr('key') as any,
+      new MockCredMgr() as any,
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );

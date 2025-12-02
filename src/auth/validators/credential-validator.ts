@@ -2,7 +2,6 @@ import { Logger } from '../../core/logger';
 import { CredentialValidationResult, CredentialValidator } from '../../types/credentials';
 import { VALIDATION_ENDPOINTS, VALIDATION_TIMEOUTS } from '../constants';
 import {
-    AzureOpenAIValidationRules,
     GitHubTokenValidationRules,
     ValidationErrorCodes
 } from './validation-rules';
@@ -15,65 +14,6 @@ export class CredentialValidatorImpl implements CredentialValidator {
 
   constructor(logger: Logger) {
     this.logger = logger;
-  }
-
-  async validateAzureOpenAIKey(key: string): Promise<CredentialValidationResult> {
-    this.logger.debug('Validating Azure OpenAI key format');
-
-    // Format validation
-    const formatErrors = AzureOpenAIValidationRules.validateFormat(key);
-    if (formatErrors.length > 0) {
-      return { isValid: false, errors: formatErrors };
-    }
-
-    // Network validation (optional, with timeout)
-    try {
-      const isValid = await this.testAzureOpenAIConnection(key);
-      if (!isValid) {
-        return {
-          isValid: false,
-          errors: [{
-            code: ValidationErrorCodes.KEY_AUTHENTICATION_FAILED,
-            message: 'Azure OpenAI key authentication failed',
-            remediation: 'Verify key is active and has necessary permissions in Azure Portal'
-          }]
-        };
-      }
-
-      this.logger.debug('Azure OpenAI key validation successful');
-      return {
-        isValid: true,
-        errors: [],
-        metadata: {
-          keyFormat: 'azure-openai-hex',
-          permissions: ['openai.deployments.read']
-        }
-      };
-    } catch (error: any) {
-      // Network errors don't invalidate the key format
-      this.logger.warn('Could not validate Azure OpenAI key due to network error', { error: error.message });
-
-      if (error.name === 'AbortError') {
-        return {
-          isValid: true, // Format is valid, network timeout doesn't invalidate
-          errors: [],
-          metadata: {
-            keyFormat: 'azure-openai-hex',
-            permissions: ['validation-timeout']
-          }
-        };
-      }
-
-      // Return format validation success with network warning
-      return {
-        isValid: true,
-        errors: [],
-        metadata: {
-          keyFormat: 'azure-openai-hex',
-          permissions: ['network-validation-failed']
-        }
-      };
-    }
   }
 
   async validateGitHubToken(token: string): Promise<CredentialValidationResult> {
@@ -121,29 +61,6 @@ export class CredentialValidatorImpl implements CredentialValidator {
           permissions: ['network-validation-failed']
         }
       };
-    }
-  }
-
-  private async testAzureOpenAIConnection(key: string): Promise<boolean> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), VALIDATION_TIMEOUTS.NETWORK_VALIDATION_MS);
-
-    try {
-      const response = await fetch(VALIDATION_ENDPOINTS.AZURE_OPENAI, {
-        headers: {
-          'api-key': key,
-          'User-Agent': 'Agent Voice/1.0'
-        },
-        signal: controller.signal
-      });
-      return response.ok;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        throw new Error('Validation timeout');
-      }
-      throw error;
-    } finally {
-      clearTimeout(timeout);
     }
   }
 

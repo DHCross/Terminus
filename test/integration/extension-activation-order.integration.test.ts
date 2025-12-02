@@ -16,9 +16,6 @@ suite("Integration: Activation Telemetry", () => {
   let originalShowInformationMessage:
     | typeof vscode.window.showInformationMessage
     | undefined;
-  let originalGetAzureKey:
-    | CredentialManagerImpl["getAzureOpenAIKey"]
-    | undefined;
   let originalTestCredentialAccess:
     | CredentialManagerImpl["testCredentialAccess"]
     | undefined;
@@ -93,11 +90,6 @@ suite("Integration: Activation Telemetry", () => {
     originalShowInformationMessage = vscode.window.showInformationMessage;
     (vscode.window as any).showInformationMessage = async () => undefined;
 
-    originalGetAzureKey = CredentialManagerImpl.prototype.getAzureOpenAIKey;
-    CredentialManagerImpl.prototype.getAzureOpenAIKey = async function () {
-      return "azure-openai-integration-test-key";
-    };
-
     originalTestCredentialAccess =
       CredentialManagerImpl.prototype.testCredentialAccess;
     CredentialManagerImpl.prototype.testCredentialAccess = async function () {
@@ -119,9 +111,6 @@ suite("Integration: Activation Telemetry", () => {
     if (originalShowInformationMessage) {
       (vscode.window as any).showInformationMessage =
         originalShowInformationMessage;
-    }
-    if (originalGetAzureKey) {
-      CredentialManagerImpl.prototype.getAzureOpenAIKey = originalGetAzureKey;
     }
     if (originalTestCredentialAccess) {
       CredentialManagerImpl.prototype.testCredentialAccess =

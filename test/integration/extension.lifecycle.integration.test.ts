@@ -48,9 +48,8 @@ suite("Integration: Extension lifecycle", () => {
     const events: string[] = [];
     const logger = new Logger("TestLogger");
     const config = new ConfigurationManager(context, logger);
-    const credentialManager: { isInitialized(): boolean; getAzureOpenAIKey(): Promise<string> } = {
+    const credentialManager: { isInitialized(): boolean } = {
       isInitialized: () => true,
-      getAzureOpenAIKey: async () => "test-key",
     };
     const keyService = new EphemeralKeyServiceImpl(
       credentialManager as any,
@@ -146,9 +145,8 @@ suite("Integration: Extension lifecycle", () => {
   test("session manager tracks session state", async () => {
     const logger = new Logger("TestLogger");
     const config = new ConfigurationManager(context, logger);
-    const credentialManager: { isInitialized(): boolean; getAzureOpenAIKey(): Promise<string> } = {
+    const credentialManager: { isInitialized(): boolean } = {
       isInitialized: () => true,
-      getAzureOpenAIKey: async () => "test-key",
     };
     const keyService = new EphemeralKeyServiceImpl(
       credentialManager as any,

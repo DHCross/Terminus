@@ -214,22 +214,10 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
 
     try {
       const config = this.configManager.getAzureOpenAIConfig();
-      const apiKey = await this.credentialManager.getAzureOpenAIKey();
 
-      if (!apiKey) {
-        return {
-          success: false,
-          error: {
-            code: "MISSING_CREDENTIALS",
-            message: "Azure OpenAI API key not configured",
-            isRetryable: false,
-            remediation: "Configure Azure OpenAI credentials in settings",
-          },
-        };
-      }
-
+      // Use keyless authentication (Azure CLI / Managed Identity)
       const sessionResponse = await this.executeAuthOperation(
-        () => this.createAzureSession(config, apiKey),
+        () => this.createAzureSession(config, undefined),
         {
           code: "AUTH_EPHEMERAL_SESSION_CREATE_FAILED",
           message: "Failed to create Azure OpenAI realtime session",
@@ -255,10 +243,14 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       const expiresAt = new Date(
         sessionResponse.client_secret.expires_at * 1000,
       );
+      // Calculate TTL from the Azure-provided expiration timestamp
+      // Azure provides expires_at as a Unix timestamp (seconds since epoch)
+      // The TTL represents the total lifetime from when Azure issued the key to when it expires
+      // Add 1 to account for fractional seconds lost to Math.floor() truncation
+      const nowInSeconds = Math.floor(Date.now() / 1000);
       const ttlSeconds = Math.max(
         0,
-        sessionResponse.client_secret.expires_at -
-          Math.floor(issuedAt.getTime() / 1000),
+        sessionResponse.client_secret.expires_at - nowInSeconds + 1,
       );
       const marginMs = this.config.renewalMarginSeconds * 1000;
       const proactiveMs = this.config.proactiveRenewalIntervalMs;
@@ -434,20 +426,23 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       const config = this.configManager.getAzureOpenAIConfig();
       const sessionPreferences =
         this.configManager.getRealtimeSessionPreferences();
-      const apiKey = await this.credentialManager.getAzureOpenAIKey();
       const apiVersion = sessionPreferences.apiVersion;
 
-      if (apiKey) {
-        // Notify Azure to end session
-        const response = await this.executeAuthOperation(
-          () =>
-            fetch(
-              `${config.endpoint}/openai/realtimeapi/sessions/${sessionId}?api-version=${apiVersion}`,
-              {
-                method: "DELETE",
-                headers: { "api-key": apiKey },
-              },
-            ),
+      // Get authentication token
+      const { DefaultAzureCredential } = await import("@azure/identity");
+      const credential = new DefaultAzureCredential();
+      const tokenResponse = await credential.getToken("https://cognitiveservices.azure.com/.default");
+
+      // Notify Azure to end session
+      const response = await this.executeAuthOperation(
+        () =>
+          fetch(
+            `${config.endpoint}/openai/realtimeapi/sessions/${sessionId}?api-version=${apiVersion}`,
+            {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${tokenResponse.token}` },
+            },
+          ),
           {
             code: "AUTH_SESSION_TERMINATION_FAILED",
             message: "Failed to terminate Azure realtime session",
@@ -468,12 +463,11 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
           },
         );
 
-        if (!response.ok) {
-          this.logger.warn("Azure session deletion returned non-OK status", {
-            sessionId,
-            status: response.status,
-          });
-        }
+      if (!response.ok) {
+        this.logger.warn("Azure session deletion returned non-OK status", {
+          sessionId,
+          status: response.status,
+        });
       }
 
       this.logger.info("Session ended successfully", { sessionId });
@@ -499,19 +493,13 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
 
   async testAuthentication(): Promise<AuthenticationTestResult> {
     const config = this.configManager.getAzureOpenAIConfig();
-    const apiKey = await this.credentialManager.getAzureOpenAIKey();
 
     const result: AuthenticationTestResult = {
       success: false,
       endpoint: config.endpoint,
-      hasValidCredentials: !!apiKey,
+      hasValidCredentials: true, // Using keyless auth
       canCreateSessions: false,
     };
-
-    if (!apiKey) {
-      result.error = "No Azure OpenAI API key configured";
-      return result;
-    }
 
     try {
       const startTime = Date.now();
@@ -528,6 +516,11 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
         turn_detection: sessionPreferences.turnDetection,
       };
 
+      // Get authentication token
+      const { DefaultAzureCredential } = await import("@azure/identity");
+      const credential = new DefaultAzureCredential();
+      const tokenResponse = await credential.getToken("https://cognitiveservices.azure.com/.default");
+
       // Test session creation
       const response = await fetch(
         `${config.endpoint}/openai/realtimeapi/sessions?api-version=${sessionPreferences.apiVersion}`,
@@ -535,7 +528,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "api-key": apiKey,
+            "Authorization": `Bearer ${tokenResponse.token}`,
           },
           body: JSON.stringify(sessionRequest),
         },
@@ -598,7 +591,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
   // Private implementation methods
   private async createAzureSession(
     config: AzureOpenAIConfig,
-    apiKey: string,
+    apiKey: string | undefined,
   ): Promise<AzureSessionResponse> {
     const sessionPreferences =
       this.configManager.getRealtimeSessionPreferences();
@@ -613,22 +606,36 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       turn_detection: sessionPreferences.turnDetection,
     };
 
+    // Build headers based on authentication method
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (apiKey) {
+      // Use API key authentication
+      headers["api-key"] = apiKey;
+    } else {
+      // Use keyless authentication (Azure CLI / Managed Identity)
+      const { DefaultAzureCredential } = await import("@azure/identity");
+      const credential = new DefaultAzureCredential();
+      const tokenResponse = await credential.getToken("https://cognitiveservices.azure.com/.default");
+      headers["Authorization"] = `Bearer ${tokenResponse.token}`;
+    }
+
     const response = await fetch(
       `${config.endpoint}/openai/realtimeapi/sessions?api-version=${sessionPreferences.apiVersion}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": apiKey,
-        },
+        headers,
         body: JSON.stringify(sessionRequest),
       },
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.error?.message || errorData.message || "Unknown error";
       throw new Error(
-        `Azure Sessions API error: ${response.status} - ${errorData.error?.message || "Unknown error"}`,
+        `Azure Sessions API error: ${response.status} - ${errorMessage}`,
       );
     }
 
