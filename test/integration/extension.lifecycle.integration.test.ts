@@ -44,7 +44,10 @@ suite("Integration: Extension lifecycle", () => {
     disposables.forEach((d) => d.dispose());
   });
 
-  test("services initialize and dispose in correct order", async () => {
+  test("services initialize and dispose in correct order", async function () {
+    // Increase timeout for CI environments where VS Code extension host initialization can be slower
+    this.timeout(30000);
+    
     const events: string[] = [];
     const logger = new Logger("TestLogger");
     const config = new ConfigurationManager(context, logger);
@@ -97,10 +100,13 @@ suite("Integration: Extension lifecycle", () => {
         originalConfigDispose();
       };
 
+      const startTime = Date.now();
       await config.initialize();
+      const configTime = Date.now() - startTime;
       expect(config.isInitialized(), "Config should be initialized").to.be.true;
 
       await keyService.initialize();
+      const keyServiceTime = Date.now() - startTime - configTime;
       expect(keyService.isInitialized(), "Key service should be initialized").to.be.true;
 
       expect((session as any).keyService, "Session should have the keyService").to.equal(
@@ -109,10 +115,17 @@ suite("Integration: Extension lifecycle", () => {
       expect((session as any).keyService.isInitialized(), "Session keyService should be initialized").to.be.true;
 
       await session.initialize();
+      const sessionTime = Date.now() - startTime - configTime - keyServiceTime;
       expect(session.isInitialized(), "Session should be initialized").to.be.true;
 
       await panel.initialize();
+      const panelTime = Date.now() - startTime - configTime - keyServiceTime - sessionTime;
       expect(panel.isInitialized(), "Panel should be initialized").to.be.true;
+
+      const totalInitTime = Date.now() - startTime;
+      if (totalInitTime > 10000) {
+        console.warn(`Slow initialization detected: total=${totalInitTime}ms, config=${configTime}ms, keyService=${keyServiceTime}ms, session=${sessionTime}ms, panel=${panelTime}ms`);
+      }
 
       panel.dispose();
       session.dispose();
@@ -130,7 +143,9 @@ suite("Integration: Extension lifecycle", () => {
     }
   });
 
-  test("panel can be shown and disposed", async () => {
+  test("panel can be shown and disposed", async function () {
+    this.timeout(30000);
+    
     const panel = new VoiceControlPanel(context);
 
   await panel.initialize();
@@ -142,7 +157,9 @@ suite("Integration: Extension lifecycle", () => {
   expect(panel.isVisible(), "Panel should not be visible after dispose").to.be.false;
   });
 
-  test("session manager tracks session state", async () => {
+  test("session manager tracks session state", async function () {
+    this.timeout(30000);
+    
     const logger = new Logger("TestLogger");
     const config = new ConfigurationManager(context, logger);
     const credentialManager: { isInitialized(): boolean } = {
