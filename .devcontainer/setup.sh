@@ -48,6 +48,17 @@ else
   echo "⚠️ Azure CLI not found; skipping Bicep CLI installation."
 fi
 
+# Install uv (fast Python package installer)
+echo "🐍 Installing uv..."
+if ! command -v uv >/dev/null 2>&1; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  # Add uv to PATH for current session
+  export PATH="$HOME/.local/bin:$PATH"
+  echo "✅ uv installed successfully."
+else
+  echo "uv already installed."
+fi
+
 # Install Node.js dependencies
 echo "📦 Installing Node.js dependencies..."
 npm install
@@ -151,13 +162,14 @@ fi
 echo "🖼️ Starting virtual display..."
 export DISPLAY=:99
 Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-
-# Setup git if needed
-if [ ! -f ~/.gitconfig ]; then
-    echo "⚙️ Setting up git configuration..."
-    git config --global user.name "Agent Voice Developer"
-    git config --global user.email "developer@agentvoice.dev"
-    git config --global init.defaultBranch main
+echo "📋 What was configured:"
+echo "  • GUI dependencies for VS Code extension testing"
+echo "  • uv (fast Python package installer)"
+echo "  • Node.js packages and global tools (@vscode/vsce)"
+echo "  • Playwright Test agent definitions (planner, generator, healer)"
+echo "  • Test environment with Mocha and proper test index"
+echo "  • Virtual display (Xvfb) for headless testing"
+echo "  • Git configuration (if needed)"ch main
 fi
 
 echo "✅ Development environment setup complete!"

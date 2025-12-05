@@ -1,77 +1,13 @@
 {
-    "github.copilot.chat.commitMessageGeneration.instructions": [
-        {
-            "text": "The first line should be summary of no more than 50 characters starting with classification of commit from: `CHORE:`|`FIX:`|`CHANGE:`|`BREAKING CHANGE:`|`TESTS:`|`SECURITY:`|`COMPLEX:`. The second line should be blank. The following lines should be the full summary with each item starting with a `-`. Any summary item that is security related should start with `SECURITY:`. Any summary item change that causes a breaking change to a feature/interface/dependency should start with `BREAKING CHANGE:`"
-        }
-    ],
-    "chat.agentSessionsViewLocation": "disabled",
-    "chat.todoListTool.writeOnly": true,
     "chat.promptFilesRecommendations": {
-      "create-specification": true,
-      "create-implementation-plan": true,
-      "create-technical-spike": true
+        "speckit.constitution": true,
+        "speckit.specify": true,
+        "speckit.plan": true,
+        "speckit.tasks": true,
+        "speckit.implement": true
     },
-
-    // TypeScript settings
-    "typescript.preferences.quoteStyle": "single",
-    "typescript.preferences.includePackageJsonAutoImports": "auto",
-    "typescript.suggest.autoImports": true,
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "typescript.preferences.importModuleSpecifier": "relative",
-
-    // Editor settings for development
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
-    "editor.detectIndentation": false,
-    "editor.trimAutoWhitespace": true,
-    "[typescript]": {
-        "editor.insertSpaces": true,
-        "editor.tabSize": 2
-    },
-    "editor.formatOnSave": false,
-    "editor.formatOnPaste": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit",
-        "source.fixAll.eslint": "explicit"
-    },
-
-    // File settings
-    "files.eol": "\n",
-    "files.insertFinalNewline": true,
-    "files.trimTrailingWhitespace": true,
-    "files.encoding": "utf8",
-
-    // Search settings
-    "search.exclude": {
-        "out/**": true,
-        "node_modules/**": true,
-        "**/*.vsix": true,
-        ".vscode-test/**": true
-    },
-
-    // Extension development specific
-    "debug.openDebug": "openOnSessionStart",
-    "extensions.ignoreRecommendations": false,
-
-    // JSON settings
-    "json.schemas": [
-        {
-            "fileMatch": ["package.json"],
-            "url": "https://json.schemastore.org/package.json"
-        }
-    ],
-
-    // ESLint settings
-    "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact"
-    ],
-
-    // Prettier settings (if using)
-    "prettier.singleQuote": true,
-    "prettier.tabWidth": 4,
-    "prettier.trailingComma": "es5",
-    "prettier.semi": true
+    "chat.tools.terminal.autoApprove": {
+        ".specify/scripts/bash/": true,
+        ".specify/scripts/powershell/": true
+    }
 }
