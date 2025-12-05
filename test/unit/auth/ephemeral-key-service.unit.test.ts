@@ -6,6 +6,7 @@ import { ConfigurationManager } from '../../../src/config/configuration-manager'
 import { Logger } from '../../../src/core/logger';
 import { AudioConfig, AzureOpenAIConfig, AzureRealtimeConfig } from '../../../src/types/configuration';
 import { EphemeralKeyInfo } from '../../../src/types/ephemeral';
+import { RealtimeSessionPreferences } from '../../../src/config/realtime-session';
 import { suite } from '../../mocha-globals';
 
 // Mock VS Code extension context
@@ -125,6 +126,21 @@ class MockConfigurationManager extends ConfigurationManager {
     return this.mockAudioConfig;
   }
 
+  override getRealtimeSessionPreferences(): RealtimeSessionPreferences {
+    return {
+      apiVersion: this.mockRealtimeConfig.apiVersion || '2025-08-28',
+      voice: this.mockAudioConfig.tts.voice?.name,
+      turnDetection: {
+        type: 'server_vad',
+        threshold: 0.5,
+        prefix_padding_ms: 300,
+        silence_duration_ms: 200,
+        create_response: true,
+        interrupt_response: true
+      }
+    };
+  }
+
   setMockConfig(config: Partial<AzureOpenAIConfig>): void {
     this.mockConfig = { ...this.mockConfig, ...config };
   }
@@ -200,6 +216,15 @@ const mockAzureAuthentication = (service: EphemeralKeyServiceImpl) => {
     }
 
     return mockFetchResponse;
+  };
+
+  // Mock the endSession method to avoid real Azure credential calls
+  (service as any).endSession = async (sessionId: string) => {
+    if (mockFetchError) {
+      throw mockFetchError;
+    }
+    // Simulate successful session deletion with mocked fetch response
+    return Promise.resolve();
   };
 };
 
