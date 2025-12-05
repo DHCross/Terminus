@@ -742,8 +742,12 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       };
     }
 
+    // Check for HTTP status codes in error object or message
+    const statusCode = error.status || (error.response && error.response.status);
+    const errorMessage = error.message || '';
+
     // Map Azure-specific errors to standardized error format
-    if (error.message?.includes("401")) {
+    if (statusCode === 401 || errorMessage.includes("401")) {
       return {
         code: "INVALID_CREDENTIALS",
         message: "Azure OpenAI API key is invalid or expired",
@@ -752,7 +756,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       };
     }
 
-    if (error.message?.includes("403")) {
+    if (statusCode === 403 || errorMessage.includes("403")) {
       return {
         code: "INSUFFICIENT_PERMISSIONS",
         message: "API key lacks necessary permissions for Realtime API",
@@ -761,7 +765,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       };
     }
 
-    if (error.message?.includes("429")) {
+    if (statusCode === 429 || errorMessage.includes("429")) {
       return {
         code: "RATE_LIMITED",
         message: "Too many requests to Azure OpenAI service",

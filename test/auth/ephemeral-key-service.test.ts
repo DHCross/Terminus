@@ -167,6 +167,39 @@ const resetFetch = () => {
   mockFetchError = null;
 };
 
+// Helper function to mock Azure credential authentication
+const mockAzureAuthentication = (service: EphemeralKeyServiceImpl) => {
+  // Mock the testAuthentication method to avoid real Azure calls
+  (service as any).testAuthentication = async () => ({
+    success: true,
+    endpoint: 'https://test.openai.azure.com',
+    hasValidCredentials: true,
+    canCreateSessions: true
+  });
+
+  // Mock the createAzureSession method to use mocked fetch responses
+  (service as any).createAzureSession = async (config: any, apiKey: any) => {
+    if (mockFetchError) {
+      throw mockFetchError;
+    }
+
+    const response = {
+      ok: mockFetchStatus >= 200 && mockFetchStatus < 300,
+      status: mockFetchStatus,
+      json: async () => mockFetchResponse,
+    } as Response;
+
+    if (!response.ok) {
+      const errorData = mockFetchResponse || {};
+      const error = new Error(`HTTP ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+      (error as any).status = response.status;
+      throw error;
+    }
+
+    return mockFetchResponse;
+  };
+};
+
 describe('EphemeralKeyService Tests', () => {
   let service: EphemeralKeyServiceImpl;
   let mockCredentialManager: MockCredentialManager;
@@ -186,6 +219,9 @@ describe('EphemeralKeyService Tests', () => {
       mockConfigManager,
       logger
     );
+
+    // Mock Azure authentication to avoid real credential calls
+    mockAzureAuthentication(service);
   });
 
   afterEach(() => {
