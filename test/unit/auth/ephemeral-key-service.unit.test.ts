@@ -442,7 +442,6 @@ suite('Unit: EphemeralKeyService', () => {
       setMockFetch({}, 204);
 
       await service.revokeCurrentKey();
-      await new Promise((resolve) => setImmediate(resolve));
 
       assert.strictEqual(service.getCurrentKey(), undefined);
       assert.strictEqual(service.isKeyValid(), false);

@@ -388,7 +388,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       }
 
       this.logger.info("Current key revoked");
-      void this.dispatchKeyExpired(expiredSnapshot);
+      await this.dispatchKeyExpired(expiredSnapshot);
     }
   }
 
