@@ -97,7 +97,10 @@ const baseAudioConfig: AudioConfig = {
 
 suite('Unit: EphemeralKeyServiceImpl', () => {
   const originalFetch = (global as any).fetch;
-  afterEach(() => { (global as any).fetch = originalFetch; });
+
+  afterEach(() => {
+    (global as any).fetch = originalFetch;
+  });
 
   test('initializes successfully with valid key and session creation', async () => {
     (global as any).fetch = async () => ({ ok: true, status: 200, json: async () => okSessionResponse() });
@@ -106,6 +109,15 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );
+
+    // Mock the testAuthentication method to avoid Azure credential issues
+    (svc as any).testAuthentication = async () => ({
+      success: true,
+      endpoint: baseConfig.endpoint,
+      hasValidCredentials: true,
+      canCreateSessions: true
+    });
+
     await svc.initialize();
     expect(svc.isInitialized()).to.equal(true);
   });
@@ -117,6 +129,16 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );
+
+    // Mock the testAuthentication method to return failure
+    (svc as any).testAuthentication = async () => ({
+      success: false,
+      endpoint: baseConfig.endpoint,
+      hasValidCredentials: true,
+      canCreateSessions: false,
+      error: 'HTTP 401: Unauthorized'
+    });
+
     // Service should initialize successfully even if auth test fails (degraded mode)
     await svc.initialize();
     expect(svc.isInitialized()).to.equal(true);
@@ -144,7 +166,25 @@ suite('Unit: EphemeralKeyServiceImpl', () => {
       new MockConfigMgr(baseConfig, baseRealtimeConfig, baseAudioConfig) as any,
       new Logger('Test'),
     );
-    (svc as any).initialized = true;
+
+    // Mock the testAuthentication method to avoid Azure credential issues during initialization
+    (svc as any).testAuthentication = async () => ({
+      success: true,
+      endpoint: baseConfig.endpoint,
+      hasValidCredentials: true,
+      canCreateSessions: true
+    });
+
+    // Initialize first (this calls testAuthentication)
+    await svc.initialize();
+
+    // Now mock createAzureSession to test the specific error handling
+    (svc as any).createAzureSession = async () => {
+      const error = new Error('HTTP 429');
+      (error as any).status = 429;
+      throw error;
+    };
+
     const result = await svc.requestEphemeralKey();
     expect(result.success).to.equal(false);
     expect(result.error?.code).to.equal('RATE_LIMITED');
