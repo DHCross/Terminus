@@ -1,9 +1,10 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { ConfigurationManager } from '../../src/config/configuration-manager';
-import { Logger } from '../../src/core/logger';
+import { ConfigurationManager } from '../../../src/config/configuration-manager';
+import { Logger } from '../../../src/core/logger';
+import { suite } from '../../mocha-globals';
 
-describe('Configuration Validation', () => {
+suite('Unit: Configuration validation', () => {
   async function createManager(): Promise<ConfigurationManager> {
     const logger = new Logger('CfgTest');
     const context: any = {

@@ -1,17 +1,18 @@
 import * as assert from 'assert';
-import { Logger } from '../../src/core/logger';
-import { SessionTimerManagerImpl } from '../../src/session/session-timer-manager';
+import { Logger } from '../../../src/core/logger';
+import { SessionTimerManagerImpl } from '../../../src/session/session-timer-manager';
+import { suite } from '../../mocha-globals';
 
 class TestLogger extends Logger {
   constructor() { super('SessionTimerTest'); }
   // Silence output during tests
-  debug(): void { /* no-op */ }
-  info(): void { /* no-op */ }
-  warn(): void { /* no-op */ }
-  error(): void { /* no-op */ }
+  override debug(): void { /* no-op */ }
+  override info(): void { /* no-op */ }
+  override warn(): void { /* no-op */ }
+  override error(): void { /* no-op */ }
 }
 
-describe('SessionTimerManagerImpl', () => {
+suite('Unit: SessionTimerManagerImpl', () => {
   let renewal: string[];
   let timeout: string[];
   let heartbeat: string[];

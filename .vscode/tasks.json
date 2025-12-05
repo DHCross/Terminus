@@ -56,9 +56,9 @@
       ]
     },
     {
-      "label": "Test Extension",
+      "label": "Test Unit",
       "type": "npm",
-      "script": "test",
+      "script": "test:unit",
       "icon": {
         "id": "beaker"
       },
@@ -68,9 +68,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Test Unit",
+      "label": "Test Integration",
       "type": "npm",
-      "script": "test:unit",
+      "script": "test:integration",
       "icon": {
         "id": "beaker"
       },
@@ -195,7 +195,7 @@
       "dependsOn": [
         "Lint Extension",
         "Test Unit",
-        "Test Extension",
+        "Test Integration",
         "Test All",
         "Test Coverage",
         "Test Performance"

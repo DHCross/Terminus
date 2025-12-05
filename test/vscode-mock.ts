@@ -123,7 +123,7 @@ export const window = {
 export const workspace = {
   onDidChangeConfiguration: () => ({ dispose: () => {} }),
   getConfiguration: () => ({
-    get: () => undefined,
+    get: (key: string, defaultValue?: any) => defaultValue,
     has: () => false,
     inspect: () => undefined,
     update: () => Promise.resolve(),
@@ -265,6 +265,18 @@ export const FileType = {
   File: 1,
   Directory: 2,
   SymbolicLink: 64,
+};
+
+export const ConfigurationTarget = {
+  Global: 1,
+  Workspace: 2,
+  WorkspaceFolder: 3,
+};
+
+export const ExtensionMode = {
+  Production: 1,
+  Development: 2,
+  Test: 3,
 };
 
 export type { MockUri };

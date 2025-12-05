@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { SessionManagerImpl } from '../../src/session/session-manager';
-import { EphemeralKeyInfo, EphemeralKeyResult } from '../../src/types/ephemeral';
+import { SessionManagerImpl } from '../../../src/session/session-manager';
+import { EphemeralKeyInfo, EphemeralKeyResult } from '../../../src/types/ephemeral';
 import {
     SessionConfig,
     SessionErrorEvent,
@@ -8,9 +8,10 @@ import {
     SessionInfo,
     SessionRenewalEvent,
     SessionState
-} from '../../src/types/session';
+} from '../../../src/types/session';
+import { suite } from '../../mocha-globals';
 
-describe('SessionManagerImpl - Comprehensive Tests', () => {
+suite('Integration: SessionManager comprehensive tests', () => {
   let sessionManager: SessionManagerImpl;
   let mockKeyService: any;
   let mockTimerManager: any;
@@ -103,7 +104,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     );
   });
 
-  describe('Initialization and Lifecycle', () => {
+  suite('Initialization and Lifecycle', () => {
     it('should initialize successfully with all dependencies', async () => {
       await sessionManager.initialize();
       assert.ok(sessionManager.isInitialized());
@@ -141,7 +142,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Session Lifecycle Operations', () => {
+  suite('Session Lifecycle Operations', () => {
     beforeEach(async () => {
       await sessionManager.initialize();
     });
@@ -232,7 +233,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Session State Management', () => {
+  suite('Session State Management', () => {
     let sessionInfo: SessionInfo;
 
     beforeEach(async () => {
@@ -316,7 +317,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Session Renewal', () => {
+  suite('Session Renewal', () => {
     let sessionInfo: SessionInfo;
 
     beforeEach(async () => {
@@ -380,7 +381,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Event System', () => {
+  suite('Event System', () => {
     let sessionInfo: SessionInfo;
     let eventCaptured: any = null;
 
@@ -477,7 +478,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Diagnostics and Health Monitoring', () => {
+  suite('Diagnostics and Health Monitoring', () => {
     let sessionInfo: SessionInfo;
 
     beforeEach(async () => {
@@ -568,7 +569,7 @@ describe('SessionManagerImpl - Comprehensive Tests', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
+  suite('Error Handling and Edge Cases', () => {
     beforeEach(async () => {
       await sessionManager.initialize();
     });

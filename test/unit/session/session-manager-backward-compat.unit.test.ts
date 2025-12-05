@@ -1,8 +1,9 @@
 import * as assert from 'assert';
-import { Logger } from '../../src/core/logger';
-import { SessionManagerImpl } from '../../src/session/session-manager';
+import { Logger } from '../../../src/core/logger';
+import { SessionManagerImpl } from '../../../src/session/session-manager';
+import { suite } from '../../mocha-globals';
 
-describe('SessionManagerImpl - Backward Compatibility', () => {
+suite('Unit: SessionManagerImpl backward compatibility', () => {
   let manager: SessionManagerImpl;
   let mockLogger: Logger;
 

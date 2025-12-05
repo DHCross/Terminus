@@ -1,11 +1,12 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { CredentialManagerImpl } from '../../src/auth/credential-manager';
-import { EphemeralKeyServiceImpl } from '../../src/auth/ephemeral-key-service';
-import { ConfigurationManager } from '../../src/config/configuration-manager';
-import { Logger } from '../../src/core/logger';
-import { AudioConfig, AzureOpenAIConfig, AzureRealtimeConfig } from '../../src/types/configuration';
-import { EphemeralKeyInfo } from '../../src/types/ephemeral';
+import { CredentialManagerImpl } from '../../../src/auth/credential-manager';
+import { EphemeralKeyServiceImpl } from '../../../src/auth/ephemeral-key-service';
+import { ConfigurationManager } from '../../../src/config/configuration-manager';
+import { Logger } from '../../../src/core/logger';
+import { AudioConfig, AzureOpenAIConfig, AzureRealtimeConfig } from '../../../src/types/configuration';
+import { EphemeralKeyInfo } from '../../../src/types/ephemeral';
+import { suite } from '../../mocha-globals';
 
 // Mock VS Code extension context
 const createMockContext = (): vscode.ExtensionContext => ({
@@ -38,11 +39,11 @@ class MockCredentialManager extends CredentialManagerImpl {
     super(createMockContext(), new Logger('MockCredentialManager'));
   }
 
-  async initialize(): Promise<void> {
+  override async initialize(): Promise<void> {
     // Mock initialization no-op
   }
 
-  isInitialized(): boolean {
+  override isInitialized(): boolean {
     return true;
   }
 }
@@ -104,23 +105,23 @@ class MockConfigurationManager extends ConfigurationManager {
     super(createMockContext(), new Logger('MockConfigurationManager'));
   }
 
-  async initialize(): Promise<void> {
+  override async initialize(): Promise<void> {
     // Mock initialization
   }
 
-  isInitialized(): boolean {
+  override isInitialized(): boolean {
     return true;
   }
 
-  getAzureOpenAIConfig(): AzureOpenAIConfig {
+  override getAzureOpenAIConfig(): AzureOpenAIConfig {
     return this.mockConfig;
   }
 
-  getAzureRealtimeConfig(): AzureRealtimeConfig {
+  override getAzureRealtimeConfig(): AzureRealtimeConfig {
     return this.mockRealtimeConfig;
   }
 
-  getAudioConfig(): AudioConfig {
+  override getAudioConfig(): AudioConfig {
     return this.mockAudioConfig;
   }
 
@@ -170,11 +171,13 @@ const resetFetch = () => {
 // Helper function to mock Azure credential authentication
 const mockAzureAuthentication = (service: EphemeralKeyServiceImpl) => {
   // Mock the testAuthentication method to avoid real Azure calls
+  // Note: This will be overridden in specific test suites that need real implementation
   (service as any).testAuthentication = async () => ({
     success: true,
     endpoint: 'https://test.openai.azure.com',
     hasValidCredentials: true,
-    canCreateSessions: true
+    canCreateSessions: true,
+    latencyMs: 100 // Add latencyMs to mock
   });
 
   // Mock the createAzureSession method to use mocked fetch responses
@@ -200,7 +203,7 @@ const mockAzureAuthentication = (service: EphemeralKeyServiceImpl) => {
   };
 };
 
-describe('EphemeralKeyService Tests', () => {
+suite('Unit: EphemeralKeyService', () => {
   let service: EphemeralKeyServiceImpl;
   let mockCredentialManager: MockCredentialManager;
   let mockConfigManager: MockConfigurationManager;
@@ -508,6 +511,24 @@ describe('EphemeralKeyService Tests', () => {
 
   describe('Authentication Testing', () => {
   beforeEach(async () => {
+      // Restore the real testAuthentication method for these tests
+      // We need to test the actual implementation, not the mock
+      delete (service as any).testAuthentication;
+
+      // Mock Azure credential to avoid real Azure calls
+      const mockCredential = {
+        getToken: async () => ({ token: 'mock-token', expiresOnTimestamp: Date.now() + 3600000 })
+      };
+      const azureIdentityModule = { DefaultAzureCredential: function() { return mockCredential; } };
+      const Module = require('module');
+      const originalRequire = Module.prototype.require;
+      Module.prototype.require = function(id: string) {
+        if (id === '@azure/identity') {
+          return azureIdentityModule;
+        }
+        return originalRequire.apply(this, arguments);
+      };
+
       // Mock successful authentication test for initialization
       setMockFetch({
         id: 'session-123',

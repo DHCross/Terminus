@@ -1,9 +1,10 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { ConfigurationManager } from '../../src/config/configuration-manager';
-import { Logger } from '../../src/core/logger';
+import { ConfigurationManager } from '../../../src/config/configuration-manager';
+import { Logger } from '../../../src/core/logger';
+import { suite } from '../../mocha-globals';
 
-describe('Configuration Sections', () => {
+suite('Unit: Configuration sections', () => {
   async function init(): Promise<ConfigurationManager> {
     const logger = new Logger('CfgSect');
     const context: any = { subscriptions: [], extensionUri: vscode.Uri.parse('file://test'), secrets: { get: async () => undefined } };
