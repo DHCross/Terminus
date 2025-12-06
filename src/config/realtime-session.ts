@@ -2,10 +2,7 @@ import { normalizeTurnDetectionConfig } from "../audio/turn-detection-defaults";
 import type { AudioConfig, AzureRealtimeConfig } from "../types/configuration";
 import type { AzureSessionRequest } from "../types/ephemeral";
 
-export const DEFAULT_REALTIME_API_VERSION = "2025-08-28";
-
 export interface RealtimeSessionPreferences {
-  apiVersion: string;
   voice?: string;
   turnDetection?: AzureSessionRequest["turn_detection"];
 }
@@ -37,7 +34,6 @@ export function resolveRealtimeSessionPreferences(
         } satisfies AzureSessionRequest["turn_detection"]);
 
   return {
-    apiVersion: realtimeConfig.apiVersion || DEFAULT_REALTIME_API_VERSION,
     voice: audioConfig.tts.voice?.name,
     turnDetection,
   };

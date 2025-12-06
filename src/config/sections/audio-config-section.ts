@@ -49,7 +49,6 @@ export class AudioSection {
     const voiceRaw = configuration.get('tts.voiceProfile') as Partial<TtsConfig['voice']> | undefined;
     const transport = configuration.get('tts.transport', 'webrtc') as TtsConfig['transport'];
     const fallbackMode = configuration.get('tts.fallbackMode', 'retry') as TtsConfig['fallbackMode'];
-    const apiVersion = configuration.get('tts.apiVersion', '2025-04-01-preview');
     const maxInitialLatencyMs = configuration.get('tts.maxInitialLatencyMs', 300);
     const voice: TtsConfig['voice'] = {
       name: voiceRaw?.name ?? DEFAULT_TTS_VOICE.name,
@@ -62,7 +61,6 @@ export class AudioSection {
 
     return {
       transport,
-      apiVersion,
       fallbackMode,
       maxInitialLatencyMs,
       voice

@@ -19,10 +19,6 @@ export interface AzureServiceOptions {
    */
   deploymentName?: string;
   /**
-   * API version used for Azure OpenAI requests.
-   */
-  apiVersion?: string;
-  /**
    * Token credential used for Azure Active Directory authentication.
    */
   credential?: TokenCredential;
@@ -38,7 +34,6 @@ export interface AzureServiceOptions {
 export class AzureService {
   private readonly endpoint: string;
   private readonly deploymentName: string;
-  private readonly apiVersion: string;
   private readonly credential: TokenCredential;
   private readonly scope: string;
 
@@ -52,14 +47,12 @@ export class AzureService {
       endpoint = process.env.AZURE_OPENAI_ENDPOINT ?? "AZURE_OPENAI_ENDPOINT",
       deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME ??
         "gpt-realtime",
-      apiVersion = process.env.OPENAI_API_VERSION ?? "2025-08-28",
       credential = new DefaultAzureCredential(),
       scope = "https://cognitiveservices.azure.com/.default",
     } = options;
 
     this.endpoint = endpoint;
     this.deploymentName = deploymentName;
-    this.apiVersion = apiVersion;
     this.credential = credential;
     this.scope = scope;
   }
@@ -71,18 +64,17 @@ export class AzureService {
    * @throws {Error} Propagates errors encountered while creating the token provider or websocket transport.
    */
   public async initializeRealtimeClient(): Promise<OpenAIRealtimeWS> {
-    const azureADTokenProvider = getBearerTokenProvider(
+    const tokenProvider = getBearerTokenProvider(
       this.credential,
       this.scope,
     );
 
-    const azureOpenAIClient = new AzureOpenAI({
-      azureADTokenProvider,
-      apiVersion: this.apiVersion,
+    const client = new AzureOpenAI({
+      azureADTokenProvider: tokenProvider,
       deployment: this.deploymentName,
       endpoint: this.endpoint,
     });
 
-    return OpenAIRealtimeWS.azure(azureOpenAIClient);
+    return OpenAIRealtimeWS.azure(client);
   }
 }

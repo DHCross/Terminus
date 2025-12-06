@@ -170,15 +170,14 @@ import { AzureOpenAI } from "openai";
 import { DefaultAzureCredential, getBearerTokenProvider } from "@azure/identity";
 import { OpenAIRealtimeWS } from "openai/beta/realtime/ws";
 
-async function createRealtimeClient({ endpoint, deployment, apiVersion }: {
+async function createRealtimeClient({ endpoint, deployment }: {
   endpoint: string;
   deployment: string;
-  apiVersion: string;
 }) {
   const credential = new DefaultAzureCredential();
   const scope = "https://cognitiveservices.azure.com/.default";
   const azureADTokenProvider = getBearerTokenProvider(credential, scope);
-  const client = new AzureOpenAI({ azureADTokenProvider, endpoint, deployment, apiVersion });
+  const client = new AzureOpenAI({ azureADTokenProvider, endpoint, deployment });
   const realtime = await OpenAIRealtimeWS.azure(client);
   realtime.socket.on("open", () => {
     realtime.send({

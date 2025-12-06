@@ -174,6 +174,15 @@
       "problemMatcher": []
     },
     {
+      "label": "Install Extension Locally",
+      "type": "npm",
+      "script": "install:local",
+      "icon": {
+        "id": "desktop-download"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Quality Gate (npm)",
       "type": "shell",
       "command": "npm run quality:gate",

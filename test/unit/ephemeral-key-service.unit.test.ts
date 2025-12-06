@@ -48,12 +48,10 @@ function okSessionResponse() {
 
 const baseConfig: AzureOpenAIConfig = {
   endpoint: 'https://unit.openai.azure.com',
-  deploymentName: 'gpt-4o-realtime-preview',
-  apiVersion: '2025-04-01-preview'
+  deploymentName: 'gpt-realtime'
 };
 
 const baseRealtimeConfig: AzureRealtimeConfig = {
-  apiVersion: '2025-08-28',
   transcriptionModel: 'whisper-large-v3',
   inputAudioFormat: 'pcm16',
   locale: 'en-US',
@@ -85,7 +83,6 @@ const baseAudioConfig: AudioConfig = {
   },
   tts: {
     transport: 'webrtc',
-    apiVersion: '2025-08-28',
     fallbackMode: 'retry',
     maxInitialLatencyMs: 750,
     voice: {

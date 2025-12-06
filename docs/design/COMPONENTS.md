@@ -124,7 +124,7 @@ class EphemeralKeyServiceImpl {
   private async issueKey(): Promise<EphemeralKeyInfo> {
     // Credential provider handles authentication (keyless or API key)
     const response = await axios.post(
-      `${endpoint}/openai/realtime/sessions`,
+      `${endpoint}/openai/v1/realtime/sessions`,
       config,
       { headers: await this.getAuthHeaders() }
     );
@@ -554,7 +554,7 @@ sequenceDiagram
     User->>UI: Click "Start Conversation"
     UI->>Controller: startConversation()
     Controller->>KeyService: issueKey()
-    KeyService->>Azure: POST /openai/realtime/sessions (with credentials)
+    KeyService->>Azure: POST /openai/v1/realtime/sessions (with credentials)
     Azure-->>KeyService: Ephemeral key + Session ID + expires_at
     KeyService-->>Controller: EphemeralKeyInfo
 
@@ -746,14 +746,13 @@ graph TD
 ### Azure OpenAI Settings
 
 - `agentvoice.azureOpenAI.endpoint`: Azure OpenAI resource endpoint (required)
-- `agentvoice.azureOpenAI.deploymentName`: Realtime model deployment name (required)
-- `agentvoice.azureOpenAI.apiVersion`: API version for REST calls (default: 2025-04-01-preview)
+- `agentvoice.azureOpenAI.deploymentName`: Realtime model deployment name (required, default: gpt-realtime)
 - **Authentication**: Keyless via `DefaultAzureCredential` or API key in VS Code secret storage
 - **WebRTC Region**: Auto-selected (defaults to eastus2, could be enhanced with latency-based selection)
+- **API Version**: Uses v1 API endpoints that don't require api-version parameters
 
 ### Azure Realtime Settings
 
-- `agentvoice.azureRealtime.apiVersion`: Realtime API version (default: 2025-08-28)
 - `agentvoice.azureRealtime.transcriptionModel`: Transcription model (default: whisper-1)
 - `agentvoice.azureRealtime.inputAudioFormat`: Input PCM format (pcm16/pcm24/pcm32)
 - `agentvoice.azureRealtime.locale`: Locale hint for transcription (default: en-US)

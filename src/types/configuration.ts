@@ -12,8 +12,6 @@ export interface AzureOpenAIConfig {
   endpoint: string;
   /** Deployment name that maps to the targeted Azure OpenAI model. */
   deploymentName: string;
-  /** Optional API version override; defaults to 2025-04-01-preview when omitted. */
-  apiVersion?: string;
   /** Optional API key retrieved from secret storage for key-based auth flows. */
   apiKey?: string;
 }
@@ -22,8 +20,6 @@ export interface AzureOpenAIConfig {
  * Configuration contract for Azure OpenAI Realtime (audio) sessions.
  */
 export interface AzureRealtimeConfig {
-  /** API version applied when negotiating realtime sessions. */
-  apiVersion: string;
   /** Secondary model used for transcription fallbacks or hybrid flows. */
   transcriptionModel: string;
   /** PCM audio format for microphone capture sent to Azure. */
@@ -75,8 +71,6 @@ export interface AudioConfig {
 export interface TtsConfig {
   /** Preferred transport for realtime TTS streaming. */
   transport: "webrtc" | "websocket";
-  /** API version to request for TTS calls. */
-  apiVersion: string;
   /** Strategy when audio is unavailable or delayed. */
   fallbackMode: "text-only" | "retry";
   /** Maximum tolerated latency for the first audio packet, in milliseconds. */

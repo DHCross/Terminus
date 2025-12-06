@@ -90,8 +90,7 @@ function createAzureConfig(
 ): AzureOpenAIConfig {
   return {
     endpoint: "https://example.openai.azure.com",
-    deploymentName: "gpt-4o-realtime-preview",
-    apiVersion: "2025-04-01-preview",
+    deploymentName: "gpt-realtime",
     ...overrides,
   };
 }
@@ -143,7 +142,6 @@ function createRealtimeConfig(
   overrides: Partial<AzureRealtimeConfig> = {},
 ): AzureRealtimeConfig {
   return {
-    apiVersion: "2025-08-28",
     transcriptionModel: "whisper-1",
     inputAudioFormat: "pcm16",
     locale: "en-US",

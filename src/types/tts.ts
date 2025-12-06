@@ -45,7 +45,6 @@ export interface TtsVoiceProfile {
 export interface TtsServiceConfig {
   endpoint: string;
   deployment: string;
-  apiVersion: string;
   transport: TtsTransport;
   defaultVoice: TtsVoiceProfile;
   fallbackMode: TtsFallbackMode;

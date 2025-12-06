@@ -903,7 +903,7 @@ export class WebRTCTransportImpl
     config: WebRTCConfig,
     offer: RTCSessionDescriptionInit,
   ): Promise<{ sdp: string }> {
-    const endpoint = `${config.endpoint.url}?model=${encodeURIComponent(config.endpoint.deployment)}&api-version=${encodeURIComponent(config.endpoint.apiVersion)}`;
+    const endpoint = `${config.endpoint.url}?model=${encodeURIComponent(config.endpoint.deployment)}`;
 
     const response = await fetch(endpoint, {
       method: "POST",

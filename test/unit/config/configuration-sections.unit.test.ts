@@ -27,8 +27,6 @@ suite('Unit: Configuration sections', () => {
 
   it('Defaults present for azure realtime', async () => {
     const mgr = await init();
-    const azureOpenAI = mgr.getAzureOpenAIConfig();
-    assert.strictEqual(azureOpenAI.apiVersion, '2025-04-01-preview');
     const realtime = mgr.getAzureRealtimeConfig();
     assert.ok(['pcm16','pcm24','pcm32'].includes(realtime.inputAudioFormat), 'inputAudioFormat enum');
     assert.strictEqual(realtime.transcriptionModel, 'whisper-1');
@@ -39,7 +37,6 @@ suite('Unit: Configuration sections', () => {
   it('resolves realtime session preferences with normalized turn detection', async () => {
     const mgr = await init();
     const prefs = mgr.getRealtimeSessionPreferences();
-    assert.strictEqual(prefs.apiVersion, '2025-08-28');
     assert.strictEqual(prefs.voice, 'alloy');
     assert.ok(prefs.turnDetection, 'turn detection payload present');
     assert.strictEqual(prefs.turnDetection?.type, 'server_vad');

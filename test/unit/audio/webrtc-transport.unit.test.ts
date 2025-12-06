@@ -78,7 +78,6 @@ function createConfig(overrides: ConfigOverrides = {}): WebRTCConfig {
       region: "eastus2",
       url: "https://example.azure.com/realtime",
       deployment: "gpt-realtime",
-      apiVersion: "2025-08-28",
     },
     authentication: {
       ephemeralKey: "ephemeral-key",

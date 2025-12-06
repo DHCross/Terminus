@@ -214,7 +214,7 @@ ms-vscode.vscode-speech,ark-tik.multiline-cursor-audio-visualizer,0xluffyb.inter
 - **API Technology**: WebRTC (recommended) and WebSocket support
 - **Regional Availability**: East US 2 and Sweden Central (global deployments)
 - **Models Available**: `gpt-4o-realtime-preview`, `gpt-4o-mini-realtime-preview`, `gpt-realtime`
-- **API Version**: `2025-04-01-preview` (current stable)
+- **API Version**: Uses v1 API endpoints (no api-version parameter required)
 - **Authentication**: Ephemeral key system (1-minute validity) perfect for client-side integration
 - **Audio Formats**: PCM16 for streaming (native Web Audio API format)
 

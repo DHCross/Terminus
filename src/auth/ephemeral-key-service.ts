@@ -424,20 +424,17 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
   async endSession(sessionId: string): Promise<void> {
     try {
       const config = this.configManager.getAzureOpenAIConfig();
-      const sessionPreferences =
-        this.configManager.getRealtimeSessionPreferences();
-      const apiVersion = sessionPreferences.apiVersion;
 
       // Get authentication token
       const { DefaultAzureCredential } = await import("@azure/identity");
       const credential = new DefaultAzureCredential();
       const tokenResponse = await credential.getToken("https://cognitiveservices.azure.com/.default");
 
-      // Notify Azure to end session
+      // Notify Azure to end session using v1 API
       const response = await this.executeAuthOperation(
         () =>
           fetch(
-            `${config.endpoint}/openai/realtimeapi/sessions/${sessionId}?api-version=${apiVersion}`,
+            `${config.endpoint}/openai/v1/realtime/sessions/${sessionId}`,
             {
               method: "DELETE",
               headers: { "Authorization": `Bearer ${tokenResponse.token}` },
@@ -521,9 +518,9 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
       const credential = new DefaultAzureCredential();
       const tokenResponse = await credential.getToken("https://cognitiveservices.azure.com/.default");
 
-      // Test session creation
+      // Test session creation using v1 API
       const response = await fetch(
-        `${config.endpoint}/openai/realtimeapi/sessions?api-version=${sessionPreferences.apiVersion}`,
+        `${config.endpoint}/openai/v1/realtime/sessions`,
         {
           method: "POST",
           headers: {
@@ -623,7 +620,7 @@ export class EphemeralKeyServiceImpl implements EphemeralKeyService {
     }
 
     const response = await fetch(
-      `${config.endpoint}/openai/realtimeapi/sessions?api-version=${sessionPreferences.apiVersion}`,
+      `${config.endpoint}/openai/v1/realtime/sessions`,
       {
         method: "POST",
         headers,

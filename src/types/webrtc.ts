@@ -153,8 +153,7 @@ export interface WebRTCConfig {
 export interface WebRTCEndpoint {
   region: "eastus2" | "swedencentral";
   url: string; // e.g., https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc
-  deployment: string; // e.g., gpt-4o-realtime-preview
-  apiVersion: string;
+  deployment: string; // e.g., gpt-realtime
 }
 
 /**

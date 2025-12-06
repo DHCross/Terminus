@@ -49,7 +49,6 @@ export class WebRTCConfigFactory {
 
       const endpoint = this.createEndpoint(
         azureConfig.deploymentName,
-        sessionPreferences.apiVersion,
       );
 
       const authentication = this.createAuthentication(realtimeSession);
@@ -106,7 +105,6 @@ export class WebRTCConfigFactory {
    */
   private createEndpoint(
     deploymentName: string,
-    apiVersion: string,
   ): WebRTCEndpoint {
     // Auto-select region - default to eastus2
     // Future enhancement: implement latency-based region selection
@@ -118,7 +116,6 @@ export class WebRTCConfigFactory {
       region: webrtcRegion,
       url,
       deployment: deploymentName,
-      apiVersion,
     };
   }
 
@@ -368,8 +365,7 @@ export class WebRTCConfigFactory {
         !config.endpoint ||
         !config.endpoint.url ||
         !config.endpoint.region ||
-        !config.endpoint.deployment ||
-        !config.endpoint.apiVersion
+        !config.endpoint.deployment
       ) {
         throw new Error("Invalid endpoint configuration");
       }
@@ -469,7 +465,6 @@ export class WebRTCConfigFactory {
       },
       tts: {
         transport: "webrtc",
-        apiVersion: "2025-04-01-preview",
         fallbackMode: "retry",
         maxInitialLatencyMs: 300,
         voice: {
@@ -482,7 +477,6 @@ export class WebRTCConfigFactory {
     };
 
     const realtimePreferences: AzureRealtimeConfig = {
-      apiVersion: "2025-08-28",
       transcriptionModel: "whisper-1",
       inputAudioFormat: "pcm16",
       locale: "en-US",
@@ -502,8 +496,7 @@ export class WebRTCConfigFactory {
       endpoint: {
         region: "eastus2",
         url: "https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc",
-        deployment: "gpt-4o-realtime-preview",
-        apiVersion: realtimePreferences.apiVersion,
+        deployment: "gpt-realtime",
       },
       authentication: testAuthentication,
       audioConfig,

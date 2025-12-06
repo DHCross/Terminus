@@ -9,7 +9,7 @@
     "url": "https://github.com/PlagueHO/agent-voice.git"
   },
   "engines": {
-    "vscode": "^1.105.0",
+    "vscode": "^1.106.0",
     "node": ">=20.19.0"
   },
   "activationEvents": [
@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "compile": "tsc -p ./",
+    "install:local": "npm run package && code --install-extension *.vsix",
     "lint": "eslint src --ext ts",
     "package": "npm run webpack:prod && vsce package",
     "package:check": "vsce package --no-dependencies && echo 'Package created successfully'",
@@ -85,18 +86,8 @@
         },
         "agentvoice.azureOpenAI.deploymentName": {
           "type": "string",
-          "default": "gpt-4o-realtime-preview",
+          "default": "gpt-realtime",
           "description": "Azure OpenAI Realtime model deployment name"
-        },
-        "agentvoice.azureOpenAI.apiVersion": {
-          "type": "string",
-          "default": "2025-04-01-preview",
-          "description": "Azure OpenAI API version used for realtime sessions"
-        },
-        "agentvoice.azureRealtime.apiVersion": {
-          "type": "string",
-          "default": "2025-08-28",
-          "description": "Realtime API version for Azure OpenAI"
         },
         "agentvoice.azureRealtime.transcriptionModel": {
           "type": "string",

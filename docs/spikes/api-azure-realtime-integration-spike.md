@@ -118,10 +118,10 @@ outcome: "✅ FEASIBLE - Strong recommendation to proceed with WebRTC integratio
 **Azure OpenAI Realtime API Key Findings:**
 
 1. **API Availability and Models:**
-   - Available models: `gpt-4o-realtime-preview`, `gpt-4o-mini-realtime-preview`, `gpt-realtime`
+   - Available GA models: `gpt-realtime`, `gpt-realtime-mini`
    - Supports both WebRTC and WebSocket protocols
    - Available in East US 2 and Sweden Central regions
-   - API version: `2025-04-01-preview`
+   - Uses v1 API endpoints (no api-version parameter required)
 
 2. **WebRTC vs WebSocket Trade-offs:**
    - **WebRTC Recommended for Real-time Audio:** Lower latency, built-in media handling, error correction, peer-to-peer communication
@@ -139,7 +139,7 @@ outcome: "✅ FEASIBLE - Strong recommendation to proceed with WebRTC integratio
 
 4. **Technical Requirements:**
    - WebRTC URL format: `https://{region}.realtimeapi-preview.ai.azure.com/v1/realtimertc`
-   - Sessions URL format: `https://{resource}.openai.azure.com/openai/realtimeapi/sessions?api-version=2025-04-01-preview`
+   - Sessions URL format: `https://{resource}.openai.azure.com/openai/v1/realtime/sessions`
    - Audio formats: PCM16 input/output
    - Real-time audio processing with voice activity detection
 

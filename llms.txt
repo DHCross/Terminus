@@ -53,7 +53,7 @@ Key technical components include Azure AI Foundry GPT-Realtime for low-latency t
 - [Realtime Audio Overview](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/realtime-audio): Comprehensive guide covering session configuration, voice activity detection, and conversation management
 - [Realtime Audio WebRTC](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/realtime-audio-webrtc): WebRTC implementation guide for low-latency real-time audio streaming
 - [GPT Models and Versions](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/models): Available GPT-Realtime models (gpt-4o-realtime-preview, gpt-4o-mini-realtime-preview, gpt-realtime)
-- [API Version Lifecycle](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/api-version-lifecycle): API versioning information for Realtime API (2025-08-28 recommended)
+- [API Version Lifecycle](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/api-version-lifecycle): Migration guide to v1 API that eliminates api-version parameters
 - [Authentication Guide](https://learn.microsoft.com/en-us/azure/ai-services/authentication): Azure authentication methods including Microsoft Entra ID and API keys
 - [Environment Variables](https://learn.microsoft.com/en-us/azure/ai-services/cognitive-services-environment-variables): Setting up Azure service credentials and configuration
 - [API Keys with Azure Key Vault](https://learn.microsoft.com/en-us/azure/key-vault/general/apps-api-keys-secrets): Secure API key management best practices

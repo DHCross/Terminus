@@ -1,5 +1,5 @@
 import { DefaultAzureCredential, getBearerTokenProvider } from "@azure/identity";
-import { AzureOpenAI } from "openai";
+import { OpenAI } from "openai";
 import { Logger } from "../../core/logger";
 import type {
     IntentCategory,
@@ -14,7 +14,6 @@ import type {
 export interface LlmClassifierConfig {
   endpoint: string;
   deployment: string;
-  apiVersion: string;
   temperature?: number;
   maxTokens?: number;
 }
@@ -41,7 +40,7 @@ interface LlmClassificationResponse {
 export class LlmIntentClassifier {
   private readonly logger: Logger;
   private readonly config: LlmClassifierConfig;
-  private client?: AzureOpenAI;
+  private client?: OpenAI;
 
   constructor(config: LlmClassifierConfig, logger?: Logger) {
     this.config = config;
@@ -49,19 +48,17 @@ export class LlmIntentClassifier {
   }
 
   /**
-   * Initialize the Azure OpenAI client with keyless auth.
+   * Initialize the Azure OpenAI client with keyless auth using v1 API.
    */
   async initialize(): Promise<void> {
     try {
       const credential = new DefaultAzureCredential();
       const scope = "https://cognitiveservices.azure.com/.default";
-      const azureADTokenProvider = getBearerTokenProvider(credential, scope);
+      const tokenProvider = getBearerTokenProvider(credential, scope);
 
-      this.client = new AzureOpenAI({
-        azureADTokenProvider,
-        endpoint: this.config.endpoint,
-        deployment: this.config.deployment,
-        apiVersion: this.config.apiVersion,
+      this.client = new OpenAI({
+        baseURL: `${this.config.endpoint}/openai/v1`,
+        apiKey: tokenProvider,
       });
 
       this.logger.debug("LlmIntentClassifier initialized", {

@@ -221,8 +221,7 @@ function createConfig(): WebRTCConfig {
     endpoint: {
       region: "eastus2",
       url: "https://eastus2.realtimeapi-preview.ai.azure.com/v1/realtimertc",
-      deployment: "gpt-4o-realtime-preview",
-      apiVersion: "2025-08-28",
+      deployment: "gpt-realtime",
     },
     authentication: {
       ephemeralKey: "ephemeral-key",

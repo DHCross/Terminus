@@ -53,12 +53,10 @@ class MockCredentialManager extends CredentialManagerImpl {
 class MockConfigurationManager extends ConfigurationManager {
   private mockConfig: AzureOpenAIConfig = {
     endpoint: 'https://test.openai.azure.com',
-    deploymentName: 'gpt-4o-realtime-preview',
-    apiVersion: '2025-04-01-preview'
+    deploymentName: 'gpt-realtime'
   };
 
   private mockRealtimeConfig: AzureRealtimeConfig = {
-    apiVersion: '2025-08-28',
     transcriptionModel: 'whisper-1',
     inputAudioFormat: 'pcm16',
     locale: 'en-US',
@@ -90,7 +88,6 @@ class MockConfigurationManager extends ConfigurationManager {
     },
     tts: {
       transport: 'webrtc',
-      apiVersion: '2025-04-01-preview',
       fallbackMode: 'retry',
       maxInitialLatencyMs: 300,
       voice: {
@@ -128,7 +125,6 @@ class MockConfigurationManager extends ConfigurationManager {
 
   override getRealtimeSessionPreferences(): RealtimeSessionPreferences {
     return {
-      apiVersion: this.mockRealtimeConfig.apiVersion || '2025-08-28',
       voice: this.mockAudioConfig.tts.voice?.name,
       turnDetection: {
         type: 'server_vad',

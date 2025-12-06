@@ -5,7 +5,6 @@ export class AzureOpenAIRealtimeSection {
   read(): AzureRealtimeConfig {
     const c = vscode.workspace.getConfiguration('agentvoice.azureRealtime');
     return {
-      apiVersion: c.get('apiVersion', '2025-08-28'),
       transcriptionModel: c.get('transcriptionModel', 'whisper-1'),
       inputAudioFormat: c.get('inputAudioFormat', 'pcm16') as AzureRealtimeConfig['inputAudioFormat'],
       locale: c.get('locale', 'en-US'),
