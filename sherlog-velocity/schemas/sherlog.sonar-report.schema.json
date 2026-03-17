@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.sonar-report.schema.json",
+  "title": "Sherlog Sonar Report",
+  "type": "object",
+  "required": [
+    "_sherlog_schema",
+    "generated_at",
+    "project_key",
+    "quality_gate",
+    "measures",
+    "summary",
+    "issues_by_file",
+    "unreviewed_hotspots"
+  ],
+  "properties": {
+    "_sherlog_schema": {
+      "type": "string",
+      "const": "sonar-report@1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "org": {
+      "type": ["string", "null"]
+    },
+    "project_key": {
+      "type": "string"
+    },
+    "branch": {
+      "type": ["string", "null"]
+    },
+    "pull_request": {
+      "type": ["string", "null"]
+    },
+    "head": {
+      "type": ["string", "null"]
+    },
+    "quality_gate": {
+      "type": "object",
+      "required": ["status", "passed", "conditions"],
+      "properties": {
+        "status": { "type": "string" },
+        "passed": { "type": "boolean" },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["metric", "status"],
+            "properties": {
+              "metric": { "type": "string" },
+              "status": { "type": "string" },
+              "actual": { "type": ["string", "null"] },
+              "threshold": { "type": ["string", "null"] },
+              "comparator": { "type": ["string", "null"] }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "measures": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "null"]
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total_issues", "by_severity"],
+      "properties": {
+        "total_issues": { "type": "number" },
+        "bugs": { "type": "number" },
+        "vulnerabilities": { "type": "number" },
+        "code_smells": { "type": "number" },
+        "unreviewed_hotspots": { "type": "number" },
+        "by_severity": {
+          "type": "object",
+          "properties": {
+            "BLOCKER": { "type": "number" },
+            "CRITICAL": { "type": "number" },
+            "MAJOR": { "type": "number" },
+            "MINOR": { "type": "number" },
+            "INFO": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "issues_by_type": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "issues_by_file": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["key", "type", "severity", "message"],
+          "properties": {
+            "key": { "type": "string" },
+            "type": { "type": "string" },
+            "severity": { "type": "string" },
+            "message": { "type": "string" },
+            "line": { "type": ["number", "null"] },
+            "effort": { "type": ["string", "null"] },
+            "status": { "type": ["string", "null"] },
+            "rule": { "type": ["string", "null"] }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+    "unreviewed_hotspots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "message", "file"],
+        "properties": {
+          "key": { "type": "string" },
+          "message": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": ["number", "null"] },
+          "vulnerability_probability": { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

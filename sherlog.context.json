@@ -1,0 +1,36 @@
+{
+  "zones": [
+    {
+      "name": "Seed Pack",
+      "paths": [
+        "seed/**/*"
+      ],
+      "belief": "Coherence Lab seed pack: personas, prompts, toolsets, continuity tasks, and knowledge notes for Sapphire.",
+      "last_updated": "2026-03-17"
+    },
+    {
+      "name": "Scripts",
+      "paths": [
+        "scripts/**/*"
+      ],
+      "belief": "Setup and installation scripts for native Sapphire launcher and seed deployment.",
+      "last_updated": "2026-03-17"
+    },
+    {
+      "name": "Documentation",
+      "paths": [
+        "docs/**/*"
+      ],
+      "belief": "User-facing and internal documentation.",
+      "last_updated": "2026-03-17"
+    },
+    {
+      "name": "SHERLOG",
+      "paths": [
+        "sherlog-velocity/**/*"
+      ],
+      "belief": "Repo-aware preflight CLI: velocity tracking, gap detection, hygiene, session tracking.",
+      "last_updated": "2026-03-17"
+    }
+  ]
+}

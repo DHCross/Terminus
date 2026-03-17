@@ -1,0 +1,42 @@
+{
+  "_comment": "Disabled sample continuity task for Coherence Lab. Safe to merge by task id.",
+  "tasks": [
+    {
+      "id": "terminus-daily-brief",
+      "name": "Terminus Daily Brief",
+      "enabled": false,
+      "schedule": "0 9 * * *",
+      "chance": 100,
+      "provider": "auto",
+      "model": "",
+      "prompt": "terminus_lab",
+      "toolset": "coherence_lab",
+      "chat_target": "terminus_lab",
+      "initial_message": "Review the current continuity context for Dan's coherence-engine research. Preserve any meaningful cross-session structure, including active hypotheses, unresolved confounders, promising experiments, and important naming/history context such as the Terminus thread. End with the single highest-value next step. If a memory or knowledge note should be stored, do so briefly and explicitly.",
+      "tts_enabled": false,
+      "browser_tts": false,
+      "inject_datetime": true,
+      "persona": "terminus",
+      "voice": "",
+      "pitch": null,
+      "speed": null,
+      "memory_scope": "default",
+      "knowledge_scope": "default",
+      "people_scope": "none",
+      "goal_scope": "default",
+      "heartbeat": false,
+      "emoji": "CL",
+      "context_limit": 0,
+      "max_parallel_tools": 0,
+      "max_tool_rounds": 0,
+      "active_hours_start": null,
+      "active_hours_end": null,
+      "source": "",
+      "handler": "",
+      "plugin_dir": "",
+      "last_run": null,
+      "last_response": null,
+      "created": "2026-03-15T00:00:00"
+    }
+  ]
+}

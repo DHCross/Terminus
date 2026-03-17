@@ -1,145 +1,98 @@
-# Agent Voice: Hands/Eyes Free Planning and Specification Assistant for VS Code
+# Terminus
 
-[![Continuous Integration][ci-badge]][ci-url] [![Continuous Delivery][cd-badge]][cd-url]
+A native macOS launcher for [Sapphire](https://github.com/ddxfish/sapphire) with a custom seed pack for continuity-focused research.
 
-## Project Overview
+Sapphire runs directly on your Mac (Python backend + Electron shell) — no Docker required. The Sapphire installation lives on an external drive; this repo holds configuration, environment, and the Coherence Lab seed pack.
 
-Agent Voice is a desktop-based VS Code extension designed to enable hands/eyes free interaction with GitHub Copilot for specification writing, project planning, and task management. It enables natural conversation for ideation, feature scoping, architecture planning, and GitHub issue creation through speech-to-text and text-to-speech. The tool serves both accessibility needs (visual impairments, conditions like Bell's Palsy) and enables fluid conversational workflows in situations where traditional keyboard/screen interaction isn't practical (e.g., commuting, walking, or when maintaining conversational flow is more important than precise code editing).
+## Prerequisites
 
-**Implementation Approach**: Agent Voice functions as an AI manager agent that orchestrates the VS Code GitHub Copilot Agent, acting as an intelligent translator between voice interactions and Copilot's planning and specification capabilities. This design enables 100% hands/eyes free communication by converting spoken planning discussions into appropriate Copilot prompts and translating responses back into natural speech. By leveraging Copilot's existing system context awareness and MCP server integrations, Agent Voice can help with specification writing and planning that considers existing codebases, design documents, and external system knowledge without reimplementing these complex integrations.
+- **Python 3.11+** (installed via [uv](https://docs.astral.sh/uv/) or system Python)
+- **Node.js** (for the Electron shell)
+- **[Task](https://taskfile.dev/installation/)** CLI (task runner used by Sapphire)
+- **[uv](https://docs.astral.sh/uv/)** (Python package manager)
+- Sapphire source cloned to your external drive (default: `/Volumes/My Passport/Sapphire-native`)
 
-## System Requirements
+## Quick Start
 
-- **Node.js**: `>=20.19.0` (project provides an `.nvmrc` pinned to `22.12.0`; run `nvm use` to align your shell).
-- **npm**: Bundled with the Node.js runtime noted above (Corepack-enabled).
+```bash
+cp .env.example .env    # edit to add API keys and verify paths
+make setup              # check prerequisites and wire up .env
+make launch             # start Sapphire natively
+```
 
-## Why GitHub Copilot Integration?
+Then open: [https://localhost:8073](https://localhost:8073)
 
-**Leveraging Existing Context**: When planning features for existing systems, context matters tremendously. GitHub Copilot already has sophisticated understanding of:
+Sapphire uses a self-signed certificate, so your browser will show a warning. Proceed to continue.
 
-- Your current codebase structure and patterns
-- Existing design documents and architecture decisions
-- Dependencies and technology stack
-- Code quality standards and conventions
+## Coherence Lab Seed
 
-**MCP Server Access**: Rather than reimplementing integrations with external systems, Agent Voice leverages GitHub Copilot's existing MCP (Model Context Protocol) server connections. This provides access to:
+This repo includes a seed pack oriented around continuity and research:
 
-- GitHub repositories and issue tracking
-- Documentation systems and wikis
-- Project management tools
-- External APIs and services
-- Custom organizational knowledge bases
+- continuity and memory as external state
+- coherence engines / Logos Theory
+- contradiction dynamics in transformers
+- falsifiability-first research collaboration
 
-**Proven AI Planning Capabilities**: GitHub Copilot has already invested heavily in understanding software planning workflows, requirement analysis, and architectural decision-making. Agent Voice amplifies these capabilities through natural voice interaction rather than rebuilding them from scratch.
+Install the seed pack:
 
-## Key Features
+```bash
+make seed-coherence-lab
+```
 
-- **Hands/Eyes Free Operation**: Complete voice-only interaction for accessibility and situational needs
-- **Voice Input**: Use Azure AI Foundry's GPT-Realtime for real-time transcription
-- **Text-to-Speech**: Use Azure OpenAI Realtime audio (gpt-realtime) for synthesized audio output
-- **Copilot Integration**: Leverage GitHub Copilot's existing system context and MCP server access for informed planning
-- **Specification Writing**: Voice-driven creation of requirements, architecture docs, and technical specifications
-- **Project Planning**: Conversational ideation, feature scoping, and task breakdown
-- **Context Awareness**: Leverage existing codebase and design documentation through Copilot's knowledge
-- **GitHub Issue Management**: Create and manage issues via voice for planning and task tracking
-- **Conversational Flow**: Natural dialogue with follow-up questions and conversational memory
-- **Conversation Persistence**: Resume, browse, and delete past voice sessions stored locally in VS Code user data storage per workspace
+What it seeds:
 
-## Architecture Components
+- persona: `terminus`
+- prompt preset: `terminus_lab`
+- compatibility persona: `coherence_engine`
+- compatibility prompt preset: `logos_lab`
+- toolset: `coherence_lab`
+- disabled continuity task: `Terminus Daily Brief`
 
-1. **VS Code Extension Shell**
-    - Language: TypeScript
-    - APIs: vscode.window, vscode.workspace, vscode.authentication
-    - UI: Status bar button, chat panel, transcript log
-2. **Speech-to-Text (STT)**
-    - Primary: Azure AI Foundry GPT-Realtime (for low-latency transcription)
-    - Integration: Microphone capture via Node.js or Electron module
-3. **Text-to-Speech (TTS)**
-    - Primary: Azure OpenAI Realtime audio (gpt-realtime) for synthesized audio output
-    - Optional: OS-native TTS for fallback
-4. **Copilot Integration (AI Manager Agent)**
-    - Orchestrate GitHub Copilot Agent through Chat extension APIs
-    - Act as intelligent translator between voice input and Copilot commands
-    - Convert spoken planning discussions into structured @vscode/copilot-chat prompts
-    - Process Copilot responses for optimal voice delivery and specification formatting
-    - Leverage Copilot's existing system context (codebase, design docs) for informed planning
-    - Utilize Copilot's MCP server integrations without reimplementation
-    - Manage conversation context and follow-up interactions for planning sessions
-    - Reference: Copilot Chat GitHub Repo
-5. **Conversation History Storage**
-    - Persist conversations on the local device using VS Code workspace storage (`Memento`) scoped to the active repository
-    - Restore the latest session automatically after VS Code restarts with the same workspace open
-    - Provide quick switching between historical sessions while the same workspace is open
-    - Support secure deletion and retention policies honoring local-only storage
-6. **Codebase Context**
-    - Use VS Code APIs to:
-        - Read open files
-        - Search workspace
-        - Summarize code segments
-7. **GitHub Integration**
-    - Preferred: GitHub MCP server for issue creation and repo actions
-    - Alternative: GitHub REST API via octokit.js
-    - Authentication: VS Code GitHub auth API or PAT
+After Sapphire starts:
 
-## Development Phases
+1. Switch to the `terminus` persona.
+2. If you want recurring synthesis, enable `Terminus Daily Brief` in Continuity.
+3. Upload the Markdown notes in [seed/coherence-lab/knowledge/](seed/coherence-lab/knowledge/) into Mind > Knowledge for richer long-term context.
 
-### Phase 1: Voice I/O Prototype
+This is the useful connection to Sapphire: not "continuous learning" in the weight-update sense, but persistent prompt state, memory, knowledge, goals, and scheduled continuity as a scaffold around a stateless model.
 
-- Set up microphone capture
-- Integrate GPT-Realtime for STT
-- Implement Azure TTS for response playback
+## SHERLOG Preflight
 
-### Phase 2: AI Manager Agent & Copilot Orchestration
+[SHERLOG](https://github.com/dancross/SHERLOG_starter) is a repo-aware preflight CLI for AI-assisted development. It detects gaps, tracks velocity, and validates code hygiene before you hand work off to an AI.
 
-- Implement AI manager agent layer
-- Connect to GitHub Copilot Chat extension APIs
-- Develop intelligent prompt translation (voice planning → Copilot commands)
-- Create response processing pipeline (Copilot → optimized speech for specifications)
-- Establish conversation context management for planning sessions
-- Enable seamless hands/eyes free interaction flow
+```bash
+make verify              # Validate install and bundle freshness
+make doctor ARGS="--feature 'Seed Pack'"   # Feature health check
+make gaps ARGS="--feature 'Seed Pack'"     # Detect missing tests/docs
+make hygiene             # Code quality scan
+```
 
-### Phase 3: Specification & Planning Workflows
+SHERLOG is under active development. Not every type of work has a pre-defined feature key — use what's available and skip checks that don't apply.
 
-- Implement voice-driven document creation (requirements, architecture specs)
-- Leverage Copilot's codebase context for informed planning
-- Create planning session templates and workflows
+## Common Commands
 
-### Phase 4: Task & Issue Management
+```bash
+make launch              # Start Sapphire (Electron + Python backend)
+make stop                # Stop Sapphire
+make logs                # Tail runtime logs
+make setup               # Check prerequisites and configure
+make seed-coherence-lab  # Install the Coherence Lab seed pack
+make verify              # SHERLOG preflight check
+make doctor              # SHERLOG feature health
+make gaps                # SHERLOG gap detection
+make hygiene             # SHERLOG code quality scan
+```
 
-- Draft issues and tasks from planning conversations
-- Leverage Copilot's GitHub integrations and MCP servers
-- Voice-driven issue creation and task breakdown
+## Configuration
 
-### Phase 5: Accessibility & UX Polish
+Edit [.env](.env) before starting:
 
-- Optimize for screen-free operation
-- Add conversation transcription and replay
-- Support for planning session management
-- Implement local conversation storage, resume support, and history management UI
-- Optimize latency for conversational flow
+- `SAPPHIRE_NATIVE_DIR`: path to Sapphire installation (default: `/Volumes/My Passport/Sapphire-native`)
+- `TZ`: your timezone
+- `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`
+- `ELEVENLABS_API_KEY`: for ElevenLabs TTS
+- `LMSTUDIO_BASE_URL`: if you run LM Studio locally
 
-## Testing & Quality Gates
+## Upstream References
 
-- Run `npm run quality:gate` to execute the VS Code `Quality Gate Sequence` (Lint → Test Unit → Test Extension → Test All → Test Coverage → Test Performance).
-- The gate fails if cumulative runtime exceeds **15 minutes** and persists sanitized telemetry to `telemetry/gate-report.json` alongside NYC coverage summaries.
-- Coverage thresholds are enforced at ≥90% statements, ≥90% lines, ≥90% functions, and ≥85% branches for activation and disposal paths.
-- The GitHub Actions workflow uploads the `quality-gate-telemetry` artifact so PR reviewers can inspect task durations, coverage, and extension host logs.
-
-### Azure-dependent suites
-
-- Integration tests that rely on live Azure resources are tagged with `[requiresAzure]` and skip automatically when credentials are absent.
-- To opt-in locally, provide `agentvoice.azureOpenAI.apiKey` via the extension secret store (`Agent Voice: Configure Azure Credentials`) or set `AZURE_OPENAI_API_KEY` before running the quality gate.
-- Regression suites validate failure handling and cleanup using fixtures under `test/fixtures/activation-failure`, with outputs sanitized via `test/utils/sanitizers.ts`.
-
-## Reference Projects & APIs
-
-- [Copilot Chat Extension](https://github.com/microsoft/vscode-copilot-chat)
-- [Azure AI Foundry Realtime Audio Quickstart](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/realtime-audio-quickstart?tabs=keyless%2Cwindows&pivots=programming-language-typescript)
-- [Azure AI Services](https://learn.microsoft.com/en-us/azure/ai-services/)
-- [VS Code API](https://code.visualstudio.com/api)
-- [Octokit.js](https://github.com/octokit/octokit.js)
-
-[ci-badge]: https://github.com/PlagueHO/agent-voice/actions/workflows/continuous-integration.yml/badge.svg
-[ci-url]: https://github.com/PlagueHO/agent-voice/actions/workflows/continuous-integration.yml
-[cd-badge]: https://github.com/PlagueHO/agent-voice/actions/workflows/continuous-delivery.yml/badge.svg
-[cd-url]: https://github.com/PlagueHO/agent-voice/actions/workflows/continuous-delivery.yml
+- [Sapphire repository](https://github.com/ddxfish/sapphire)

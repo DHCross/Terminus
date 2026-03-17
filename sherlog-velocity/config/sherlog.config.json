@@ -1,0 +1,141 @@
+{
+  "version": 2,
+  "drop_version": "1.0.0",
+  "repo_root": ".",
+  "installed_at": "2026-03-17T08:01:49.605Z",
+  "stack": {
+    "language": "Generic",
+    "framework": null
+  },
+  "ci": null,
+  "bundler": {
+    "type": null,
+    "bundles": []
+  },
+  "context": {
+    "mode": "sherlog-map",
+    "map_file": "sherlog.context.json"
+  },
+  "paths": {
+    "velocity_log": "sherlog-velocity/data/velocity-log.jsonl",
+    "gap_history_log": "sherlog-velocity/data/gap-history.jsonl",
+    "gap_acknowledgements": "sherlog.acknowledgements.json",
+    "profile_run_history_log": "sherlog-velocity/data/profile-run-history.jsonl",
+    "profile_run_artifacts_dir": "velocity-artifacts/sherlog-runs",
+    "core_suite_history_log": "sherlog-velocity/data/core-suite-history.jsonl",
+    "report_output_markdown": "docs/velocity-forecast.md",
+    "summary_output_json": "velocity-artifacts/velocity-summary.json",
+    "gap_weights": "sherlog-velocity/config/gap-weights.json",
+    "docs_dir": "docs",
+    "source_roots": ["scripts", "seed"],
+    "test_roots": [],
+    "context_map": "sherlog.context.json",
+    "repomix_manifest": "repomix-manifest.json"
+  },
+  "settings": {
+    "window_days": 7,
+    "session_autostart_on_feature_commands": true,
+    "gap_analysis": true,
+    "gap_scan_ignore_dirs": [],
+    "path_lanes_default": "core",
+    "path_lanes": [
+      {
+        "name": "core",
+        "mode": "strict",
+        "include": [],
+        "exclude": []
+      },
+      {
+        "name": "legacy",
+        "mode": "relaxed",
+        "include": [
+          "legacy/**",
+          "archive/**",
+          "deprecated/**",
+          "prototype/**",
+          "prototypes/**",
+          "experimental/**",
+          "sandbox/**"
+        ],
+        "exclude": []
+      }
+    ],
+    "lane_multipliers": {
+      "strict": 1,
+      "relaxed": 0.35,
+      "excluded": 0
+    },
+    "convergence_thresholds": {
+      "implementation": 0.5,
+      "tests": 0.45,
+      "docs": 0.5,
+      "repomix": 0.4,
+      "overall": 0.45
+    },
+    "convergence_weights": {
+      "implementation": {
+        "path": 0.45,
+        "export": 0.35,
+        "callsite": 0.2
+      },
+      "tests": {
+        "path": 0.65,
+        "content": 0.35
+      },
+      "docs": {
+        "path": 0.55,
+        "content": 0.45
+      },
+      "repomix": {
+        "path": 0.35,
+        "content": 0.35,
+        "bundle": 0.3
+      },
+      "overall": {
+        "implementation": 0.4,
+        "tests": 0.25,
+        "docs": 0.2,
+        "repomix": 0.15
+      }
+    },
+    "core_suite_features": [
+      "Sherlog Control Center UI",
+      "Sherlog Vibe Coder Doctrine",
+      "Sherlog Session Summary Launch Risk",
+      "Sherlog Feature Profile Registry",
+      "Sherlog Acknowledgement Expiry Flow"
+    ],
+    "feature_profiles": {
+      "sherlog-control-center-ui": {
+        "aliases": [
+          "sherlog control center",
+          "velocity panel",
+          "sherlog panel"
+        ],
+        "path_hints": [
+          "sherlog-vscode/**"
+        ],
+        "implementation_path_hints": [
+          "sherlog-vscode/extension.js"
+        ],
+        "doc_path_hints": [
+          "sherlog-vscode/README.md",
+          "docs/sherlog-next-steps.md",
+          "docs/why-sherlog.md"
+        ],
+        "export_hints": [
+          "runProfileCheck",
+          "saveHeuristics",
+          "saveProfiles",
+          "saveAcknowledgements",
+          "loadRunHistory"
+        ],
+        "callsite_hints": [
+          "sherlog.openPanel",
+          "runTaskfile",
+          "loadControlState"
+        ]
+      }
+    }
+  }
+}

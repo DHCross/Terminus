@@ -1,0 +1,23 @@
+{
+  "entries": [
+    {
+      "id": "ack_defer_docs",
+      "feature": "reflection protocol handler",
+      "gap": "documentation",
+      "status": "deferred",
+      "reason": "Public docs blocked pending API review.",
+      "recorded_at": "2026-02-06T00:00:00Z",
+      "expires_at": "2026-02-20T00:00:00Z"
+    },
+    {
+      "id": "ack_exempt_legacy_test",
+      "feature": "*",
+      "gap": "test_coverage",
+      "status": "exempt",
+      "reason": "Legacy adapter slated for retirement in Q2.",
+      "recorded_at": "2026-02-06T00:00:00Z",
+      "audit_every_days": 30,
+      "reviewed_at": "2026-02-06T00:00:00Z"
+    }
+  ]
+}

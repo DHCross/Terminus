@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.context.schema.json",
+  "title": "Sherlog Context Map",
+  "type": "object",
+  "required": ["zones"],
+  "properties": {
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "paths"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "belief": { "type": "string" },
+          "last_updated": {
+            "type": "string",
+            "description": "ISO date or date-time string (e.g. 2026-02-06)"
+          },
+          "ship_ready": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, missing_implementation in this zone becomes blocking. Use only when the zone is explicitly intended to ship, not during scaffolding."
+          },
+          "critical_artifacts": {
+            "type": "array",
+            "description": "Machine-checkable list of files/patterns that MUST exist for this zone to be considered shippable. Absence triggers a blocking 'critical_artifact_missing' gap.",
+            "items": {
+              "type": "object",
+              "required": ["path"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Glob pattern or exact relative path to the required artifact."
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Why this artifact is irreplaceable (data loss, security, build, schema)."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,7 +1,0 @@
-{
-  "status": 503,
-  "error": {
-    "code": "UpstreamOutage",
-    "message": "Simulated Azure OpenAI outage for regression testing"
-  }
-}

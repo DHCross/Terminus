@@ -1,0 +1,37 @@
+{
+  "_comment": "Coherence Lab toolset additions for Sapphire. Safe to merge with seeded defaults.",
+  "coherence_lab": {
+    "emoji": "CL",
+    "functions": [
+      "web_search",
+      "get_website",
+      "get_wikipedia",
+      "research_topic",
+      "get_site_links",
+      "get_images",
+      "save_memory",
+      "search_memory",
+      "get_recent_memories",
+      "delete_memory",
+      "save_knowledge",
+      "search_knowledge",
+      "delete_knowledge",
+      "create_goal",
+      "list_goals",
+      "update_goal",
+      "delete_goal",
+      "notepad_read",
+      "notepad_append_lines",
+      "notepad_delete_lines",
+      "notepad_insert_line",
+      "view_prompt",
+      "switch_prompt",
+      "set_piece",
+      "remove_piece",
+      "create_piece",
+      "list_pieces",
+      "search_help_docs",
+      "ask_claude"
+    ]
+  }
+}

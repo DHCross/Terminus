@@ -1,0 +1,36 @@
+{
+  "name": "sherlog-velocity",
+  "version": "1.0.0",
+  "description": "Portable velocity tracking, gap detection, and AI context optimization — zero-dependency drop package",
+  "license": "MIT",
+  "keywords": [
+    "sherlog",
+    "velocity",
+    "gap-detection",
+    "ai-context",
+    "developer-tools"
+  ],
+  "main": "src/core/analyzer.js",
+  "scripts": {
+    "velocity:run": "node src/core/analyzer.js",
+    "velocity:report": "node src/core/reporter.js",
+    "velocity:estimate": "node src/core/estimate.js",
+    "sherlog:verify": "node src/cli/verify.js --strict",
+    "sherlog:doctor": "node src/cli/doctor.js",
+    "sherlog:gaps": "node src/cli/gaps.js",
+    "sherlog:consumers": "node src/cli/consumers.js",
+    "sherlog:bounds": "node src/cli/bounds.js",
+    "sherlog:prompt": "node src/cli/prompt.js",
+    "sherlog:hygiene": "node src/cli/hygiene.js",
+    "sherlog:init-context": "node src/cli/init-context.js",
+    "sherlog:index-sync": "node src/cli/index-sync.js",
+    "sherlog:repomix-sync": "node src/cli/repomix-sync.js",
+    "sherlog:bridge": "node src/cli/bridge.js",
+    "velocity:all": "npm run velocity:run && npm run velocity:report",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}
