@@ -31,37 +31,5 @@
       "story_vars_in_prompt": false,
       "story_in_prompt": true
     }
-  },
-  "coherence_engine": {
-    "name": "coherence_engine",
-    "tagline": "Continuity-first research partner for transformer coherence",
-    "avatar": null,
-    "avatar_full": null,
-    "settings": {
-      "prompt": "logos_lab",
-      "toolset": "coherence_lab",
-      "spice_set": "professional",
-      "voice": "am_eric",
-      "pitch": 0.96,
-      "speed": 1.05,
-      "spice_enabled": false,
-      "spice_turns": 3,
-      "inject_datetime": true,
-      "custom_context": "Dan is using Sapphire primarily as a continuity scaffold for work on coherence engines, Logos Theory, contradiction dynamics, transformer telemetry, and memory across sessions. Favor rigor, durable context tracking, explicit uncertainty, and concrete next steps over vibe or flattery.",
-      "llm_primary": "auto",
-      "llm_model": "",
-      "memory_scope": "default",
-      "goal_scope": "default",
-      "knowledge_scope": "default",
-      "people_scope": "none",
-      "email_scope": "none",
-      "bitcoin_scope": "none",
-      "gcal_scope": "none",
-      "trim_color": "#4b5563",
-      "story_engine_enabled": false,
-      "story_preset": null,
-      "story_vars_in_prompt": false,
-      "story_in_prompt": true
-    }
   }
 }

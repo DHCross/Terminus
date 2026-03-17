@@ -11,10 +11,8 @@ This seed pack turns Sapphire into a continuity scaffold for Dan's work on:
 
 It does not modify Sapphire source code. It seeds Sapphire's mounted `user/` data with:
 
-- a primary research persona: `terminus`
-- a custom persona: `coherence_engine`
-- a custom assembled prompt preset: `terminus_lab`
-- a custom assembled prompt preset: `logos_lab`
+- one persona: `terminus`
+- one prompt preset: `terminus_lab`
 - a custom merged toolset: `coherence_lab`
 - one disabled continuity task you can enable later
 - six Markdown knowledge notes you can upload into Mind > Knowledge
@@ -38,4 +36,3 @@ Design choice:
 - toolset enables research plus memory
 - continuity task gives an optional recurring synthesis loop
 - knowledge notes hold the durable project context that should outlive any one chat
-- `coherence_engine` remains as a fallback persona for compatibility, but `terminus` is the preferred identity
