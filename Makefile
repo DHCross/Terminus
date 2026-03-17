@@ -6,11 +6,13 @@ ifeq ($(SAPPHIRE_NATIVE_DIR),)
   SAPPHIRE_NATIVE_DIR = /Volumes/My Passport/Sapphire-native
 endif
 
+TASK ?= $(shell command -v task 2>/dev/null || echo /opt/homebrew/bin/task)
+
 launch:
-	cd "$(SAPPHIRE_NATIVE_DIR)" && task launch
+	cd "$(SAPPHIRE_NATIVE_DIR)" && $(TASK) launch
 
 stop:
-	cd "$(SAPPHIRE_NATIVE_DIR)" && task kill
+	cd "$(SAPPHIRE_NATIVE_DIR)" && $(TASK) kill
 
 logs:
 	tail -f /tmp/sapphire-electron.log /tmp/sapphire-native.log 2>/dev/null || echo "No log files found yet. Start Sapphire first with: make launch"

@@ -42,15 +42,16 @@ else
 fi
 
 # Task CLI
-if command -v task >/dev/null 2>&1; then
-  check "Task CLI" 1
+if command -v task >/dev/null 2>&1 || [ -x /opt/homebrew/bin/task ] || [ -x /usr/local/bin/task ]; then
+  TASK_VER="$(task --version 2>/dev/null || /opt/homebrew/bin/task --version 2>/dev/null | head -1)"
+  check "Task CLI ($TASK_VER)" 1
 else
   check "Task CLI" 0
-  echo "         Install: https://taskfile.dev/installation/"
+  echo "         Install: brew install go-task/tap/go-task"
 fi
 
 # uv
-if command -v uv >/dev/null 2>&1; then
+if command -v uv >/dev/null 2>&1 || [ -x "$HOME/.local/bin/uv" ] || [ -x /opt/homebrew/bin/uv ]; then
   check "uv" 1
 else
   check "uv" 0
@@ -98,7 +99,8 @@ VENV_DIR="$SAPPHIRE_NATIVE_DIR/.venv"
 REQ_FILE="$SAPPHIRE_NATIVE_DIR/requirements.txt"
 if [ -d "$VENV_DIR" ] && [ -f "$REQ_FILE" ]; then
   echo "Syncing Python dependencies..."
-  (cd "$SAPPHIRE_NATIVE_DIR" && uv pip sync "$REQ_FILE" 2>&1 | tail -1)
+  UV="$(command -v uv 2>/dev/null || echo "$HOME/.local/bin/uv")"
+  (cd "$SAPPHIRE_NATIVE_DIR" && "$UV" pip sync "$REQ_FILE" 2>&1 | tail -1)
 fi
 
 # Install Electron dependencies if needed
