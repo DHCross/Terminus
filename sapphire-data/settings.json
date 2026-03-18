@@ -8,6 +8,9 @@
     "LLM_PROVIDERS": {
       "lmstudio": {
         "model": "GLM-4.7-Flash-Uncen-Hrt-NEO-CODE-MAX-imat-D_AU-IQ2_M"
+      },
+      "claude": {
+        "model": "claude-3-7-sonnet-20250219"
       }
     },
     "MODEL_GENERATION_PROFILES": {
@@ -28,8 +31,7 @@
     "FASTER_WHISPER_NUM_WORKERS": 4
   },
   "tts": {
-    "TTS_PROVIDER": "elevenlabs",
-    "TTS_ELEVENLABS_MODEL": "eleven_flash_v2_5"
+    "TTS_PROVIDER": "none"
   },
   "setup": {
     "SETUP_WIZARD_STEP": 4

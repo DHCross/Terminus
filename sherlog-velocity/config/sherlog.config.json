@@ -2,9 +2,9 @@
   "version": 2,
   "drop_version": "1.0.0",
   "repo_root": ".",
-  "installed_at": "2026-03-17T08:01:49.605Z",
+  "installed_at": "2026-03-18T18:41:17.998Z",
   "stack": {
-    "language": "Generic",
+    "language": "JavaScript/TypeScript",
     "framework": null
   },
   "ci": null,
@@ -27,10 +27,16 @@
     "summary_output_json": "velocity-artifacts/velocity-summary.json",
     "gap_weights": "sherlog-velocity/config/gap-weights.json",
     "docs_dir": "docs",
-    "source_roots": ["scripts", "seed"],
+    "source_roots": [
+      "scripts",
+      "seed",
+      "user"
+    ],
     "test_roots": [],
     "context_map": "sherlog.context.json",
-    "repomix_manifest": "repomix-manifest.json"
+    "repomix_manifest": "repomix-manifest.json",
+    "generated_context_map": "sherlog.generated.context.json",
+    "self_model_index": "sherlog-velocity/data/self-model.json"
   },
   "settings": {
     "window_days": 7,

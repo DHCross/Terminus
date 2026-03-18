@@ -27,3 +27,4 @@ If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`pr
 
 Use `/docs/sherlog-next-steps.md` and `/docs/why-sherlog.md` as the local operating guide.
 <!-- SHERLOG END -->
+

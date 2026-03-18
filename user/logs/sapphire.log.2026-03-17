@@ -1,0 +1,95 @@
+2026-03-17 03:53:48,087 - core.settings_manager - INFO - Loaded default settings from /Volumes/My Passport/Sapphire-native/core/settings_defaults.json
+2026-03-17 03:53:48,205 - core.settings_manager - INFO - Loaded user settings from /Volumes/My Passport/Sapphire-native/user/settings.json
+2026-03-17 03:53:50,306 - core.toolsets.toolset_manager - INFO - Toolset user directory: /Volumes/My Passport/Sapphire-native/user/toolsets
+2026-03-17 03:53:50,350 - core.toolsets.toolset_manager - INFO - Loaded 5 toolsets
+2026-03-17 03:54:04,391 - core.prompt_manager - INFO - Loaded prompt pieces: 8 component types
+2026-03-17 03:54:04,420 - core.prompt_manager - INFO - Loaded 1 monolith prompts
+2026-03-17 03:54:04,447 - core.prompt_manager - INFO - Loaded spice pool: 16 categories, 10 disabled
+2026-03-17 03:54:05,794 - core.credentials_manager - INFO - Loading credentials, checking /Users/dancross/Library/Application Support/Sapphire/credentials.json
+2026-03-17 03:54:05,808 - core.credentials_manager - INFO - Loaded credentials from /Users/dancross/Library/Application Support/Sapphire/credentials.json
+2026-03-17 03:54:07,746 - core.tts.tts_client - INFO - Testing output device 'Scarlett Solo USB' (default_rate=44100)
+2026-03-17 03:54:32,572 - core.tts.tts_client - INFO -   -> 44100Hz: OK
+2026-03-17 03:54:32,626 - core.tts.tts_client - INFO - Output device 'Scarlett Solo USB' OK at 44100Hz
+2026-03-17 03:54:32,647 - core.tts.tts_client - INFO - TTS client initialized: NullTTSProvider
+2026-03-17 03:54:32,648 - core.tts.tts_client - INFO - Voice: af_heart, Speed: 1.3, Pitch: 0.98
+2026-03-17 03:54:32,648 - core.tts.tts_client - INFO - Temp directory: /var/folders/ty/8cj5bpys0kx7x6lt4b6_1__w0000gn/T
+2026-03-17 03:54:32,649 - core.tts.tts_client - INFO - Audio playback: device=1, rate=44100Hz
+2026-03-17 03:54:32,668 - __main__ - INFO - TTS disabled
+2026-03-17 03:54:32,806 - core.chat.chat - INFO - LLMChat.__init__ starting...
+2026-03-17 03:54:32,834 - core.chat.chat - INFO - Using new LLM_PROVIDERS config with 9 providers
+2026-03-17 03:54:33,081 - core.personas.persona_manager - INFO - Loaded 1 personas
+2026-03-17 03:54:33,088 - core.chat.history - INFO - Created default chat
+2026-03-17 03:54:33,099 - core.chat.history - INFO - Loaded chat 'default' with 0 messages
+2026-03-17 03:54:33,099 - core.chat.history - INFO - ChatSessionManager initialized with SQLite storage
+2026-03-17 03:54:36,072 - core.chat.function_manager - INFO - Loaded function module 'web' with 6 tools
+2026-03-17 03:54:36,076 - core.chat.function_manager - INFO - Loaded function module 'memory' with 4 tools
+2026-03-17 03:54:36,078 - core.chat.function_manager - INFO - Loaded function module 'goals' with 4 tools
+2026-03-17 03:54:36,079 - core.chat.function_manager - INFO - Loaded function module 'ai' with 1 tools
+2026-03-17 03:54:36,080 - core.chat.function_manager - INFO - Loaded function module 'docs' with 1 tools
+2026-03-17 03:54:36,080 - core.chat.function_manager - INFO - Loaded function module 'notepad' with 4 tools
+2026-03-17 03:54:36,080 - core.chat.function_manager - INFO - Loaded function module 'network' with 3 tools
+2026-03-17 03:54:36,087 - core.chat.function_manager - INFO - Loaded function module 'knowledge' with 4 tools
+2026-03-17 03:54:36,088 - core.chat.function_manager - INFO - Module 'meta' has mode filtering: ['monolith', 'assembled']
+2026-03-17 03:54:36,088 - core.chat.function_manager - INFO - Loaded function module 'meta' with 13 tools
+2026-03-17 03:54:36,088 - core.chat.function_manager - INFO - Ability 'none' - all functions disabled
+2026-03-17 03:54:36,088 - core.chat.chat - INFO - LLMChat.__init__ completed
+2026-03-17 03:54:36,088 - __main__ - INFO - Startup prompt from chat settings: 'terminus_lab'
+2026-03-17 03:54:36,088 - core.event_bus - INFO - EventBus initialized (replay_size=50)
+2026-03-17 03:54:36,088 - __main__ - INFO - System primed with 'terminus_lab' prompt.
+2026-03-17 03:54:36,088 - core.tts.tts_client - INFO - Voice set to: am_eric
+2026-03-17 03:54:36,088 - core.tts.tts_client - INFO - Pitch set to: 0.96
+2026-03-17 03:54:36,088 - core.tts.tts_client - INFO - Speed set to: 1.0
+2026-03-17 03:54:36,088 - core.chat.function_manager - INFO - Ability 'terminus_memory' (toolset) requesting 11 functions
+2026-03-17 03:54:36,088 - core.chat.function_manager - INFO - Toolset 'terminus_memory': 11/11 functions loaded
+2026-03-17 03:54:36,088 - __main__ - INFO - Applied toolset on startup: terminus_memory
+2026-03-17 03:54:36,088 - __main__ - INFO - Applied chat settings on startup
+2026-03-17 03:54:36,088 - core.wakeword.wakeword_null - INFO - Wakeword disabled - using NullAudioRecorder
+2026-03-17 03:54:36,088 - core.wakeword.wakeword_null - INFO - Wakeword disabled - using NullWakeWordDetector
+2026-03-17 03:54:36,088 - core.stt.stt_null - INFO - STT disabled - using NullAudioRecorder
+2026-03-17 03:54:36,089 - core.stt.stt_null - INFO - STT disabled - using NullWhisperClient
+2026-03-17 03:54:36,401 - functions.knowledge - INFO - Knowledge database ready at /Volumes/My Passport/Sapphire-native/user/knowledge.db
+2026-03-17 03:54:37,513 - core.plugin_loader - INFO - [PLUGINS] voice-commands: signature verified
+2026-03-17 03:54:37,516 - core.hooks - INFO - [HOOKS] Registered voice-commands:pre_chat on 'pre_chat' (priority 1)
+2026-03-17 03:54:37,516 - core.hooks - INFO - [HOOKS] Registered voice-commands:pre_chat on 'pre_chat' (priority 1)
+2026-03-17 03:54:37,516 - core.plugin_loader - INFO - [PLUGINS] Loaded: voice-commands (priority 1, system)
+2026-03-17 03:54:37,516 - core.plugin_loader - INFO - [PLUGINS] Scan complete: 11 found, 1 loaded
+2026-03-17 03:54:37,516 - __main__ - INFO - System init took: 31550.9ms
+2026-03-17 03:54:37,516 - __main__ - INFO - Initializing STT provider: faster_whisper
+2026-03-17 03:54:37,542 - core.stt.providers.faster_whisper - INFO - Loading faster-whisper model: base.en
+2026-03-17 03:55:23,340 - core.stt.providers.faster_whisper - INFO - Falling back to CPU model with int8
+2026-03-17 03:55:30,274 - httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-base.en/revision/main "HTTP/1.1 200 OK"
+2026-03-17 03:55:35,363 - core.stt.providers.faster_whisper - INFO - Successfully loaded model on CPU
+2026-03-17 03:55:36,176 - core.audio.device_manager - INFO - Trying configured device by name 'Razer Kiyo Pro': Razer Kiyo Pro
+2026-03-17 03:55:37,643 - core.audio.device_manager - INFO - Using configured device 2: Razer Kiyo Pro
+2026-03-17 03:55:37,658 - core.stt.recorder - INFO - STT Recorder: device=2, rate=48000Hz, channels=1, blocksize=1024, stereo_downmix=False
+2026-03-17 03:55:37,659 - core.stt.recorder - INFO - Temp directory: /var/folders/ty/8cj5bpys0kx7x6lt4b6_1__w0000gn/T
+2026-03-17 03:55:37,681 - __main__ - INFO - Voice components are running.
+2026-03-17 03:55:37,715 - core.api_fastapi - INFO - System instance registered with FastAPI
+2026-03-17 03:55:37,995 - core.continuity.scheduler - INFO - [Continuity] Loaded 1 tasks
+2026-03-17 03:55:37,996 - core.continuity.scheduler - INFO - [Continuity] Scheduler loop running
+2026-03-17 03:55:37,996 - core.continuity.scheduler - INFO - [Continuity] Scheduler started
+2026-03-17 03:55:38,024 - __main__ - INFO - Continuity scheduler started
+2026-03-17 03:55:38,072 - core.settings_manager - INFO - File watcher thread started
+2026-03-17 03:55:38,080 - core.settings_manager - INFO - File watcher started
+2026-03-17 03:55:38,180 - core.prompt_manager - INFO - Prompt file watcher started
+2026-03-17 03:55:38,188 - __main__ - INFO - Prompt file watcher started
+2026-03-17 03:55:38,226 - core.toolsets.toolset_manager - INFO - Toolset file watcher started
+2026-03-17 03:55:38,227 - __main__ - INFO - Toolset file watcher started
+2026-03-17 03:55:38,236 - __main__ - INFO - Sapphire is running. Starting uvicorn server...
+2026-03-17 03:55:40,399 - core.ssl_utils - INFO - Using existing SSL certificate: /Volumes/My Passport/Sapphire-native/user/ssl/cert.pem
+2026-03-17 04:15:51,364 - core.settings_manager - INFO - Detected settings file change, reloading...
+2026-03-17 04:15:51,401 - core.settings_manager - INFO - Loaded user settings from /Volumes/My Passport/Sapphire-native/user/settings.json
+2026-03-17 04:15:51,404 - core.settings_manager - INFO - Settings reloaded from disk
+2026-03-17 04:17:32,133 - core.settings_manager - INFO - Detected settings file change, reloading...
+2026-03-17 04:17:32,137 - core.settings_manager - INFO - Loaded user settings from /Volumes/My Passport/Sapphire-native/user/settings.json
+2026-03-17 04:17:32,138 - core.settings_manager - INFO - Settings reloaded from disk
+2026-03-17 04:19:18,850 - core.settings_manager - INFO - Detected settings file change, reloading...
+2026-03-17 04:19:18,854 - core.settings_manager - INFO - Loaded user settings from /Volumes/My Passport/Sapphire-native/user/settings.json
+2026-03-17 04:19:18,855 - core.settings_manager - INFO - Settings reloaded from disk
+2026-03-17 04:34:51,826 - __main__ - INFO - Shutdown signal received...
+2026-03-17 04:34:51,840 - __main__ - INFO - Stopping voice chat system...
+2026-03-17 04:34:52,226 - core.continuity.scheduler - INFO - [Continuity] Scheduler stopped
+2026-03-17 04:34:52,757 - core.settings_manager - INFO - File watcher stopped
+2026-03-17 04:34:52,757 - core.settings_manager - INFO - File watcher stopped
+2026-03-17 04:34:53,196 - core.prompt_manager - INFO - Prompt file watcher stopped
+2026-03-17 04:34:55,059 - core.toolsets.toolset_manager - INFO - Toolset file watcher stopped

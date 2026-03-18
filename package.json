@@ -1,0 +1,37 @@
+{
+  "name": "terminus",
+  "version": "1.0.0",
+  "description": "A native macOS launcher for [Sapphire](https://github.com/ddxfish/sapphire) with a custom seed pack for continuity-focused research.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "sherlog:verify": "node sherlog-velocity/src/cli/verify.js --strict",
+    "sherlog:doctor": "node sherlog-velocity/src/cli/doctor.js",
+    "sherlog:gaps": "node sherlog-velocity/src/cli/gaps.js",
+    "sherlog:consumers": "node sherlog-velocity/src/cli/consumers.js",
+    "sherlog:bounds": "node sherlog-velocity/src/cli/bounds.js",
+    "sherlog:prompt": "node sherlog-velocity/src/cli/prompt.js",
+    "sherlog:init-context": "node sherlog-velocity/src/cli/init-context.js",
+    "sherlog:index-sync": "node sherlog-velocity/src/cli/index-sync.js",
+    "sherlog:repomix-sync": "node sherlog-velocity/src/cli/repomix-sync.js",
+    "sherlog:bridge": "node sherlog-velocity/src/cli/bridge.js",
+    "sherlog:retrospective": "node sherlog-velocity/src/cli/retrospective.js",
+    "sherlog:hygiene": "node sherlog-velocity/src/cli/hygiene.js",
+    "sherlog:session:start": "node sherlog-velocity/src/cli/session.js start",
+    "sherlog:session:end": "node sherlog-velocity/src/cli/session.js end",
+    "sherlog:session:report": "node sherlog-velocity/src/cli/session.js report",
+    "sherlog:session:status": "node sherlog-velocity/src/cli/session.js status",
+    "sherlog:session:note": "node sherlog-velocity/src/cli/session.js note",
+    "velocity:run": "node sherlog-velocity/src/core/analyzer.js",
+    "velocity:report": "node sherlog-velocity/src/core/reporter.js",
+    "velocity:estimate": "node sherlog-velocity/src/core/estimate.js",
+    "sherlog:manifest": "node scripts/generate-manifest.js",
+    "velocity:all": "npm run velocity:run && npm run velocity:report && npm run sherlog:manifest",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

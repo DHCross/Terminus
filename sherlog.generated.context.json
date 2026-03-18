@@ -5,7 +5,7 @@
       "paths": [
         "scripts/**/*"
       ],
-      "belief": "Deployment and environment setup scripts for launching the Terminus client and the native Sapphire backend.",
+      "belief": "TODO: Describe what this zone governs.",
       "last_updated": "2026-03-18"
     },
     {
@@ -13,7 +13,7 @@
       "paths": [
         "seed/**/*"
       ],
-      "belief": "Coherence lab context injections, configuration presets, and toolset definitions imported directly into the user’s mind.",
+      "belief": "TODO: Describe what this zone governs.",
       "last_updated": "2026-03-18"
     },
     {
@@ -21,7 +21,7 @@
       "paths": [
         "user/**/*"
       ],
-      "belief": "The active continuity footprint: contains persistent runtime state, conversation traces, dynamically loaded plugins, custom prompt pieces, and workspace databases.",
+      "belief": "TODO: Describe what this zone governs.",
       "last_updated": "2026-03-18"
     },
     {

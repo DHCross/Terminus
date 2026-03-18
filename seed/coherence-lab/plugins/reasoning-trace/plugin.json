@@ -1,0 +1,15 @@
+{
+  "name": "reasoning-trace",
+  "version": "1.0.0",
+  "description": "Captures Terminus's reasoning traces — tool calls and responses — to daily JSONL files for self-audit and journal generation.",
+  "author": "terminus-lab",
+  "priority": 90,
+  "default_enabled": true,
+  "capabilities": {
+    "hooks": {
+      "post_llm": "hooks/post_llm.py",
+      "post_execute": "hooks/post_execute.py"
+    },
+    "tools": ["tools/trace_tools.py"]
+  }
+}
