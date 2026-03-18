@@ -9,10 +9,11 @@ endif
 TASK ?= $(shell command -v task 2>/dev/null || echo /opt/homebrew/bin/task)
 
 launch:
-	cd "$(SAPPHIRE_NATIVE_DIR)" && $(TASK) launch
+	open -a "LM Studio" 2>/dev/null || true
+	cd "$(SAPPHIRE_NATIVE_DIR)" && PATH="/usr/local/bin:/opt/homebrew/bin:$$HOME/.local/bin:$$PATH" $(TASK) launch
 
 stop:
-	cd "$(SAPPHIRE_NATIVE_DIR)" && $(TASK) kill
+	cd "$(SAPPHIRE_NATIVE_DIR)" && PATH="/usr/local/bin:/opt/homebrew/bin:$$HOME/.local/bin:$$PATH" $(TASK) kill
 
 logs:
 	tail -f /tmp/sapphire-electron.log /tmp/sapphire-native.log 2>/dev/null || echo "No log files found yet. Start Sapphire first with: make launch"

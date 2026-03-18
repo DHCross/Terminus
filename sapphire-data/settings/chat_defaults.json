@@ -1,0 +1,15 @@
+{
+  "_comment": "Factory defaults for new chats - copied to user/settings/chat_defaults.json on first launch",
+  "prompt": "sapphire",
+  "ability": "user_new",
+  "voice": "af_heart",
+  "pitch": 0.98,
+  "speed": 1.3,
+  "spice_enabled": false,
+  "spice_turns": 3,
+  "inject_datetime": false,
+  "custom_context": "",
+  "llm_primary": "auto",
+  "llm_model": "",
+  "memory_scope": "default"
+}

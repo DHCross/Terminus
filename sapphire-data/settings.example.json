@@ -1,0 +1,506 @@
+{
+  "_comment": "Example settings - copy to settings.json and customize",
+  "identity": {
+    "DEFAULT_USERNAME": "Human Protagonist",
+    "AVATARS_IN_CHAT": true,
+    "DEFAULT_PERSONA": "",
+    "USER_TIMEZONE": "UTC"
+  },
+  "network": {
+    "SOCKS_ENABLED": false,
+    "SOCKS_HOST": "",
+    "SOCKS_PORT": 1080,
+    "SOCKS_TIMEOUT": 10.0
+  },
+  "privacy": {
+    "_comment": "Privacy mode blocks all outbound connections except whitelisted local endpoints",
+    "START_IN_PRIVACY_MODE": false,
+    "PRIVACY_NETWORK_WHITELIST": [
+      "127.0.0.1",
+      "localhost",
+      "192.168.0.0/16",
+      "10.0.0.0/8",
+      "172.16.0.0/12"
+    ]
+  },
+  "backups": {
+    "BACKUPS_ENABLED": true,
+    "BACKUPS_KEEP_DAILY": 7,
+    "BACKUPS_KEEP_WEEKLY": 4,
+    "BACKUPS_KEEP_MONTHLY": 3,
+    "BACKUPS_KEEP_MANUAL": 5
+  },
+  "audio": {
+    "_comment": "Unified audio device settings used by STT and wakeword",
+    "AUDIO_INPUT_DEVICE": null,
+    "AUDIO_OUTPUT_DEVICE": null,
+    "AUDIO_SAMPLE_RATES": [
+      44100,
+      48000,
+      16000,
+      8000
+    ],
+    "AUDIO_BLOCKSIZE_FALLBACKS": [
+      1024,
+      512,
+      2048,
+      4096
+    ],
+    "AUDIO_PREFERRED_DEVICES_LINUX": [
+      "pipewire",
+      "pulse",
+      "default"
+    ],
+    "AUDIO_PREFERRED_DEVICES_WINDOWS": [
+      "default",
+      "microsoft sound mapper",
+      "microphone"
+    ]
+  },
+  "wakeword": {
+    "WAKE_WORD_ENABLED": false,
+    "CHUNK_SIZE": 1280,
+    "BUFFER_DURATION": 0.5,
+    "WAKEWORD_MODEL": "hey_sapphire",
+    "WAKEWORD_THRESHOLD": 0.6,
+    "WAKEWORD_FRAMEWORK": "onnx",
+    "WAKE_TONE_DURATION": 0.15,
+    "WAKE_TONE_FREQUENCY": 440
+  },
+  "stt": {
+    "STT_PROVIDER": "none",
+    "STT_MODEL_SIZE": "base.en",
+    "STT_LANGUAGE": "en",
+    "STT_FIREWORKS_API_KEY": "",
+    "STT_FIREWORKS_MODEL": "whisper-v3-turbo",
+    "FASTER_WHISPER_CUDA_DEVICE": 0,
+    "FASTER_WHISPER_DEVICE": "cuda",
+    "FASTER_WHISPER_COMPUTE_TYPE": "int8",
+    "FASTER_WHISPER_BEAM_SIZE": 3,
+    "FASTER_WHISPER_NUM_WORKERS": 4,
+    "FASTER_WHISPER_VAD_FILTER": true
+  },
+  "recorder": {
+    "RECORDER_CHUNK_SIZE": 1024,
+    "RECORDER_CHANNELS": 1,
+    "RECORDER_SILENCE_THRESHOLD": 0.0025,
+    "RECORDER_SILENCE_DURATION": 1.0,
+    "RECORDER_NO_SPEECH_TIMEOUT": 3.0,
+    "RECORDER_SPEECH_DURATION": 0.2,
+    "RECORDER_LEVEL_HISTORY_SIZE": 15,
+    "RECORDER_BACKGROUND_PERCENTILE": 32,
+    "RECORDER_NOISE_MULTIPLIER": 1.1,
+    "RECORDER_MAX_SECONDS": 30,
+    "RECORDER_BEEP_WAIT_TIME": 0.15,
+    "RECORDER_SAMPLE_RATES": [
+      44100,
+      48000,
+      16000,
+      8000
+    ],
+    "RECORDER_BLOCKSIZE_FALLBACKS": [
+      1024,
+      512,
+      2048,
+      4096
+    ],
+    "RECORDER_PREFERRED_DEVICES": [
+      "default"
+    ],
+    "RECORDER_PREFERRED_DEVICES_LINUX": [
+      "pipewire",
+      "pulse",
+      "default"
+    ],
+    "RECORDER_PREFERRED_DEVICES_WINDOWS": [
+      "default",
+      "microsoft sound mapper",
+      "speakers",
+      "microphone"
+    ]
+  },
+  "tts": {
+    "TTS_PROVIDER": "none",
+    "TTS_SERVER_HOST": "0.0.0.0",
+    "TTS_SERVER_PORT": 5012,
+    "TTS_PRIMARY_SERVER": "http://localhost:5012",
+    "TTS_FALLBACK_SERVER": "http://127.0.0.1:5012",
+    "TTS_FALLBACK_TIMEOUT": 0.2,
+    "TTS_ELEVENLABS_API_KEY": "",
+    "TTS_ELEVENLABS_MODEL": "eleven_flash_v2_5",
+    "TTS_ELEVENLABS_VOICE_ID": ""
+  },
+  "embedding": {
+    "EMBEDDING_PROVIDER": "local",
+    "EMBEDDING_API_URL": "",
+    "EMBEDDING_API_KEY": ""
+  },
+  "sapphire_router": {
+    "SAPPHIRE_ROUTER_URL": "",
+    "SAPPHIRE_ROUTER_TENANT_ID": ""
+  },
+  "server": {
+    "WEB_UI_HOST": "0.0.0.0",
+    "WEB_UI_PORT": 8073,
+    "WEB_UI_SSL_ADHOC": true
+  },
+  "llm": {
+    "LLM_MAX_HISTORY": 0,
+    "CONTEXT_LIMIT": 65535,
+    "LLM_REQUEST_TIMEOUT": 240.0,
+    "LLM_PROVIDERS": {
+      "lmstudio": {
+        "provider": "openai",
+        "display_name": "LM Studio",
+        "base_url": "http://127.0.0.1:1234/v1",
+        "timeout": 0.3,
+        "enabled": true,
+        "use_as_fallback": true
+      },
+      "claude": {
+        "provider": "claude",
+        "display_name": "Claude",
+        "api_key_env": "ANTHROPIC_API_KEY",
+        "model": "claude-sonnet-4-5",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true,
+        "thinking_enabled": true,
+        "thinking_budget": 10000
+      },
+      "fireworks": {
+        "provider": "fireworks",
+        "display_name": "Fireworks",
+        "base_url": "https://api.fireworks.ai/inference/v1",
+        "api_key_env": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/glm-4p7",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true
+      },
+      "openai": {
+        "provider": "openai",
+        "display_name": "OpenAI",
+        "base_url": "https://api.openai.com/v1",
+        "api_key_env": "OPENAI_API_KEY",
+        "model": "gpt-4o",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true,
+        "reasoning_effort": "medium",
+        "reasoning_summary": "detailed"
+      },
+      "grok": {
+        "provider": "openai",
+        "display_name": "Grok (xAI)",
+        "base_url": "https://api.x.ai/v1",
+        "api_key_env": "XAI_API_KEY",
+        "model": "grok-4-1-fast-reasoning",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true
+      },
+      "gemini": {
+        "provider": "gemini",
+        "display_name": "Gemini",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key_env": "GOOGLE_API_KEY",
+        "model": "gemini-2.5-flash",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true,
+        "thinking_enabled": true,
+        "reasoning_effort": "medium"
+      },
+      "featherless": {
+        "provider": "openai",
+        "display_name": "Featherless",
+        "base_url": "https://api.featherless.ai/v1",
+        "api_key_env": "FEATHERLESS_API_KEY",
+        "model": "deepseek-ai/DeepSeek-V3.2",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true
+      },
+      "other": {
+        "provider": "openai",
+        "display_name": "Other (OpenAI Compatible)",
+        "base_url": "",
+        "model": "",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true,
+        "generation_params": {}
+      },
+      "responses": {
+        "provider": "responses",
+        "display_name": "Responses API (Generic)",
+        "base_url": "",
+        "model": "",
+        "timeout": 10.0,
+        "enabled": false,
+        "use_as_fallback": true,
+        "reasoning_effort": "medium",
+        "reasoning_summary": "detailed"
+      }
+    },
+    "LLM_FALLBACK_ORDER": [
+      "lmstudio",
+      "claude",
+      "gemini",
+      "fireworks",
+      "featherless",
+      "openai",
+      "other"
+    ],
+    "MODEL_GENERATION_PROFILES": {
+      "_comment": "Balanced generation params per model. Edit values here to tune.",
+      "__fallback__": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "claude-sonnet-4-6": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 16000,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "claude-sonnet-4-5": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 16000,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "claude-haiku-4-5": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 16000,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "claude-opus-4-5": {
+        "temperature": 0.65,
+        "top_p": 0.85,
+        "max_tokens": 16000,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "gpt-4o": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "gpt-4o-mini": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "gpt-4-turbo": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "o1": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "o1-mini": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 4096,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "gemini-2.5-flash": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "gemini-2.5-pro": {
+        "temperature": 0.65,
+        "top_p": 0.85,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "gemini-2.0-flash": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "gemini-2.0-flash-lite": {
+        "temperature": 0.8,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "accounts/fireworks/models/qwen3-235b-a22b-thinking-2507": {
+        "temperature": 0.6,
+        "top_p": 0.8,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "accounts/fireworks/models/qwen3-vl-235b-a22b-thinking": {
+        "temperature": 0.6,
+        "top_p": 0.8,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "accounts/fireworks/models/qwq-32b": {
+        "temperature": 0.6,
+        "top_p": 0.8,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "accounts/fireworks/models/kimi-k2-thinking": {
+        "temperature": 0.6,
+        "top_p": 0.8,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "accounts/fireworks/models/qwen3-coder-480b-a35b-instruct": {
+        "temperature": 0.3,
+        "top_p": 0.7,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "accounts/fireworks/models/gpt-oss-120b": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "accounts/fireworks/models/deepseek-v3p2": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "accounts/fireworks/models/glm-4p7": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "accounts/fireworks/models/minimax-m2p5": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "zai-org/GLM-5": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "zai-org/GLM-4.7": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "deepseek-ai/DeepSeek-V3.2": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "deepseek-ai/DeepSeek-V3.2-Speciale": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "Qwen/Qwen3.5-397B-A17B": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "Qwen/Qwen3-32B": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "openai/gpt-oss-120b": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      },
+      "moonshotai/Kimi-K2.5": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "max_tokens": 8192,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      },
+      "meta-llama/Llama-3.3-70B-Instruct": {
+        "temperature": 0.75,
+        "top_p": 0.9,
+        "max_tokens": 4096,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+      }
+    },
+    "FORCE_THINKING": false,
+    "THINKING_PREFILL": "<think>Okay, let me see. I need to act like a duck and only speak in 'quack's so that",
+    "CLAUDE_THINKING_ENABLED": true,
+    "CLAUDE_THINKING_BUDGET": 10000,
+    "IMAGE_UPLOAD_MAX_WIDTH": 1920
+  },
+  "tools": {
+    "TOOL_HISTORY_MAX_ENTRIES": 0,
+    "MAX_TOOL_ITERATIONS": 7,
+    "MAX_PARALLEL_TOOLS": 5,
+    "DEBUG_TOOL_CALLING": false
+  },
+  "rag": {
+    "RAG_SIMILARITY_THRESHOLD": 0.4
+  },
+  "plugins": {
+    "ALLOW_UNSIGNED_PLUGINS": false,
+    "PLUGIN_KEYS_URL": "https://raw.githubusercontent.com/ddxfish/sapphire-plugin-keys/main/authorized_keys.json"
+  },
+  "setup": {
+    "SETUP_WIZARD_STEP": 0,
+    "_wizard_steps": "0=not started, 1=voice done, 2=audio done, 3=llm done, 4=complete"
+  }
+}

@@ -1,0 +1,111 @@
+2026-03-15 01:07:28,666 - core.setup - INFO - Bootstrapped prompt_monoliths.json to user/prompts/
+2026-03-15 01:07:28,706 - core.setup - INFO - Bootstrapped prompt_pieces.json to user/prompts/
+2026-03-15 01:07:28,748 - core.setup - INFO - Bootstrapped prompt_spices.json to user/prompts/
+2026-03-15 01:07:28,800 - core.setup - INFO - Bootstrapped chat_defaults.json to user/settings/
+2026-03-15 01:07:28,891 - core.setup - INFO - Created story preset template at user/story_presets/_template/
+2026-03-15 01:07:28,892 - core.setup - INFO - Created user/story_presets/ for custom stories
+2026-03-15 01:07:30,045 - core.settings_manager - INFO - Loaded default settings from /app/core/settings_defaults.json
+2026-03-15 01:07:30,054 - core.settings_manager - INFO - No user settings found, using defaults
+2026-03-15 01:07:30,116 - core.settings_manager - INFO - Created /app/user/settings.example.json
+2026-03-15 01:07:34,242 - core.toolsets.toolset_manager - INFO - Toolset user directory: /app/user/toolsets
+2026-03-15 01:07:34,252 - core.toolsets.toolset_manager - INFO - Seeded 3 new toolsets from defaults
+2026-03-15 01:07:34,276 - core.toolsets.toolset_manager - INFO - Saved 3 toolsets to /app/user/toolsets/toolsets.json
+2026-03-15 01:07:34,285 - core.toolsets.toolset_manager - INFO - Loaded 3 toolsets
+2026-03-15 01:08:11,366 - core.prompt_manager - INFO - Loaded prompt pieces: 8 component types
+2026-03-15 01:08:11,372 - core.prompt_manager - INFO - Loaded 1 monolith prompts
+2026-03-15 01:08:11,373 - core.prompt_manager - INFO - Loaded spice pool: 16 categories, 0 disabled
+2026-03-15 01:08:13,259 - core.credentials_manager - INFO - Loading credentials, checking /home/sapphire/.config/sapphire/credentials.json
+2026-03-15 01:08:13,259 - core.credentials_manager - INFO - Credentials file does not exist, creating with defaults
+2026-03-15 01:08:13,264 - core.credentials_manager - INFO - Saved credentials to /home/sapphire/.config/sapphire/credentials.json
+2026-03-15 01:08:13,483 - core.settings_manager - INFO - Saved user settings to /app/user/settings.json
+2026-03-15 01:08:13,483 - __main__ - INFO - Auto-detected timezone: Etc/UTC
+2026-03-15 01:08:19,666 - core.tts.tts_client - ERROR - No output devices found
+2026-03-15 01:08:19,669 - core.tts.tts_client - INFO - TTS client initialized: NullTTSProvider
+2026-03-15 01:08:19,671 - core.tts.tts_client - INFO - Voice: af_heart, Speed: 1.3, Pitch: 0.98
+2026-03-15 01:08:19,671 - core.tts.tts_client - INFO - Temp directory: /dev/shm
+2026-03-15 01:08:19,671 - core.tts.tts_client - WARNING - Audio playback unavailable - TTS will be silent
+2026-03-15 01:08:19,671 - __main__ - INFO - TTS disabled
+2026-03-15 01:08:19,672 - core.chat.chat - INFO - LLMChat.__init__ starting...
+2026-03-15 01:08:19,675 - core.chat.chat - INFO - Using new LLM_PROVIDERS config with 9 providers
+2026-03-15 01:08:19,824 - core.chat.history - INFO - Created default chat
+2026-03-15 01:08:19,836 - core.chat.history - INFO - Loaded chat 'default' with 0 messages
+2026-03-15 01:08:19,836 - core.chat.history - INFO - ChatSessionManager initialized with SQLite storage
+2026-03-15 01:08:19,975 - core.chat.function_manager - INFO - Loaded function module 'docs' with 1 tools
+2026-03-15 01:08:20,124 - core.chat.function_manager - INFO - Loaded function module 'memory' with 4 tools
+2026-03-15 01:08:20,629 - core.chat.function_manager - INFO - Loaded function module 'network' with 3 tools
+2026-03-15 01:08:20,684 - core.chat.function_manager - INFO - Loaded function module 'goals' with 4 tools
+2026-03-15 01:08:20,706 - core.chat.function_manager - INFO - Module 'meta' has mode filtering: ['monolith', 'assembled']
+2026-03-15 01:08:20,706 - core.chat.function_manager - INFO - Loaded function module 'meta' with 12 tools
+2026-03-15 01:08:20,711 - core.chat.function_manager - INFO - Loaded function module 'notepad' with 4 tools
+2026-03-15 01:08:20,715 - core.chat.function_manager - INFO - Loaded function module 'ai' with 1 tools
+2026-03-15 01:08:21,155 - core.chat.function_manager - INFO - Loaded function module 'web' with 6 tools
+2026-03-15 01:08:21,206 - core.chat.function_manager - INFO - Loaded function module 'knowledge' with 4 tools
+2026-03-15 01:08:21,207 - core.chat.function_manager - INFO - Ability 'none' - all functions disabled
+2026-03-15 01:08:21,207 - core.chat.chat - INFO - LLMChat.__init__ completed
+2026-03-15 01:08:21,207 - __main__ - INFO - Startup prompt from chat settings: 'sapphire'
+2026-03-15 01:08:21,208 - core.event_bus - INFO - EventBus initialized (replay_size=50)
+2026-03-15 01:08:21,208 - __main__ - INFO - System primed with 'sapphire' prompt.
+2026-03-15 01:08:21,208 - core.tts.tts_client - INFO - Voice set to: af_heart
+2026-03-15 01:08:21,208 - core.tts.tts_client - INFO - Pitch set to: 0.98
+2026-03-15 01:08:21,208 - core.tts.tts_client - INFO - Speed set to: 1.3
+2026-03-15 01:08:21,209 - core.chat.function_manager - INFO - Ability 'all' - LOADED ALL 39 FUNCTIONS
+2026-03-15 01:08:21,209 - __main__ - INFO - Applied toolset on startup: all
+2026-03-15 01:08:21,209 - __main__ - INFO - Applied chat settings on startup
+2026-03-15 01:08:21,209 - core.wakeword.wakeword_null - INFO - Wakeword disabled - using NullAudioRecorder
+2026-03-15 01:08:21,209 - core.wakeword.wakeword_null - INFO - Wakeword disabled - using NullWakeWordDetector
+2026-03-15 01:08:21,209 - core.stt.stt_null - INFO - STT disabled - using NullAudioRecorder
+2026-03-15 01:08:21,209 - core.stt.stt_null - INFO - STT disabled - using NullWhisperClient
+2026-03-15 01:08:21,241 - functions.knowledge - INFO - Migrated people table: added email_whitelisted column
+2026-03-15 01:08:21,296 - functions.knowledge - INFO - Knowledge database ready at /app/user/knowledge.db
+2026-03-15 01:08:21,517 - core.plugin_loader - INFO - [PLUGINS] voice-commands: signature verified
+2026-03-15 01:08:21,518 - core.hooks - INFO - [HOOKS] Registered voice-commands:pre_chat on 'pre_chat' (priority 1)
+2026-03-15 01:08:21,519 - core.hooks - INFO - [HOOKS] Registered voice-commands:pre_chat on 'pre_chat' (priority 1)
+2026-03-15 01:08:21,519 - core.plugin_loader - INFO - [PLUGINS] Loaded: voice-commands (priority 1, system)
+2026-03-15 01:08:21,519 - core.plugin_loader - INFO - [PLUGINS] Scan complete: 11 found, 1 loaded
+2026-03-15 01:08:21,520 - __main__ - INFO - System init took: 8035.0ms
+2026-03-15 01:08:21,520 - __main__ - INFO - STT disabled - skipping initialization
+2026-03-15 01:08:21,520 - __main__ - INFO - Voice components are running.
+2026-03-15 01:08:21,520 - core.api_fastapi - INFO - System instance registered with FastAPI
+2026-03-15 01:08:21,620 - core.continuity.scheduler - INFO - [Continuity] Scheduler loop running
+2026-03-15 01:08:21,620 - core.continuity.scheduler - INFO - [Continuity] Scheduler started
+2026-03-15 01:08:21,624 - __main__ - INFO - Continuity scheduler started
+2026-03-15 01:08:21,625 - core.settings_manager - INFO - File watcher started
+2026-03-15 01:08:21,625 - core.settings_manager - INFO - File watcher thread started
+2026-03-15 01:08:21,630 - core.prompt_manager - INFO - Prompt file watcher started
+2026-03-15 01:08:21,631 - __main__ - INFO - Prompt file watcher started
+2026-03-15 01:08:21,632 - core.toolsets.toolset_manager - INFO - Toolset file watcher started
+2026-03-15 01:08:21,632 - __main__ - INFO - Toolset file watcher started
+2026-03-15 01:08:21,633 - __main__ - INFO - Sapphire is running. Starting uvicorn server...
+2026-03-15 01:08:21,633 - core.ssl_utils - INFO - SSL certificate not found, generating new one...
+2026-03-15 01:08:22,034 - core.ssl_utils - INFO - Generated new SSL certificate: /app/user/ssl/cert.pem
+2026-03-15 01:08:22,035 - core.ssl_utils - INFO - First time: Browser will show security warning - click Advanced > Proceed
+2026-03-15 01:08:55,190 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:09:25,951 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:09:57,464 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:10:28,291 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:11:01,232 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:11:41,818 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:12:11,608 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:12:47,466 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:13:20,842 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:13:54,700 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:14:35,473 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:15:05,343 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:15:38,495 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:16:09,188 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:16:42,541 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:17:13,224 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:17:44,030 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:18:14,584 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:18:45,061 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:19:16,490 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:19:48,532 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:20:19,212 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:20:49,620 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:21:20,968 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:21:51,193 - core.api_fastapi - INFO - REQ: HEAD /
+2026-03-15 01:21:51,314 - core.api_fastapi - WARNING - RSP: 405 HEAD /
+2026-03-15 01:21:51,707 - core.api_fastapi - INFO - REQ: GET /api/health
+2026-03-15 01:21:59,237 - __main__ - INFO - Shutdown signal received...
+2026-03-15 01:21:59,249 - __main__ - INFO - Stopping voice chat system...
+2026-03-15 01:22:00,019 - core.continuity.scheduler - INFO - [Continuity] Scheduler stopped

@@ -1,0 +1,37 @@
+{
+  "_comment": "Your custom settings - edit freely or use web UI",
+  "identity": {
+    "USER_TIMEZONE": "America/Chicago",
+    "DEFAULT_USERNAME": "Dan"
+  },
+  "llm": {
+    "LLM_PROVIDERS": {
+      "lmstudio": {
+        "model": "GLM-4.7-Flash-Uncen-Hrt-NEO-CODE-MAX-imat-D_AU-IQ2_M"
+      }
+    },
+    "MODEL_GENERATION_PROFILES": {
+      "GLM-4.7-Flash-Uncen-Hrt-NEO-CODE-MAX-imat-D_AU-IQ2_M": {
+        "temperature": 0.6,
+        "top_p": 0.9,
+        "max_tokens": 640,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+      }
+    }
+  },
+  "stt": {
+    "STT_PROVIDER": "faster_whisper",
+    "STT_MODEL_SIZE": "base.en",
+    "FASTER_WHISPER_DEVICE": "cpu",
+    "FASTER_WHISPER_COMPUTE_TYPE": "int8",
+    "FASTER_WHISPER_NUM_WORKERS": 4
+  },
+  "tts": {
+    "TTS_PROVIDER": "elevenlabs",
+    "TTS_ELEVENLABS_MODEL": "eleven_flash_v2_5"
+  },
+  "setup": {
+    "SETUP_WIZARD_STEP": 4
+  }
+}

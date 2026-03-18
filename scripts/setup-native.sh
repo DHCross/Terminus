@@ -100,7 +100,7 @@ REQ_FILE="$SAPPHIRE_NATIVE_DIR/requirements.txt"
 if [ -d "$VENV_DIR" ] && [ -f "$REQ_FILE" ]; then
   echo "Syncing Python dependencies..."
   UV="$(command -v uv 2>/dev/null || echo "$HOME/.local/bin/uv")"
-  (cd "$SAPPHIRE_NATIVE_DIR" && "$UV" pip sync "$REQ_FILE" 2>&1 | tail -1)
+  UV_LINK_MODE=copy "$UV" pip install -r "$REQ_FILE" --python "$VENV_DIR/bin/python3" 2>&1 | tail -3
 fi
 
 # Install Electron dependencies if needed
