@@ -1,28 +1,48 @@
 # Terminus
 
-A native macOS launcher for [Sapphire](https://github.com/ddxfish/sapphire) with a custom seed pack for continuity-focused research.
+A native macOS launcher for Terminus, with a custom seed pack for continuity-focused research.
 
-Sapphire runs directly on your Mac (Python backend + Electron shell) — no Docker required. The Sapphire installation lives on an external drive; this repo holds configuration, environment, and the Coherence Lab seed pack.
+Terminus runs directly on your Mac (Python backend + Electron shell) — no Docker required. The native Terminus install lives on an external drive; this repo holds configuration, environment, and the Coherence Lab seed pack.
+
+## Origin And Attribution
+
+Terminus did not originate from a blank slate. It began as a personal derivative environment bootstrapped from the open-source [Sapphire](https://github.com/ddxfish/sapphire) project and has been evolving toward a distinct local system with its own prompt architecture, continuity model, project memory, and workflow conventions.
+
+The goal of this repo is not to relabel Sapphire as if it originated here. The goal is to build a clearly differentiated personal system on top of borrowed scaffolding while preserving upstream attribution.
+
+If you are reading this as a public project:
+
+- Sapphire is the upstream foundation
+- Terminus is the local derivative system and seed/config layer built around that foundation
+- Terminus-specific changes should be understood as modifications and additions, not as a claim of original authorship over upstream Sapphire
+
+## License Status
+
+This repo currently needs a licensing review before any public release.
+
+The upstream Sapphire repository appears to be licensed under AGPL-3.0, while this repo currently contains an MIT `LICENSE` file. That may not be the correct licensing posture for a derivative distribution if this repo includes or depends on Sapphire-derived code rather than only separate configuration and notes.
+
+Until that is resolved, treat Terminus as a personal derivative workspace rather than a ready-to-publish standalone project.
 
 ## Prerequisites
 
 - **Python 3.11+** (installed via [uv](https://docs.astral.sh/uv/) or system Python)
 - **Node.js** (for the Electron shell)
-- **[Task](https://taskfile.dev/installation/)** CLI (task runner used by Sapphire)
+- **[Task](https://taskfile.dev/installation/)** CLI (task runner used by the native app)
 - **[uv](https://docs.astral.sh/uv/)** (Python package manager)
-- Sapphire source cloned to your external drive (default: `/Volumes/My Passport/Sapphire-native`)
+- Native app source cloned to your external drive (default: `/Volumes/My Passport/Sapphire-native`)
 
 ## Quick Start
 
 ```bash
 cp .env.example .env    # edit to add API keys and verify paths
 make setup              # check prerequisites and wire up .env
-make launch             # start Sapphire natively
+make launch             # start Terminus natively
 ```
 
 Then open: [https://localhost:8073](https://localhost:8073)
 
-Sapphire uses a self-signed certificate, so your browser will show a warning. Proceed to continue.
+Terminus uses a self-signed certificate, so your browser will show a warning. Proceed to continue.
 
 ## Coherence Lab Seed
 
@@ -48,13 +68,13 @@ What it seeds:
 - toolset: `coherence_lab`
 - disabled continuity task: `Terminus Daily Brief`
 
-After Sapphire starts:
+After Terminus starts:
 
 1. Switch to the `terminus` persona.
 2. If you want recurring synthesis, enable `Terminus Daily Brief` in Continuity.
 3. Upload the Markdown notes in [seed/coherence-lab/knowledge/](seed/coherence-lab/knowledge/) into Mind > Knowledge for richer long-term context.
 
-This is the useful connection to Sapphire: not "continuous learning" in the weight-update sense, but persistent prompt state, memory, knowledge, goals, and scheduled continuity as a scaffold around a stateless model.
+This is the useful connection to Terminus: not "continuous learning" in the weight-update sense, but persistent prompt state, memory, knowledge, goals, and scheduled continuity as a scaffold around a stateless model.
 
 ## SHERLOG Preflight
 
@@ -72,8 +92,8 @@ SHERLOG is under active development. Not every type of work has a pre-defined fe
 ## Common Commands
 
 ```bash
-make launch              # Start Sapphire (Electron + Python backend)
-make stop                # Stop Sapphire
+make launch              # Start Terminus (Electron + Python backend)
+make stop                # Stop Terminus
 make logs                # Tail runtime logs
 make setup               # Check prerequisites and configure
 make seed-coherence-lab  # Install the Coherence Lab seed pack
@@ -87,7 +107,7 @@ make hygiene             # SHERLOG code quality scan
 
 Edit [.env](.env) before starting:
 
-- `SAPPHIRE_NATIVE_DIR`: path to Sapphire installation (default: `/Volumes/My Passport/Sapphire-native`)
+- `SAPPHIRE_NATIVE_DIR`: path to the native Terminus installation (legacy variable name, default: `/Volumes/My Passport/Sapphire-native`)
 - `TZ`: your timezone
 - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`
 - `ELEVENLABS_API_KEY`: for ElevenLabs TTS
@@ -95,4 +115,5 @@ Edit [.env](.env) before starting:
 
 ## Upstream References
 
-- [Sapphire repository](https://github.com/ddxfish/sapphire)
+- [Upstream Sapphire repository](https://github.com/ddxfish/sapphire)
+- [Attribution Notice](NOTICE)

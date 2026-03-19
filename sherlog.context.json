@@ -5,7 +5,7 @@
       "paths": [
         "scripts/**/*"
       ],
-      "belief": "Deployment and environment setup scripts for launching the Terminus client and the native Sapphire backend.",
+      "belief": "Deployment and environment setup scripts for launching the Terminus client and the native Terminus backend.",
       "last_updated": "2026-03-18"
     },
     {

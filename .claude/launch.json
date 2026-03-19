@@ -2,13 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Sapphire (Electron + backend)",
+      "name": "Terminus (Electron + backend)",
       "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": ["/Users/dancross/Dev/GitHub/Terminus/scripts/launch-sapphire.sh"],
+      "runtimeArgs": ["/Users/dancross/Dev/GitHub/Terminus/scripts/launch-terminus.sh"],
       "port": 8073
     },
     {
-      "name": "Sapphire backend only (Python)",
+      "name": "Terminus backend only (Python)",
       "runtimeExecutable": "/Volumes/My Passport/Sapphire-native/.venv/bin/python3",
       "runtimeArgs": ["/Volumes/My Passport/Sapphire-native/main.py"],
       "port": 8073

@@ -60,9 +60,9 @@ fi
 
 # External drive
 if [ -d "$SAPPHIRE_NATIVE_DIR" ]; then
-  check "Sapphire-native directory" 1
+  check "Terminus native directory" 1
 else
-  check "Sapphire-native directory" 0
+  check "Terminus native directory" 0
   echo "         Expected: $SAPPHIRE_NATIVE_DIR"
   echo "         Is your external drive mounted?"
 fi
@@ -80,7 +80,7 @@ if [ ! -f "$REPO_ROOT/.env" ]; then
   echo "Created .env from .env.example — edit it to add your API keys."
 fi
 
-# Ensure .env.path in Sapphire-native points to our .env
+# Ensure .env.path in the native install points to our .env
 ENV_PATH_FILE="$SAPPHIRE_NATIVE_DIR/.env.path"
 EXPECTED_ENV_PATH="$REPO_ROOT/.env"
 if [ -f "$ENV_PATH_FILE" ]; then
@@ -114,9 +114,9 @@ cat <<'EOF'
 
 Setup complete. Next steps:
 
-  make launch              Start Sapphire natively
+  make launch              Start Terminus natively
   make seed-coherence-lab  Install the Coherence Lab seed pack
   make logs                Tail runtime logs
-  make stop                Stop Sapphire
+  make stop                Stop Terminus
 
 EOF

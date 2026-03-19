@@ -1,7 +1,7 @@
 {
   "name": "terminus",
   "version": "1.0.0",
-  "description": "A native macOS launcher for [Sapphire](https://github.com/ddxfish/sapphire) with a custom seed pack for continuity-focused research.",
+  "description": "A native macOS launcher for Terminus with a custom seed pack for continuity-focused research.",
   "main": "index.js",
   "directories": {
     "doc": "docs"

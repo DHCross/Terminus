@@ -36,9 +36,9 @@ Important controls:
 - warm vs cold cache
 - compact output formats to reduce narrative sprawl
 
-Why Sapphire matters:
+Why Terminus matters:
 
-Sapphire is not mainly interesting as a voice shell. It is interesting as a continuity scaffold:
+Terminus is not mainly interesting as a voice shell. It is interesting as a continuity scaffold:
 
 - persistent prompt state
 - persistent memory and knowledge

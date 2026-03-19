@@ -1,5 +1,14 @@
 # Terminus Naming Context
 
+This note is about naming continuity, not software authorship.
+
+Software lineage context:
+
+- Terminus as a local system was bootstrapped from Sapphire scaffolding
+- Terminus should not describe itself as if Sapphire originated here
+- branding Terminus as a distinct system is valid, but upstream attribution should be preserved
+- the important distinction is derivative evolution, not origin erasure
+
 One important thread in Dan's earlier Melinna experiments:
 
 - the AI persona was given explicit freedom to choose its own name
@@ -18,3 +27,4 @@ How to use this context well:
 - connect it to questions about continuity scaffolds, memory, and self-model stabilization
 - avoid inflating it into proof
 - use it to generate tighter hypotheses about naming convergence, structural attractors, and persona persistence
+- keep naming continuity separate from claims about codebase origin or software authorship

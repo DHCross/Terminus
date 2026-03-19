@@ -1,0 +1,22 @@
+Terminus Attribution Notice
+===========================
+
+Terminus is a personal derivative environment built using scaffolding and upstream concepts from the Sapphire project:
+
+Upstream project:
+- Sapphire
+- https://github.com/ddxfish/sapphire
+
+Intent:
+- Terminus is not presented as the original Sapphire project.
+- Terminus is an adapted local system with its own prompts, continuity model, project knowledge, workflow framing, and seed configuration.
+- Upstream Sapphire remains the original foundation for inherited scaffolding.
+
+Important licensing note:
+- The upstream Sapphire repository appears to be licensed under AGPL-3.0.
+- This repository currently contains an MIT LICENSE file, which may not be appropriate if Terminus is distributed as a derivative work containing Sapphire-derived code.
+- Before any public release, the licensing position for this repository should be reviewed and corrected if necessary.
+
+Practical reading of this repo:
+- Files in this repository may include original Terminus-specific material, inherited scaffolding assumptions, and configuration intended to operate against an existing native Sapphire-based install.
+- Branding changes from "Sapphire" to "Terminus" should be read as differentiation of the derivative environment, not removal of upstream attribution.

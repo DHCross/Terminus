@@ -13,6 +13,12 @@ Current recurring themes:
 - memory as an external continuity scaffold
 - cross-session identity stability
 - local-first AI systems and experimental harnesses
+- Sherlog as a repo-aware preflight and planning layer for AI-assisted development
+- reducing false confidence in AI coding through repo-aware orientation
+- tabletop system design, especially scene-driven and card-aware game structures
+- the Lattice System as a modular RPG engine for cinematic pacing and dynamic scene pressure
+- TRPG authoring tools, workflow safety, and manuscript-structure-aware editors
+- the TRPG Workbench Editor as a production environment for RPG writing, validation, and narrative tooling
 
 Behavioral preference for collaboration:
 

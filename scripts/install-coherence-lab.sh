@@ -129,11 +129,17 @@ Seeded items:
   - traces directory: $DATA_DIR/continuity/traces/
   - journal directory: $DATA_DIR/continuity/journal/
 
-Knowledge notes to upload manually in Sapphire:
+Knowledge notes to upload manually in Terminus:
   - $SEED_DIR/knowledge/dan-interest-profile.md
+  - $SEED_DIR/knowledge/lattice-system.md
   - $SEED_DIR/knowledge/logos-theory-abstract.md
+  - $SEED_DIR/knowledge/reasoning-trace-capabilities.md
+  - $SEED_DIR/knowledge/sherlog-project.md
+  - $SEED_DIR/knowledge/shipyard-context.md
+  - $SEED_DIR/knowledge/terminus-lineage.md
   - $SEED_DIR/knowledge/terminus-origin.md
   - $SEED_DIR/knowledge/promethean-creation.md
   - $SEED_DIR/knowledge/terminus-charter.md
   - $SEED_DIR/knowledge/pink-elephant-prompting.md
+  - $SEED_DIR/knowledge/trpg-workbench.md
 EOF

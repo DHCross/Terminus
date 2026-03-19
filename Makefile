@@ -1,27 +1,31 @@
 .PHONY: launch stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces
 
-# Resolve Sapphire-native directory from .env or use default
+# Resolve native Terminus directory from .env or use default
 SAPPHIRE_NATIVE_DIR ?= $(shell grep -E '^SAPPHIRE_NATIVE_DIR=' .env 2>/dev/null | cut -d= -f2- || echo "/Volumes/My Passport/Sapphire-native")
 ifeq ($(SAPPHIRE_NATIVE_DIR),)
   SAPPHIRE_NATIVE_DIR = /Volumes/My Passport/Sapphire-native
 endif
 
 TASK ?= $(shell command -v task 2>/dev/null || echo /opt/homebrew/bin/task)
+STARTUP_WAIT_SECONDS ?= 60
 
 launch:
-	open -a "LM Studio" 2>/dev/null || true
 	@if lsof -ti :8073 > /dev/null 2>&1; then \
 		echo "Terminus backend already running on :8073"; \
 	else \
 		cd "$(SAPPHIRE_NATIVE_DIR)" && nohup .venv/bin/python3 main.py > /tmp/sapphire-native.log 2>&1 & \
 		echo "Starting Terminus backend..."; \
-		for i in $$(seq 1 30); do \
+		for i in $$(seq 1 $(STARTUP_WAIT_SECONDS)); do \
 			lsof -ti :8073 > /dev/null 2>&1 && break; \
 			sleep 1; \
 		done; \
-		lsof -ti :8073 > /dev/null 2>&1 && echo "Terminus ready" || echo "Backend may still be starting — check /tmp/sapphire-native.log"; \
+		lsof -ti :8073 > /dev/null 2>&1 && echo "Terminus ready" || echo "Backend did not bind :8073 within $(STARTUP_WAIT_SECONDS)s — check /tmp/sapphire-native.log"; \
 	fi
-	open https://localhost:8073
+	@if lsof -ti :8073 > /dev/null 2>&1; then \
+		open https://localhost:8073; \
+	else \
+		echo "Not opening browser because Terminus is not ready yet."; \
+	fi
 
 stop:
 	@pid=$$(lsof -ti :8073 | head -n 1); \
@@ -33,7 +37,7 @@ stop:
 	@pkill -f "electron-shell" 2>/dev/null && echo "Stopped Electron" || true
 
 logs:
-	tail -f /tmp/sapphire-electron.log /tmp/sapphire-native.log 2>/dev/null || echo "No log files found yet. Start Sapphire first with: make launch"
+	tail -f /tmp/sapphire-electron.log /tmp/sapphire-native.log 2>/dev/null || echo "No log files found yet. Start Terminus first with: make launch"
 
 setup:
 	./scripts/setup-native.sh

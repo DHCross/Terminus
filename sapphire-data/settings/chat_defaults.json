@@ -1,6 +1,6 @@
 {
   "_comment": "Factory defaults for new chats - copied to user/settings/chat_defaults.json on first launch",
-  "prompt": "sapphire",
+  "prompt": "terminus",
   "ability": "user_new",
   "voice": "af_heart",
   "pitch": 0.98,

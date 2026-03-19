@@ -10,7 +10,7 @@ This section maps exactly what the repository structures govern, used for contex
 
 ### 📂 Scripts Zone
 - **Paths:** `scripts/**/*`
-- **Belief:** Deployment and environment setup scripts for launching the Terminus client and the native Sapphire backend.
+- **Belief:** Deployment and environment setup scripts for launching the Terminus client and the native Terminus backend.
 
 ### 📂 Seed Zone
 - **Paths:** `seed/**/*`
