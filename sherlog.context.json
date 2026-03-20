@@ -6,7 +6,7 @@
         "scripts/**/*"
       ],
       "belief": "Deployment and environment setup scripts for launching the Terminus client and the native Terminus backend.",
-      "last_updated": "2026-03-18"
+      "last_updated": "2026-03-20"
     },
     {
       "name": "Seed Zone",
@@ -14,7 +14,7 @@
         "seed/**/*"
       ],
       "belief": "Coherence lab context injections, configuration presets, and toolset definitions imported directly into the user’s mind.",
-      "last_updated": "2026-03-18"
+      "last_updated": "2026-03-20"
     },
     {
       "name": "User Zone",
@@ -30,7 +30,15 @@
         "docs/**/*"
       ],
       "belief": "User-facing and internal documentation for this codebase.",
-      "last_updated": "2026-03-18"
+      "last_updated": "2026-03-20"
+    },
+    {
+      "name": "Velocity Artifacts",
+      "paths": [
+        "velocity-artifacts/**/*"
+      ],
+      "belief": "Sherlog diagnostic telemetry artifacts used as lightweight project memory for creator-mirror reads, including velocity summaries and future sherlog-runs outputs.",
+      "last_updated": "2026-03-20"
     }
   ]
 }

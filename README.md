@@ -44,6 +44,14 @@ Then open: [https://localhost:8073](https://localhost:8073)
 
 Terminus uses a self-signed certificate, so your browser will show a warning. Proceed to continue.
 
+If you want a Desktop icon that skips the IDE and opens Terminus in your browser:
+
+```bash
+make install-desktop-launcher
+```
+
+That creates `~/Desktop/Launch Terminus.command`. Double-clicking it starts the backend if needed and opens [https://localhost:8073](https://localhost:8073) in your default browser.
+
 ## Coherence Lab Seed
 
 This repo includes a seed pack oriented around continuity and research:
@@ -93,6 +101,8 @@ SHERLOG is under active development. Not every type of work has a pre-defined fe
 
 ```bash
 make launch              # Start Terminus (Electron + Python backend)
+make launch-browser      # Start Terminus and open it in your browser
+make install-desktop-launcher  # Install a Desktop launcher on macOS
 make stop                # Stop Terminus
 make logs                # Tail runtime logs
 make setup               # Check prerequisites and configure

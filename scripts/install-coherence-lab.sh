@@ -120,6 +120,7 @@ Installed Coherence Lab seed into:
 Seeded items:
   - persona: terminus
   - prompt preset: terminus_lab
+  - prompt preset: CREATOR_MIRROR
   - compatibility persona: coherence_engine
   - compatibility prompt preset: logos_lab
   - toolset: coherence_lab

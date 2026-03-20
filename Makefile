@@ -1,4 +1,4 @@
-.PHONY: launch stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces
+.PHONY: launch launch-browser mirror sync-context install-desktop-launcher stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces
 
 # Resolve native Terminus directory from .env or use default
 SAPPHIRE_NATIVE_DIR ?= $(shell grep -E '^SAPPHIRE_NATIVE_DIR=' .env 2>/dev/null | cut -d= -f2- || echo "/Volumes/My Passport/Sapphire-native")
@@ -13,7 +13,7 @@ launch:
 	@if lsof -ti :8073 > /dev/null 2>&1; then \
 		echo "Terminus backend already running on :8073"; \
 	else \
-		cd "$(SAPPHIRE_NATIVE_DIR)" && nohup .venv/bin/python3 main.py > /tmp/sapphire-native.log 2>&1 & \
+		cd "$(SAPPHIRE_NATIVE_DIR)" && TERMINUS_REPO_ROOT="$(CURDIR)" STARTUP_PROMPT="$(STARTUP_PROMPT)" nohup .venv/bin/python3 main.py > /tmp/sapphire-native.log 2>&1 & \
 		echo "Starting Terminus backend..."; \
 		for i in $$(seq 1 $(STARTUP_WAIT_SECONDS)); do \
 			lsof -ti :8073 > /dev/null 2>&1 && break; \
@@ -26,6 +26,18 @@ launch:
 	else \
 		echo "Not opening browser because Terminus is not ready yet."; \
 	fi
+
+launch-browser:
+	@./scripts/launch-terminus-browser.sh
+
+mirror: verify
+	@STARTUP_PROMPT=CREATOR_MIRROR ./scripts/launch-terminus-browser.sh --prompt CREATOR_MIRROR
+
+sync-context:
+	@./scripts/sync_context.sh
+
+install-desktop-launcher:
+	@./scripts/install-desktop-launcher.sh
 
 stop:
 	@pid=$$(lsof -ti :8073 | head -n 1); \
