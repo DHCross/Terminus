@@ -29,6 +29,20 @@ if [ -f "$ENV_FILE" ]; then
   fi
 fi
 
+print_lan_urls() {
+  local addrs
+  addrs="$(ifconfig | grep 'inet ' | awk '{print $2}' | grep -E '^(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))\.' || true)"
+  if [ -z "$addrs" ]; then
+    return
+  fi
+
+  echo "LAN URLs for other devices on your network:"
+  while IFS= read -r addr; do
+    [ -n "$addr" ] || continue
+    echo "  https://$addr:8073"
+  done <<< "$addrs"
+}
+
 if lsof -ti :8073 >/dev/null 2>&1; then
   echo "Terminus backend already running on :8073"
 else
@@ -60,6 +74,7 @@ fi
 
 if lsof -ti :8073 >/dev/null 2>&1; then
   echo "Opening $DEFAULT_URL"
+  print_lan_urls
   open "$DEFAULT_URL"
 else
   echo "Backend did not bind :8073 within ${STARTUP_WAIT_SECONDS}s."
