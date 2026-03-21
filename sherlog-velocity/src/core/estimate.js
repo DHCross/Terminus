@@ -503,6 +503,13 @@ function renderPrompt(payload) {
     lines.push('');
   }
 
+  lines.push('REASONING MIRROR:');
+  lines.push('- List the main options or approaches you considered for this task.');
+  lines.push('- For each, briefly state what made it appealing and what risks or downsides you saw.');
+  lines.push('- Which options did you reject? Why?');
+  lines.push('- What tradeoffs did you weigh before choosing your final approach?');
+  lines.push('- If you changed your mind during the process, what new information or insight caused you to revise your plan?');
+  lines.push('');
   lines.push('INSTRUCTIONS:');
   lines.push('1. Break this into atomic implementation steps.');
   lines.push('2. Prioritize the detected gaps first.');
