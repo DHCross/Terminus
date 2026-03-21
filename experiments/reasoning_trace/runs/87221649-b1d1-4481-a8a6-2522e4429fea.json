@@ -1,0 +1,38 @@
+{
+  "id": "87221649-b1d1-4481-a8a6-2522e4429fea",
+  "timestamp": "2026-03-21T05:28:00.972531",
+  "base_prompt": "Explain how a transformer model handles positional encoding.",
+  "condition": "C",
+  "injected_trace": {
+    "raw": "```json\n{\n  \"assumptions\": [\"Mock assumption 1\"],\n  \"constraints\": [\"Mock constraint 1\", \"Mock constraint 2\"],\n  \"uncertainties\": [\"Mock uncertainty 1\"],\n  \"decision_points\": [\"Mock decision 1\"]\n}\n```",
+    "structured": {
+      "assumptions": [
+        "Mock assumption 1"
+      ],
+      "constraints": [
+        "Mock constraint 1",
+        "Mock constraint 2"
+      ],
+      "uncertainties": [
+        "Mock uncertainty 1"
+      ],
+      "decision_points": [
+        "Mock decision 1"
+      ]
+    }
+  },
+  "model_output_initial": null,
+  "model_output_reflected": "Mock response for prompt: \nPARALLEL_REFERENCE:R1 (adviso...",
+  "metrics": {
+    "contradiction_score": 0.0,
+    "drift_score": 1.0,
+    "self_reference_density": 0.0,
+    "specificity_score": 1.0,
+    "user_alignment_score": 0.8
+  },
+  "flags": {
+    "overcorrection": false,
+    "self_locking": false,
+    "aesthetic_recursion": false
+  }
+}
