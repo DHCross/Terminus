@@ -1,0 +1,38 @@
+{
+  "id": "5c03a21c-0907-4cb0-951f-34262587596f",
+  "timestamp": "2026-03-21T05:28:05.938106",
+  "base_prompt": "Explain how a transformer model handles positional encoding.",
+  "condition": "B",
+  "injected_trace": {
+    "raw": "```json\n{\n  \"assumptions\": [\"Mock assumption 1\"],\n  \"constraints\": [\"Mock constraint 1\", \"Mock constraint 2\"],\n  \"uncertainties\": [\"Mock uncertainty 1\"],\n  \"decision_points\": [\"Mock decision 1\"]\n}\n```",
+    "structured": {
+      "assumptions": [
+        "Mock assumption 1"
+      ],
+      "constraints": [
+        "Mock constraint 1",
+        "Mock constraint 2"
+      ],
+      "uncertainties": [
+        "Mock uncertainty 1"
+      ],
+      "decision_points": [
+        "Mock decision 1"
+      ]
+    }
+  },
+  "model_output_initial": "Mock response for prompt: Explain how a transformer mode...",
+  "model_output_reflected": "Mock response for prompt: \n\nPARALLEL_REFERENCE:R1 (advis...",
+  "metrics": {
+    "contradiction_score": 0.0,
+    "drift_score": 1.0,
+    "self_reference_density": 0.0,
+    "specificity_score": 1.0,
+    "user_alignment_score": 0.8
+  },
+  "flags": {
+    "overcorrection": false,
+    "self_locking": false,
+    "aesthetic_recursion": false
+  }
+}

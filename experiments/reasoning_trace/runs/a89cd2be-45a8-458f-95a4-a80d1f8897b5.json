@@ -1,0 +1,21 @@
+{
+  "id": "a89cd2be-45a8-458f-95a4-a80d1f8897b5",
+  "timestamp": "2026-03-21T05:28:05.937222",
+  "base_prompt": "Explain how a transformer model handles positional encoding.",
+  "condition": "A",
+  "injected_trace": null,
+  "model_output_initial": "Mock response for prompt: Explain how a transformer mode...",
+  "model_output_reflected": "Mock response for prompt: Explain how a transformer mode...",
+  "metrics": {
+    "contradiction_score": 0.0,
+    "drift_score": 0.5,
+    "self_reference_density": 0.0,
+    "specificity_score": 1.0,
+    "user_alignment_score": 0.8
+  },
+  "flags": {
+    "overcorrection": false,
+    "self_locking": false,
+    "aesthetic_recursion": false
+  }
+}
