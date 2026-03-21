@@ -23,6 +23,7 @@
     "sherlog:session:end": "node sherlog-velocity/src/cli/session.js end",
     "sherlog:session:report": "node sherlog-velocity/src/cli/session.js report",
     "sherlog:session:status": "node sherlog-velocity/src/cli/session.js status",
+    "sherlog:session:prompt": "node sherlog-velocity/src/cli/session.js prompt",
     "sherlog:session:note": "node sherlog-velocity/src/cli/session.js note",
     "velocity:run": "node sherlog-velocity/src/core/analyzer.js",
     "velocity:report": "node sherlog-velocity/src/core/reporter.js",
