@@ -1,4 +1,4 @@
-.PHONY: launch launch-browser mirror sync-context install-desktop-launcher stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces
+.PHONY: launch launch-browser mirror sync-context install-desktop-launcher stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces health backup-state
 
 # Resolve native Terminus directory from .env or use default
 SAPPHIRE_NATIVE_DIR ?= $(shell grep -E '^SAPPHIRE_NATIVE_DIR=' .env 2>/dev/null | cut -d= -f2- || echo "/Volumes/My Passport/Sapphire-native")
@@ -77,3 +77,17 @@ gaps:
 
 hygiene:
 	$(NODE) sherlog-velocity/src/cli/hygiene.js $(ARGS)
+
+# Health and maintenance
+LOCAL_COMPUTER_DIR ?= $(CURDIR)/../Local Computer
+
+health:
+	@bash "$(LOCAL_COMPUTER_DIR)/terminus/health-check.sh"
+
+backup-state:
+	@BACKUP_NAME="terminus-state-$$(date +%Y%m%d-%H%M%S).tar.gz"; \
+	tar czf "$(CURDIR)/sapphire-backups/$$BACKUP_NAME" \
+		-C "$(SAPPHIRE_NATIVE_DIR)" user/ \
+		2>/dev/null; \
+	mkdir -p "$(CURDIR)/sapphire-backups"; \
+	echo "Backed up user state to sapphire-backups/$$BACKUP_NAME"

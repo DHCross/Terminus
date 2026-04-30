@@ -107,6 +107,8 @@ make stop                # Stop Terminus
 make logs                # Tail runtime logs
 make setup               # Check prerequisites and configure
 make seed-coherence-lab  # Install the Coherence Lab seed pack
+make health              # Run the 11-point health check
+make backup-state        # Snapshot user/ continuity state
 make verify              # SHERLOG preflight check
 make doctor              # SHERLOG feature health
 make gaps                # SHERLOG gap detection

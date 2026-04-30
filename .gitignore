@@ -6,5 +6,9 @@
 # Local logs
 *.log
 
+# Secrets — do not track API keys
+sapphire-config/credentials.json
+sapphire-config/secret_key
+
 # SHERLOG runtime data
 sherlog-velocity/data/
