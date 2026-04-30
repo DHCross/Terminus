@@ -337,6 +337,16 @@ def snapshot_capabilities() -> str:
 # ---------------------------------------------------------------------------
 
 def execute(function_name, arguments, config):
+    """Dispatcher required by Sapphire's FunctionManager.
+
+    Args:
+        function_name: Name of the function to execute.
+        arguments: Dict of keyword arguments from the LLM call.
+        config: Runtime config object passed by Sapphire (unused here).
+
+    Returns:
+        Tuple of (result_string, success_bool).
+    """
     try:
         if function_name == "read_capability_diff":
             return read_capability_diff(), True
