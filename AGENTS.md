@@ -23,34 +23,10 @@ npm run sherlog:session:prompt -- --lookback 5
 npm run sherlog:session:end
 ```
 
-If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`prompt`/`estimate` should auto-start a session when none is active.
+The agent should explicitly start the current coding session instead of inheriting an unrelated active session.
+
+If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`prompt`/`estimate` may auto-start a session when none is active, but that mode is optional and still command-time only.
 
 Use `/docs/sherlog-next-steps.md` and `/docs/why-sherlog.md` as the local operating guide.
 <!-- SHERLOG END -->
 
-## Artifact Creation Defaults
-
-When the user asks for a file deliverable, create the file directly in the workspace instead of substituting a text response.
-
-Examples:
-
-- `.docx` request: use the `doc` skill and create the `.docx`
-- `.pdf` request: use the `pdf` skill and create the `.pdf`
-- `.xlsx` or `.csv` request: use the `spreadsheet` skill and create the file
-- `.ipynb` request: use the `jupyter-notebook` skill and create the notebook
-
-Do not default to Markdown, plain text, or "here is content you can paste" unless:
-
-- the user explicitly asks for raw text only
-- the required toolchain is unavailable
-- file creation fails, in which case explain the failure briefly and then provide the fallback
-
-## Tool Proactivity
-
-Before replying with a workaround, check whether an available skill or local tool can complete the task directly.
-
-If a matching skill exists, use it by default. Prefer producing the requested artifact over describing how the user could produce it manually.
-
-## Avoid Weak Fallback Assumptions
-
-Do not assume you cannot create, edit, or save files in the workspace. First verify whether the workspace and available skills support the requested output. If they do, perform the work.

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const path = require('path');
-const { readJson, resolveRuntimeConfig } = require('../core/shared');
+const { loadRuntimeConfig } = require('../core/shared');
 const { analyzeConsumers } = require('../core/consumers');
 
 function parseArgs(argv) {
@@ -22,13 +21,12 @@ function parseArgs(argv) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) {
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) {
     console.error('Config not found. Run `node sherlog-velocity/install.js` first.');
     process.exit(1);
   }
-  return resolveRuntimeConfig(config);
+  return runtime.config;
 }
 
 function groupChains(chains = []) {

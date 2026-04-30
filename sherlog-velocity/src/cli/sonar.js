@@ -5,16 +5,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const https = require('node:https');
 const {
+  detectGitRepoRoot,
   detectBranchHead,
   ensureDir,
   readJson,
-  resolveRuntimeConfig,
+  loadRuntimeConfig,
 } = require('../core/shared');
 
-const REPO_ROOT = path.resolve(__dirname, '../../../');
-const CONFIG_PATH = path.resolve(__dirname, '../../config/sherlog.config.json');
-const DEFAULT_ACK_PATH = path.resolve(REPO_ROOT, 'sherlog.acknowledgements.json');
-const DEFAULT_REPORT_PATH = path.resolve(REPO_ROOT, 'velocity-artifacts', 'sonar-report.json');
 const DEFAULT_SONAR_URL = 'https://sonarcloud.io';
 const RATING_LABEL = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E' };
 const TYPE_LABEL = {
@@ -50,7 +47,7 @@ function printHelp() {
 }
 
 function loadConfig() {
-  return resolveRuntimeConfig(readJson(CONFIG_PATH, {}));
+  return loadRuntimeConfig({ fromDir: __dirname }).config || {};
 }
 
 function sanitizeSetting(value) {
@@ -61,10 +58,11 @@ function sanitizeSetting(value) {
 }
 
 function loadEnv() {
+  const repoRoot = detectGitRepoRoot(process.cwd());
   const candidates = [
-    path.resolve(REPO_ROOT, '.env.local'),
+    path.resolve(repoRoot, '.env.local'),
     path.resolve(process.cwd(), '.env.local'),
-    path.resolve(REPO_ROOT, '.env'),
+    path.resolve(repoRoot, '.env'),
     path.resolve(process.cwd(), '.env'),
   ];
 
@@ -92,14 +90,16 @@ function loadEnv() {
 
 function resolveSonarRuntime(config = {}) {
   const sonar = config?.settings?.sonar || {};
-  const repoRoot = config.repo_root || REPO_ROOT;
+  const repoRoot = config.repo_root || detectGitRepoRoot(process.cwd());
+  const defaultAckPath = path.resolve(repoRoot, 'sherlog.acknowledgements.json');
+  const defaultReportPath = path.resolve(repoRoot, 'velocity-artifacts', 'sonar-report.json');
   const reportOutput = sanitizeSetting(process.env.SONARCLOUD_REPORT_OUTPUT) || sanitizeSetting(sonar.report_output);
-  const ackPath = config?.paths?.gap_acknowledgements || DEFAULT_ACK_PATH;
+  const ackPath = config?.paths?.gap_acknowledgements || defaultAckPath;
 
   return {
     repoRoot,
     ackPath: path.isAbsolute(ackPath) ? ackPath : path.resolve(repoRoot, ackPath),
-    reportPath: reportOutput ? path.resolve(repoRoot, reportOutput) : DEFAULT_REPORT_PATH,
+    reportPath: reportOutput ? path.resolve(repoRoot, reportOutput) : defaultReportPath,
     baseUrl: sanitizeSetting(process.env.SONARCLOUD_URL) || sanitizeSetting(sonar.sonarcloud_url) || DEFAULT_SONAR_URL,
     org: sanitizeSetting(process.env.SONARCLOUD_ORG) || sanitizeSetting(sonar.org),
     projectKey: sanitizeSetting(process.env.SONARCLOUD_PROJECT)
@@ -366,7 +366,7 @@ function registerGaps(report, options = {}) {
   const gapTypes = qualityGateToGapTypes(report.quality_gate.conditions);
   const scopeType = report.pull_request ? 'pull_request' : 'branch';
   const scopeValue = report.pull_request || report.branch || 'default';
-  const docState = loadAckDocument(options.ackPath || DEFAULT_ACK_PATH);
+  const docState = loadAckDocument(options.ackPath);
   const existing = Array.isArray(docState.entries) ? docState.entries : [];
   const created = [];
   let skipped = 0;
@@ -409,16 +409,16 @@ function registerGaps(report, options = {}) {
   });
 
   if (created.length > 0 && options.dryRun !== true) {
-    ensureDir(path.dirname(options.ackPath || DEFAULT_ACK_PATH));
+    ensureDir(path.dirname(options.ackPath));
     if (docState.shape === 'array') {
-      fs.writeFileSync(options.ackPath || DEFAULT_ACK_PATH, JSON.stringify(existing, null, 2) + '\n', 'utf8');
+      fs.writeFileSync(options.ackPath, JSON.stringify(existing, null, 2) + '\n', 'utf8');
     } else {
       const nextDoc = {
         ...docState.doc,
         updated_at: now.toISOString(),
         entries: existing,
       };
-      fs.writeFileSync(options.ackPath || DEFAULT_ACK_PATH, JSON.stringify(nextDoc, null, 2) + '\n', 'utf8');
+      fs.writeFileSync(options.ackPath, JSON.stringify(nextDoc, null, 2) + '\n', 'utf8');
     }
   }
 
@@ -497,7 +497,7 @@ function printReport(report, verbose, reportPath) {
     });
   }
 
-  console.log(`Report saved: ${path.relative(REPO_ROOT, reportPath)}`);
+  console.log(`Report saved: ${path.relative(process.cwd(), reportPath)}`);
 }
 
 async function run(rawArgs = process.argv, injected = {}) {

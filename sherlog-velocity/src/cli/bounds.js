@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const path = require('path');
-const { readJson, resolveRuntimeConfig } = require('../core/shared');
+const { loadRuntimeConfig } = require('../core/shared');
 const { generateStaticBounds } = require('../core/boundary-mapper');
 
 function parseArgs(argv) {
@@ -37,12 +36,11 @@ function printHelp() {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) {
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) {
     throw new Error('Config not found. Run `node sherlog-velocity/install.js` first.');
   }
-  return resolveRuntimeConfig(config);
+  return runtime.config;
 }
 
 function main() {

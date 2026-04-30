@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { readJson, resolveRuntimeConfig, toPortableConfig } = require('../core/shared');
+const { loadRuntimeConfig, toPortableConfig } = require('../core/shared');
 const { scanHygiene } = require('../core/hygiene');
 
 function parseArgs(argv) {
@@ -42,13 +42,12 @@ function printHelp() {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) {
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) {
     console.error('Config not found. Run `node sherlog-velocity/install.js` first.');
     process.exit(1);
   }
-  return resolveRuntimeConfig(config);
+  return runtime.config;
 }
 
 const TYPE_LABELS = {
@@ -70,8 +69,8 @@ function formatFinding(f) {
 }
 
 function applyTuning(suggestions) {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  const config = runtime.config;
   if (!config) return false;
 
   if (!config.settings) config.settings = {};
@@ -81,7 +80,7 @@ function applyTuning(suggestions) {
     config.settings.hygiene[s.key] = s.suggested;
   }
 
-  fs.writeFileSync(configPath, JSON.stringify(toPortableConfig(config), null, 2) + '\n', 'utf8');
+  fs.writeFileSync(runtime.configPath, JSON.stringify(toPortableConfig(config, config.repo_root), null, 2) + '\n', 'utf8');
   return true;
 }
 

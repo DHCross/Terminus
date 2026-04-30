@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const path = require('path');
 const { execSync } = require('child_process');
 const { createEstimatePayload } = require('../core/estimate');
 const {
   ensureFile,
-  readJson,
+  loadRuntimeConfig,
   readJsonLines,
-  resolveRuntimeConfig,
 } = require('../core/shared');
 
 function parseArgs(argv) {
@@ -40,10 +38,9 @@ function parseArgs(argv) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) throw new Error('Config not found. Run `node sherlog-velocity/install.js` first.');
-  return resolveRuntimeConfig(config);
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) throw new Error('Config not found. Run `node sherlog-velocity/install.js` first.');
+  return runtime.config;
 }
 
 function runGit(repoRoot, cmd) {

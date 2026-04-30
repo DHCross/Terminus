@@ -6,6 +6,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 const {
   confidenceFromSample,
+  loadRuntimeConfig,
   readJson,
   readJsonLines,
   resolveConfigPath: resolveSharedConfigPath,
@@ -27,6 +28,7 @@ function parseArgs(argv) {
     json: false,
     bundle: null,
     autoGaps: true,
+    persistSelfModel: false,
     zones: [],
     aliases: [],
     metadata: {
@@ -34,7 +36,6 @@ function parseArgs(argv) {
       implementation_tokens: [],
       test_tokens: [],
       doc_tokens: [],
-      repomix_tokens: [],
     },
   };
 
@@ -50,7 +51,6 @@ function parseArgs(argv) {
     else if ((arg === '--implementation-token' || arg === '--impl-token') && argv[i + 1]) out.metadata.implementation_tokens.push(argv[++i]);
     else if (arg === '--test-token' && argv[i + 1]) out.metadata.test_tokens.push(argv[++i]);
     else if ((arg === '--doc-token' || arg === '--docs-token') && argv[i + 1]) out.metadata.doc_tokens.push(argv[++i]);
-    else if (arg === '--repomix-token' && argv[i + 1]) out.metadata.repomix_tokens.push(argv[++i]);
     else if ((arg === '--zone' || arg === '--area' || arg === '--vector' || arg === '--bucket') && argv[i + 1]) {
       const val = argv[++i].trim();
       if (val) out.zones.push(val);
@@ -58,6 +58,8 @@ function parseArgs(argv) {
     else if (arg === '--prompt') out.prompt = true;
     else if (arg === '--json') out.json = true;
     else if (arg === '--no-auto-gaps') out.autoGaps = false;
+    else if (arg === '--no-persist-self-model') out.persistSelfModel = false;
+    else if (arg === '--persist-self-model') out.persistSelfModel = true;
     else if (!arg.startsWith('-')) out.feature = out.feature ? `${out.feature} ${arg}` : arg;
   }
 
@@ -65,8 +67,7 @@ function parseArgs(argv) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  return resolveRuntimeConfig(readJson(configPath, null));
+  return loadRuntimeConfig({ fromDir: __dirname }).config;
 }
 
 function normalizeGap(gap) {
@@ -136,9 +137,6 @@ function chooseVelocity(entries) {
 function bundleHint(config, override) {
   if (override) return override;
   if (!config.bundler || !config.bundler.type) return 'none';
-  const first = Array.isArray(config.bundler.bundles) ? config.bundler.bundles[0] : null;
-  if (config.bundler.type === 'repomix' && first) return `@repomix:${first}`;
-  if (config.bundler.type === 'repomix') return '@repomix:core';
   return config.bundler.type;
 }
 
@@ -164,6 +162,56 @@ function resolveContextMapPath(repoRoot, config) {
   }
 
   return path.join(repoRoot, 'sherlog.context.json');
+}
+
+function collectVerificationCommands(repoRoot, config, detectionEvidence) {
+  const contextMapPath = resolveContextMapPath(repoRoot, config);
+  const contextMap = readJson(contextMapPath, null);
+  const zones = Array.isArray(contextMap?.zones) ? contextMap.zones : [];
+  if (!zones.length) return [];
+
+  // Gather matched zone names from detection evidence
+  const matchedFiles = Array.isArray(detectionEvidence?.matched_feature_files)
+    ? detectionEvidence.matched_feature_files
+    : [];
+  const matchedZoneNames = new Set(
+    matchedFiles
+      .map(item => item?.lane)
+      .filter(Boolean)
+  );
+
+  const commands = [];
+  const seenZones = new Set();
+
+  for (const zone of zones) {
+    const zoneName = String(zone?.name || '').trim();
+    if (!zoneName) continue;
+
+    // Include zone if its name was referenced in matched files, or include all zones if no matches
+    if (matchedZoneNames.size > 0 && !matchedZoneNames.has(zoneName)) continue;
+    if (seenZones.has(zoneName)) continue;
+    seenZones.add(zoneName);
+
+    const explicit = Array.isArray(zone.verify_commands) ? zone.verify_commands.filter(Boolean) : [];
+    if (explicit.length > 0) {
+      explicit.forEach(cmd => commands.push({ zone: zoneName, command: String(cmd) }));
+      continue;
+    }
+
+    // Fallback: derive from test_root or test_globs
+    const testRoot = String(zone.test_root || '').trim();
+    const testGlobs = Array.isArray(zone.test_globs) ? zone.test_globs.filter(Boolean) : [];
+
+    if (testGlobs.length > 0) {
+      testGlobs.forEach(glob => {
+        commands.push({ zone: zoneName, command: `npm test -- --testPathPattern=${glob}` });
+      });
+    } else if (testRoot) {
+      commands.push({ zone: zoneName, command: `npm test -- --testPathPattern=${testRoot}` });
+    }
+  }
+
+  return commands;
 }
 
 function readArchitecturalRules(repoRoot, config) {
@@ -248,6 +296,7 @@ function createEstimatePayload(input = {}) {
     gapsFile: input.gapsFile || null,
     bundle: input.bundle || null,
     autoGaps: input.autoGaps !== false,
+    persistSelfModel: input.persistSelfModel === true,
     zones: Array.isArray(input.zones) ? input.zones : [],
     aliases: Array.isArray(input.aliases) ? input.aliases : [],
     profile: input.profile || '',
@@ -273,6 +322,7 @@ function createEstimatePayload(input = {}) {
   } else if (args.autoGaps) {
     detection = detectGaps(featureName, config, {
       record: false,
+      persistSelfModel: false,
       zones: args.zones,
       aliases: args.aliases,
       profile: args.profile || undefined,
@@ -309,10 +359,11 @@ function createEstimatePayload(input = {}) {
     sessionOutputFeatures = null;
   }
 
+  const repoRoot = resolveRepoRoot(config);
+
   let selfModel = null;
   let selfModelSource = null;
   try {
-    const repoRoot = resolveRepoRoot(config);
     const sourceRoots = Array.isArray(config?.paths?.source_roots) && config.paths.source_roots.length > 0
       ? config.paths.source_roots
       : ['src'];
@@ -320,7 +371,7 @@ function createEstimatePayload(input = {}) {
       config,
       sourceRoots,
       contextMapPath: resolveContextMapPath(repoRoot, config),
-      persist: true,
+      persist: args.persistSelfModel,
     });
     selfModel = selfModelResult.model;
     selfModelSource = selfModelResult.source;
@@ -328,6 +379,8 @@ function createEstimatePayload(input = {}) {
     selfModel = null;
     selfModelSource = null;
   }
+
+  const verificationCommands = collectVerificationCommands(repoRoot, config, detection?.evidence || null);
 
   return {
     feature: featureName,
@@ -344,7 +397,7 @@ function createEstimatePayload(input = {}) {
       gap_source: gapSource,
     },
     context: {
-      mode: config.context?.mode || (config.bundler?.type === 'repomix' ? 'repomix-compat' : 'none'),
+      mode: config.context?.mode || 'none',
       map_file: config.context?.map_file || config.paths?.context_map || null,
       bundler: config.bundler?.type || 'none',
       bundle_hint: bundle,
@@ -355,6 +408,7 @@ function createEstimatePayload(input = {}) {
     session_output_features: sessionOutputFeatures,
     self_model: selfModel,
     self_model_source: selfModelSource,
+    verification_commands: verificationCommands,
   };
 }
 
@@ -503,17 +557,20 @@ function renderPrompt(payload) {
     lines.push('');
   }
 
-  lines.push('REASONING MIRROR:');
-  lines.push('- List the main options or approaches you considered for this task.');
-  lines.push('- For each, briefly state what made it appealing and what risks or downsides you saw.');
-  lines.push('- Which options did you reject? Why?');
-  lines.push('- What tradeoffs did you weigh before choosing your final approach?');
-  lines.push('- If you changed your mind during the process, what new information or insight caused you to revise your plan?');
-  lines.push('');
   lines.push('INSTRUCTIONS:');
   lines.push('1. Break this into atomic implementation steps.');
   lines.push('2. Prioritize the detected gaps first.');
   lines.push('3. Start with core implementation and tests, then integration/docs.');
+
+  const verificationCommands = Array.isArray(payload.verification_commands) ? payload.verification_commands : [];
+  if (verificationCommands.length > 0) {
+    lines.push('');
+    lines.push('VERIFICATION COMMANDS (copy-paste to confirm changes):');
+    verificationCommands.forEach((item, index) => {
+      const zoneLabel = item.zone ? ` [${item.zone}]` : '';
+      lines.push(`${index + 1}.${zoneLabel} ${item.command}`);
+    });
+  }
 
   return lines.join('\n');
 }
@@ -561,9 +618,6 @@ function renderEstimate(payload) {
       output.push(`Context stale areas: ${(contextMap.stale_areas || []).length}`);
       output.push(`Context drift areas: ${(contextMap.drift_areas || []).length}`);
       output.push(`Context uncovered feature files: ${(contextMap.uncovered_feature_files || []).length}`);
-    }
-    if (payload.context.bundler === 'repomix' || payload.context.mode === 'repomix-compat') {
-      output.push(`Auto-detected repomix mention: ${payload.detection.has_repomix_mention ? 'yes' : 'no'}`);
     }
   }
 

@@ -9,7 +9,6 @@ const { readJson } = require('../core/shared');
 const DROP_ROOT = path.resolve(__dirname, '../..');
 const INSTALL_PATH = path.join(DROP_ROOT, 'install.js');
 const VERIFY_PATH = path.join(__dirname, 'verify.js');
-const REPOMIX_SYNC_PATH = path.join(__dirname, 'repomix-sync.js');
 const CONFIG_PATH = path.join(DROP_ROOT, 'config', 'sherlog.config.json');
 
 function parseArgs(argv) {
@@ -18,7 +17,6 @@ function parseArgs(argv) {
     strict: false,
     dryRun: false,
     forceContext: false,
-    skipRepomixSync: false,
     noInstall: false,
     repoRoot: null,
     help: false,
@@ -30,7 +28,6 @@ function parseArgs(argv) {
     else if (arg === '--strict') out.strict = true;
     else if (arg === '--dry-run') out.dryRun = true;
     else if (arg === '--force-context') out.forceContext = true;
-    else if (arg === '--skip-repomix-sync') out.skipRepomixSync = true;
     else if (arg === '--no-install') out.noInstall = true;
     else if (arg === '--repo-root' && argv[i + 1]) out.repoRoot = argv[++i];
     else if (arg === '--help' || arg === '-h') out.help = true;
@@ -48,7 +45,6 @@ function printHelp() {
   console.log('  --dry-run             assess and report changes without writing files');
   console.log('  --strict              exit non-zero when post-bridge verify has FAIL checks');
   console.log('  --force-context       pass --force-context through to install.js');
-  console.log('  --skip-repomix-sync   skip repomix manifest reconciliation');
   console.log('  --no-install          skip re-running install.js');
   console.log('  --repo-root <path>    target repository root (default: current git root)');
   console.log('  --json                emit machine-readable JSON output');
@@ -127,42 +123,6 @@ function runVerify(repoRoot) {
   };
 }
 
-function resolveManifestPath(config, repoRoot) {
-  const configured = config?.paths?.repomix_manifest || config?.context?.map_file || config?.paths?.context_map || null;
-  const candidates = [];
-  if (configured) {
-    candidates.push(path.isAbsolute(configured) ? configured : path.join(repoRoot, configured));
-  }
-  candidates.push(path.join(repoRoot, 'repomix-manifest.json'));
-  candidates.push(path.join(repoRoot, 'vessel', 'repomix-manifest.json'));
-
-  for (const candidate of candidates) {
-    if (candidate && fs.existsSync(candidate)) return candidate;
-  }
-  return configured
-    ? (path.isAbsolute(configured) ? configured : path.join(repoRoot, configured))
-    : null;
-}
-
-function shouldRunRepomixSync(config, repoRoot) {
-  const manifestPath = resolveManifestPath(config, repoRoot);
-  const hasManifest = Boolean(manifestPath && fs.existsSync(manifestPath));
-  const mode = config?.context?.mode || 'none';
-
-  if (mode === 'repomix-compat') {
-    if (hasManifest) {
-      return { run: true, reason: 'context_mode_repomix_compat', manifest_path: manifestPath };
-    }
-    return { run: false, reason: 'repomix_manifest_missing', manifest_path: manifestPath };
-  }
-
-  if (hasManifest) {
-    return { run: true, reason: 'manifest_detected', manifest_path: manifestPath };
-  }
-
-  return { run: false, reason: 'repomix_not_configured', manifest_path: manifestPath };
-}
-
 function formatStamp(date = new Date()) {
   return date.toISOString().replace(/[:.]/g, '-');
 }
@@ -172,14 +132,11 @@ function backupTargets(repoRoot, config) {
     path.join(repoRoot, 'package.json'),
     path.join(repoRoot, 'AGENTS.md'),
     CONFIG_PATH,
-    path.join(repoRoot, 'repomix-manifest.json'),
-    path.join(repoRoot, 'vessel', 'repomix-manifest.json'),
   ]);
 
   const configuredPaths = [
     config?.paths?.context_map,
     config?.context?.map_file,
-    config?.paths?.repomix_manifest,
   ].filter(Boolean);
 
   configuredPaths.forEach(p => {
@@ -281,7 +238,6 @@ function main() {
     options: {
       strict: args.strict,
       force_context: args.forceContext,
-      skip_repomix_sync: args.skipRepomixSync,
       no_install: args.noInstall,
     },
     backup: {
@@ -292,12 +248,6 @@ function main() {
       before: verifyBefore.summary,
       after: null,
       delta: null,
-    },
-    repomix_sync: {
-      attempted: false,
-      status: 'skipped',
-      reason: null,
-      summary: null,
     },
     steps,
     status: 'pass',
@@ -335,32 +285,6 @@ function main() {
     }
   }
 
-  const configAfterInstall = readJson(CONFIG_PATH, configBefore);
-  if (args.skipRepomixSync) {
-    output.repomix_sync.reason = 'disabled_by_flag';
-    steps.push({ name: 'repomix-sync', status: 'skipped', detail: 'disabled_by_flag' });
-  } else {
-    const decision = shouldRunRepomixSync(configAfterInstall, repoRoot);
-    output.repomix_sync.reason = decision.reason;
-    if (!decision.run) {
-      steps.push({ name: 'repomix-sync', status: 'skipped', detail: decision.reason });
-    } else {
-      const syncArgs = ['--json'];
-      if (!args.dryRun) syncArgs.unshift('--write');
-      const syncResult = runNodeScript(REPOMIX_SYNC_PATH, syncArgs, repoRoot);
-      output.repomix_sync.attempted = true;
-      if (!syncResult.ok) {
-        output.repomix_sync.status = 'failed';
-        errors.push(`repomix_sync: ${syncResult.stderr || 'repomix-sync failed'}`);
-        steps.push({ name: 'repomix-sync', status: 'failed', detail: decision.reason });
-      } else {
-        output.repomix_sync.status = 'success';
-        output.repomix_sync.summary = readJsonFromStdout(syncResult);
-        steps.push({ name: 'repomix-sync', status: 'success', detail: decision.reason });
-      }
-    }
-  }
-
   const verifyAfter = runVerify(repoRoot);
   if (!verifyAfter.ok && verifyAfter.error) {
     errors.push(`post_verify: ${verifyAfter.error}`);
@@ -388,6 +312,4 @@ if (require.main === module) main();
 
 module.exports = {
   parseArgs,
-  resolveManifestPath,
-  shouldRunRepomixSync,
 };

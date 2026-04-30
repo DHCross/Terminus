@@ -64,50 +64,6 @@ test('does not flag context_drift for unrelated empty zones', () => {
   }
 });
 
-test('uses repomix file coverage as integration evidence', () => {
-  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-noise-repomix-'));
-
-  try {
-    writeText(
-      path.join(repoRoot, 'src', 'lib', 'alignment-corridor.ts'),
-      'export const ALIGNMENT_CORRIDOR = true;\n'
-    );
-
-    const manifestPath = path.join(repoRoot, 'repomix-manifest.json');
-    writeJson(manifestPath, {
-      version: '1.0',
-      bundles: [
-        {
-          id: 'alignment-core',
-          name: 'alignment-core',
-          paths: ['src/lib/**/*'],
-          last_updated: '2026-02-24',
-        },
-      ],
-    });
-
-    const config = {
-      repo_root: repoRoot,
-      bundler: { type: 'repomix', bundles: [] },
-      context: { mode: 'repomix-compat', map_file: manifestPath, stale_threshold_days: 1 },
-      paths: {
-        source_roots: ['src'],
-        docs_dir: 'docs',
-        repomix_manifest: manifestPath,
-      },
-      settings: {
-        gap_scan_ignore_dirs: [],
-      },
-    };
-
-    const result = detectGaps('AlignmentCorridor', config, { record: false });
-    assert.equal(result.gaps.includes('integration'), false);
-    assert.ok((result.evidence?.repomix?.covered_feature_files || []).length > 0);
-  } finally {
-    fs.rmSync(repoRoot, { recursive: true, force: true });
-  }
-});
-
 test('detects tests by content even when filename does not include feature token', () => {
   const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-noise-tests-'));
 
@@ -220,6 +176,85 @@ test('code index suppresses generic token overmatch and reports scored feature e
     assert.equal(evidence.feature_file_count <= evidence.raw_feature_file_count, true);
     assert.ok(Array.isArray(codeIndex.indexed_feature_matches));
     assert.ok(codeIndex.indexed_feature_matches.some(item => Array.isArray(item.reasons) && item.reasons.length > 0));
+    assert.ok(Array.isArray(evidence.matched_feature_files));
+    assert.ok(evidence.matched_feature_files.some(item => item.path === 'src/sherlog/index-sync.ts' && Array.isArray(item.triggers) && item.triggers.length > 0));
+  } finally {
+    fs.rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('generic request language does not expand the feature match set', () => {
+  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-generic-feature-'));
+
+  try {
+    writeText(
+      path.join(repoRoot, 'src', 'usability-panel.ts'),
+      'export function renderUsabilityPanel() { return "ui"; }\n'
+    );
+    writeText(
+      path.join(repoRoot, 'src', 'improve-flow.ts'),
+      'export function improveFlow() { return "flow"; }\n'
+    );
+    writeText(
+      path.join(repoRoot, 'src', 'payments-ledger.ts'),
+      'export function reconcileLedger() { return "ledger"; }\n'
+    );
+
+    const config = {
+      repo_root: repoRoot,
+      bundler: { type: 'none', bundles: [] },
+      context: { mode: 'none', stale_threshold_days: 1 },
+      paths: {
+        source_roots: ['src'],
+        docs_dir: 'docs',
+      },
+      settings: {
+        gap_scan_ignore_dirs: [],
+      },
+    };
+
+    const result = detectGaps('Improve usability', config, { record: false });
+    assert.equal(result.evidence.feature_file_count, 0);
+    assert.equal(result.evidence.raw_feature_file_count, 0);
+    assert.deepEqual(result.evidence.matched_feature_files, []);
+    assert.deepEqual(result.evidence.code_index.indexed_feature_files, []);
+  } finally {
+    fs.rmSync(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('ignores retired inspiration folders during scan and indexing', () => {
+  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-retired-scan-'));
+
+  try {
+    writeText(
+      path.join(repoRoot, 'src', 'payments-engine.ts'),
+      'export function paymentsEngine() { return "active"; }\n'
+    );
+    writeText(
+      path.join(repoRoot, 'Inspiration Folder', 'payments-retired.ts'),
+      'export function retiredPaymentsConcept() { return "retired"; }\n'
+    );
+
+    const config = {
+      repo_root: repoRoot,
+      bundler: { type: 'none', bundles: [] },
+      context: { mode: 'none', stale_threshold_days: 1 },
+      paths: {
+        source_roots: ['.'],
+        docs_dir: 'docs',
+      },
+      settings: {
+        gap_scan_ignore_dirs: [],
+      },
+    };
+
+    const result = detectGaps('Payments engine', config, { record: false });
+    const matchedPaths = result.evidence.matched_feature_files.map(item => item.path);
+
+    assert.ok(matchedPaths.includes('src/payments-engine.ts'));
+    assert.ok(!matchedPaths.includes('Inspiration Folder/payments-retired.ts'));
+    assert.ok(!result.evidence.code_index.indexed_feature_files.includes('Inspiration Folder/payments-retired.ts'));
   } finally {
     fs.rmSync(repoRoot, { recursive: true, force: true });
   }

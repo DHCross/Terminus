@@ -129,16 +129,49 @@ function walk(root, visit, ignoreRules, repoRoot = root, limit = 120000) {
   }
 }
 
+function resolveScanRoots(repoRoot, config) {
+  const configured = Array.isArray(config?.paths?.source_roots)
+    ? config.paths.source_roots
+    : [];
+  const roots = [];
+  const seen = new Set();
+
+  for (const entry of configured) {
+    const raw = String(entry || '').trim();
+    if (!raw) continue;
+
+    const absolute = path.isAbsolute(raw) ? raw : path.join(repoRoot, raw);
+    let stat = null;
+    try {
+      stat = fs.statSync(absolute);
+    } catch {
+      continue;
+    }
+    if (!stat.isDirectory()) continue;
+
+    const resolved = path.resolve(absolute);
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
+    roots.push(resolved);
+  }
+
+  return roots.length > 0 ? roots : [repoRoot];
+}
+
 function isCodeFile(relPath) {
   return CODE_EXTENSIONS.has(path.extname(relPath).toLowerCase());
 }
 
-function listRepoCodeFiles(repoRoot, ignoreRules) {
+function listConfiguredCodeFiles(repoRoot, config, ignoreRules) {
   const files = [];
-  walk(repoRoot, (_fullPath, relPath) => {
-    if (!isCodeFile(relPath)) return;
-    files.push(normalizePath(relPath));
-  }, ignoreRules, repoRoot);
+  const scanRoots = resolveScanRoots(repoRoot, config);
+
+  scanRoots.forEach(scanRoot => {
+    walk(scanRoot, (_fullPath, relPath) => {
+      if (!isCodeFile(relPath)) return;
+      files.push(normalizePath(relPath));
+    }, ignoreRules, repoRoot);
+  });
 
   return Array.from(new Set(files)).sort((a, b) => a.localeCompare(b));
 }
@@ -294,7 +327,7 @@ function buildConsumerGraph(configInput) {
   const config = resolveRuntimeConfig(configInput && typeof configInput === 'object' ? configInput : {});
   const repoRoot = config?.repo_root || process.cwd();
   const ignoreRules = ignoredDirsForConfig(config, repoRoot);
-  const files = listRepoCodeFiles(repoRoot, ignoreRules);
+  const files = listConfiguredCodeFiles(repoRoot, config, ignoreRules);
   const fileSet = new Set(files);
   const modulesByFile = new Map();
   const outgoingBySource = new Map();

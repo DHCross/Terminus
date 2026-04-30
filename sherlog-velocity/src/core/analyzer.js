@@ -2,13 +2,11 @@
 /* eslint-disable no-console */
 
 const fs = require('fs');
-const path = require('path');
 const {
   detectBranchHead,
   ensureFile,
   getGitWindowMetrics,
-  readJson,
-  resolveRuntimeConfig,
+  loadRuntimeConfig,
 } = require('./shared');
 
 function parseArgs(argv, defaultDays) {
@@ -22,13 +20,12 @@ function parseArgs(argv, defaultDays) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) {
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) {
     console.error('Config not found. Run `node sherlog-velocity/install.js` first.');
     process.exit(1);
   }
-  return resolveRuntimeConfig(config);
+  return runtime.config;
 }
 
 function main() {

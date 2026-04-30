@@ -65,20 +65,21 @@ When your repo has a `sherlog.context.json` with named zones, you can scope anal
 - Flags can be repeated: `--vector api --vector ui`
 - If the name doesn't match any zone in `sherlog.context.json`, you'll see a `zone_filter_matched_nothing` note in the output
 - You can force a feature profile match with `--profile "profile-name"`
-- Probe hints can be supplied when feature naming is noisy: `--alias`, `--token`, `--implementation-token`, `--test-token`, `--doc-token`, `--repomix-token`
+- Probe hints can be supplied when feature naming is noisy: `--alias`, `--token`, `--implementation-token`, `--test-token`, `--doc-token`
 
 | Task | NPM Script | Description |
 | :--- | :--- | :--- |
 | `task run` | `npm run velocity:run` | Take a snapshot of git history and momentum. |
 | `task report` | `npm run velocity:report` | Generate `velocity-forecast.md` and artifacts. Supports `--vector`. |
 | `task estimate -- ...` | `npm run velocity:estimate` | Estimate time by velocity and gaps. Supports `--vector`. |
-| `task verify` | `npm run sherlog:verify` | Verify install wiring, repomix freshness, and fail hard when bundle XML is stale or drifted. |
+| `task verify` | `npm run sherlog:verify` | Verify install wiring, source roots, and active context-map health. |
+| `task preflight -- ...` | `npm run sherlog:preflight` | **Preferred AI-agent entry point.** Composes blast-radius, lint-plan, and bounds into a unified telemetry packet. |
 | `task doctor -- ...` | `npm run sherlog:doctor` | Run preflight health check. Supports `--vector`. |
 | `task gaps -- ...` | `npm run sherlog:gaps` | Return raw gap detector output. Supports `--vector`. |
 | `task prompt -- ...` | `npm run sherlog:prompt` | Generate AI prompt with context. Supports `--vector`. |
 | `task sonar -- ...` | `npm run sherlog:sonar` | Fetch SonarCloud analysis, write `velocity-artifacts/sonar-report.json`, and register open quality gaps. |
 | `task init-context` | `npm run sherlog:init-context` | Rebuild `sherlog.context.json`. |
-| `task repomix-sync -- ...` | `npm run sherlog:repomix-sync` | Inspect or refresh `repomix-manifest.json` from XML mtimes and stop on stale bundle XML. |
+| `task setup -- ...` | `npm run sherlog:setup` | Guided setup wizard (plan by default, `--apply` to execute). |
 | `task bridge -- ...` | `npm run sherlog:bridge` | Upgrade/repair Sherlog in repos already using it (`--dry-run` supported). |
 | `task session:start` | `npm run sherlog:session:start` | Start tracking a working session. |
 | `task session:end` | `npm run sherlog:session:end` | End the current session. |
@@ -86,6 +87,64 @@ When your repo has a `sherlog.context.json` with named zones, you can scope anal
 | `task session:status` | `npm run sherlog:session:status` | Check activie session. |
 | `task session:note` | `npm run sherlog:session:note` | Add a note to the active session. |
 | `task session:prompt` | `npm run sherlog:session:prompt` | Show multiplier, wasted-time ledger, and boss-ready session summary. |
+
+## Preflight: AI-Agent Entry Point
+
+**`npm run sherlog:preflight`** (or `task preflight`) is the preferred entry point for AI agents before making code mutations. It composes existing Sherlog telemetry instruments into a single, unified JSON packet designed for agent consumption.
+
+### Usage
+
+```bash
+# Analyze a file's blast radius
+npm run sherlog:preflight -- --file src/app/api/raven-chat/protocolRules.ts --json
+
+# Validate a plan file
+npm run sherlog:preflight -- --plan-file plan.json --json
+
+# Get bounds for a feature
+npm run sherlog:preflight -- --feature "Add user authentication" --json
+```
+
+### Output Schema
+
+Preflight returns a stable JSON packet with telemetry framing (not approval authority):
+
+```json
+{
+  "schema_version": "sherlog.preflight.v1",
+  "mode": "telemetry",
+  "inputs": {
+    "file": null,
+    "plan_file": null,
+    "feature": null
+  },
+  "status": "clear | caution | blocked_by_policy | unknown",
+  "blast_radius": null,
+  "plan_lint": null,
+  "bounds": null,
+  "recommended_checks": [],
+  "warnings": [],
+  "unknowns": [],
+  "operator_note": "Sherlog is an instrument panel, not an approval authority. Use this packet to adjust the edit vector before mutation."
+}
+```
+
+### Status Values
+
+- **`clear`**: No blocking issues detected. Proceed with mutation.
+- **`caution`**: Elevated blast radius or risky zones detected. Review recommended checks before proceeding.
+- **`blocked_by_policy`**: Do-not-touch zones or explicit policy violations detected. Do not proceed without explicit override.
+- **`unknown`**: Analysis failed or insufficient data. Requires manual review.
+
+### Composed Instruments
+
+Preflight orchestrates the following existing tools:
+
+- **`--file`**: Runs blast-radius analysis via `analyzeBlastRadius()`
+- **`--plan-file`**: Runs lint-plan validation via `lintPlan()`
+- **`--feature`**: Runs bounds generation via `generateStaticBounds()`
+
+The command does not duplicate core analysis logic—it imports and composes the existing exported functions from each instrument.
 
 ## Bridge Upgrade Runbook (for existing installs)
 
@@ -117,15 +176,13 @@ npm run sherlog:bridge -- --strict --json
 1. Runs a pre-upgrade verify snapshot.
 2. Creates backups under `.logs/sherlog-bridge/<timestamp>/`.
 3. Re-runs install wiring (unless `--no-install`).
-4. Runs repomix sync when configured (unless `--skip-repomix-sync`).
-5. Runs post-upgrade verify and reports pass/warn/fail delta.
+4. Runs post-upgrade verify and reports pass/warn/fail delta.
 
 ### Key flags
 
 - `--dry-run`: assess only, no writes.
 - `--strict`: non-zero exit if post-bridge verify contains failures.
 - `--force-context`: forces context regeneration through installer.
-- `--skip-repomix-sync`: skip repomix reconciliation.
 - `--no-install`: skip install.js rerun (diagnostic mode).
 - `--repo-root <path>`: target another repo root explicitly.
 
@@ -142,7 +199,6 @@ task verify
 Ask them to share the JSON output from dry-run/apply so you can review:
 
 - pre/post verify counts,
-- repomix sync decision/result,
 - backup location,
 - any reported errors.
 
@@ -197,7 +253,6 @@ npm run sherlog:prompt -- "Feature Name"
 - `gaps` provides raw evidence and salience ranking.
 - `prompt` translates repository state into execution-ready AI instructions.
 - `verify` catches broken install wiring and false-positive risk before planning.
-- In `repomix-compat` mode, run `repomix-sync` before strict `verify`: Sherlog now enforces that each bundle XML is at least as new as the latest source commit in that bundle. Date-only bundle timestamps use day-level comparison; datetime timestamps use full timestamp comparison.
 
 On install, Sherlog also generates:
 
@@ -218,11 +273,10 @@ On install, Sherlog also generates:
 - Use `sherlog:prompt` before every major feature.
 - This feeds your velocity back into AI planning instead of generic timelines.
 
-### Phase 3: Context Intelligence (Repomix)
+### Phase 3: Context Intelligence
 
 - Preferred: `install.js` auto-creates `sherlog.context.json` in repo root (tool-agnostic context map).
 - Rebuild map after major structural changes with `npm run sherlog:init-context -- --force`.
-- Compatibility: `repomix-manifest.json` is still supported.
 - Detector checks implementation/tests/docs plus context-map coverage, staleness, and drift.
 - Phase 4 active: map staleness and drift checks are included in `velocity:estimate`, `sherlog:gaps`, and `sherlog:prompt`.
 - RC2 active: unresolved contradictions accumulate salience via blast radius, temporal pressure, and persistence deltas.
@@ -271,7 +325,7 @@ Full runbook: `docs/integrations/sonarcloud.md`
 
 - Main config: `config/sherlog.config.json` (paths, settings)
 - Gap weights: `config/gap-weights.json` (cost model per missing gap type)
-- Context mode: `context.mode` (`sherlog-map`, `repomix-compat`, `none`)
+- Context mode: `context.mode` (`sherlog-map`, `none`)
 - Context map path: `context.map_file` / `paths.context_map`
 - Gap history log: `paths.gap_history_log` (comparative salience baseline)
 - Optional acknowledgements: `paths.gap_acknowledgements` (`deferred`/`exempt` with expiry or review cadence)
@@ -283,13 +337,13 @@ Full runbook: `docs/integrations/sonarcloud.md`
 - Gap scan archive filter: `settings.gap_scan_ignore_dirs` (exclude legacy/archive paths from drift matching)
 - Core suite defaults: `settings.core_suite_features` (default feature list for one-click suite runs)
 - Feature aliases: `settings.feature_aliases` (map feature name -> alias list for token probes)
-- Feature probe metadata: `settings.feature_metadata` (`test_tokens`, `doc_tokens`, `implementation_tokens`, `repomix_tokens`)
+- Feature probe metadata: `settings.feature_metadata` (`test_tokens`, `doc_tokens`, `implementation_tokens`)
 - Feature profile registry: `settings.feature_profiles` (intent-first profile keys with aliases, path hints, signal hints, and optional `scope_mode: "bounded"` path enforcement)
 - Repo-local feature profile overrides: `sherlog.feature-profiles.json` (preferred for host-repo seam customization)
 - Path lanes: `settings.path_lanes` + `settings.path_lanes_default` (strict vs relaxed vs excluded quality surfaces)
 - Lane multipliers: `settings.lane_multipliers` (default convergence weighting for strict/relaxed/excluded lanes)
-- Convergence thresholds: `settings.convergence_thresholds` (`implementation`, `tests`, `docs`, `repomix`, `overall`)
-- Convergence weights: `settings.convergence_weights` (weighted scoring for path/export/callsite/content/bundle signals)
+- Convergence thresholds: `settings.convergence_thresholds` (`implementation`, `tests`, `docs`, `overall`)
+- Convergence weights: `settings.convergence_weights` (weighted scoring for path/export/callsite/content signals)
 - Outside-context warning threshold: `settings.feature_files_outside_context_map_warning_threshold` (default `1`)
 
 Host-repo customization guide: `docs/sherlog-customization-guide.md`

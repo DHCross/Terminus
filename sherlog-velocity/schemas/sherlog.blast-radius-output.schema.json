@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.blast-radius-output.schema.json",
+  "title": "Sherlog Blast-Radius Output",
+  "description": "Result of a targeted blast-radius query for a single file.",
+  "type": "object",
+  "required": [
+    "target_file",
+    "found",
+    "direct_consumers",
+    "transitive_consumers",
+    "test_files",
+    "do_not_touch",
+    "obligations",
+    "downstream_count",
+    "blast_level"
+  ],
+  "properties": {
+    "target_file": {
+      "type": "string",
+      "description": "Repo-relative path of the queried file."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "Whether the file was found in the consumer graph scan."
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message when found is false."
+    },
+    "exports": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Named exports detected in the target file."
+    },
+    "direct_consumers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files that directly import the target file (one hop)."
+    },
+    "transitive_consumers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files that import the target file transitively (two or more hops)."
+    },
+    "test_files": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Consumer files classified as test files — these must be updated when the target changes."
+    },
+    "do_not_touch": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Consumer files in do-not-touch context zones — touching target may force an exception review."
+    },
+    "obligations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Human-readable obligation statements derived from the context zones of the target and its consumers."
+    },
+    "downstream_count": {
+      "type": "number",
+      "description": "Total number of unique downstream consumers (direct + transitive)."
+    },
+    "blast_level": {
+      "type": "string",
+      "enum": ["none", "low", "medium", "high"],
+      "description": "Risk tier: none (0 consumers), low, medium, or high (>= threshold)."
+    }
+  },
+  "additionalProperties": false
+}

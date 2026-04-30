@@ -14,6 +14,15 @@ const IGNORED_DIRS = new Set([
   'coverage',
   'out',
   '.astro',
+  'archive',
+  'archives',
+  'archived',
+  'attic',
+  'obsolete',
+  'retired',
+  'inspiration folder',
+  'inspiration-folder',
+  'inspiration_folder',
 ]);
 
 const CODE_EXTENSIONS = new Set([
@@ -22,6 +31,7 @@ const CODE_EXTENSIONS = new Set([
 
 const RESOLVABLE_CODE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs'];
 const DEFAULT_SELF_MODEL_PATH = path.join('sherlog-velocity', 'data', 'self-model.json');
+const DEFAULT_INACTIVITY_DAYS = 30;
 
 function normalizePath(value) {
   return String(value || '').replace(/\\/g, '/').replace(/^\.\/+/, '');
@@ -52,6 +62,15 @@ function loadSelfModel(filePath) {
   const parsed = readJson(filePath);
   if (!parsed || typeof parsed !== 'object') return null;
   if (!parsed.summary || !Array.isArray(parsed.modules)) return null;
+  const hasModernSummary = parsed.summary?.liveness_counts && typeof parsed.summary.liveness_counts === 'object';
+  const hasModernModules = parsed.modules.length === 0 || parsed.modules.every(mod => (
+    mod
+    && typeof mod === 'object'
+    && mod.fragility
+    && mod.coupling
+    && mod.liveness
+  ));
+  if (!hasModernSummary || !hasModernModules) return null;
   return parsed;
 }
 
@@ -96,8 +115,15 @@ function gitChurnTop(repoRoot, days, limit) {
     if (!raw) return [];
     const counts = new Map();
     for (const line of raw.split('\n')) {
-      const file = line.trim();
+      const file = normalizePath(line.trim());
       if (!file) continue;
+      const fullPath = path.join(repoRoot, file);
+      if (!fs.existsSync(fullPath)) continue;
+      try {
+        if (!fs.statSync(fullPath).isFile()) continue;
+      } catch {
+        continue;
+      }
       counts.set(file, (counts.get(file) || 0) + 1);
     }
     return Array.from(counts.entries())
@@ -106,6 +132,42 @@ function gitChurnTop(repoRoot, days, limit) {
       .map(([file, commits]) => ({ file, commits }));
   } catch {
     return [];
+  }
+}
+
+function gitFileActivity(repoRoot) {
+  try {
+    const raw = execSync(
+      `git log --diff-filter=AMR --pretty=format:%ct --name-only -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' '*.mts' '*.cts'`,
+      { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    ).trim();
+    if (!raw) return new Map();
+
+    const activity = new Map();
+    let currentEpoch = null;
+    for (const line of raw.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      if (/^\d{9,}$/.test(trimmed)) {
+        currentEpoch = Number(trimmed);
+        continue;
+      }
+
+      if (!Number.isFinite(currentEpoch)) continue;
+      const relPath = normalizePath(trimmed);
+      if (!relPath || activity.has(relPath)) continue;
+
+      const ageDays = (Date.now() - (currentEpoch * 1000)) / 86400000;
+      activity.set(relPath, {
+        last_commit_epoch: currentEpoch,
+        last_commit_at: new Date(currentEpoch * 1000).toISOString(),
+        days_since_last_commit: Math.max(0, Math.round((ageDays + Number.EPSILON) * 10) / 10),
+      });
+    }
+
+    return activity;
+  } catch {
+    return new Map();
   }
 }
 
@@ -147,7 +209,12 @@ function extractExports(content) {
   return Array.from(new Set(symbols));
 }
 
-const IMPORT_PATTERN = /(?:import|from)\s+['"]([^'"]+)['"]/g;
+const IMPORT_PATTERNS = [
+  /\bimport\s+(?:[^'"]+?\s+from\s+)?['"]([^'"]+)['"]/g,
+  /\bexport\s+[^'"]+?\s+from\s+['"]([^'"]+)['"]/g,
+  /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+  /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+];
 
 function tryResolveCandidate(repoRoot, candidatePath) {
   const normalizedCandidate = normalizePath(candidatePath);
@@ -200,22 +267,31 @@ function resolveImportTarget(specifier, relPath, options = {}) {
 
 function extractImportEdges(content, relPath, options = {}) {
   const edges = [];
-  IMPORT_PATTERN.lastIndex = 0;
-  let match;
-  while ((match = IMPORT_PATTERN.exec(content)) !== null) {
-    const specifier = match[1];
-    if (specifier.startsWith('.') || specifier.startsWith('@/') || specifier.startsWith('~/')) {
+  const seen = new Set();
+  for (const pattern of IMPORT_PATTERNS) {
+    pattern.lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      const specifier = match[1];
+      if (!specifier || (!specifier.startsWith('.') && !specifier.startsWith('@/') && !specifier.startsWith('~/'))) {
+        continue;
+      }
+
+      const resolved = resolveImportTarget(specifier, relPath, options);
+      const key = `${relPath}::${specifier}::${resolved || 'unresolved'}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       edges.push({
         from: relPath,
         to: specifier,
-        resolved_to: resolveImportTarget(specifier, relPath, options),
+        resolved_to: resolved,
       });
     }
   }
   return edges;
 }
 
-function computeFragility(lineCount, exportCount, importEdgeCount, churnCommits) {
+function computeFragility(lineCount, exportCount, importEdgeCount, churnCommits, inboundCount = 0) {
   let score = 0;
   if (lineCount > 800) score += 2;
   else if (lineCount > 400) score += 1;
@@ -224,10 +300,13 @@ function computeFragility(lineCount, exportCount, importEdgeCount, churnCommits)
   else if (exportCount > 10) score += 1;
 
   if (importEdgeCount > 15) score += 1;
+  const totalCoupling = Number(importEdgeCount || 0) + Number(inboundCount || 0);
+  if (totalCoupling > 24) score += 1;
+  else if (totalCoupling > 12) score += 0.5;
   if (churnCommits > 12) score += 2;
   else if (churnCommits > 6) score += 1;
 
-  return Math.min(score, 7);
+  return Math.min(Math.round(score), 7);
 }
 
 function fragilityLabel(score) {
@@ -254,6 +333,45 @@ function pathMatchesSimple(relPath, pattern) {
   return normalizedPath.startsWith(`${prefix}/`) || normalizedPath === prefix;
 }
 
+function detectPlaceholderSignals(content) {
+  const lowered = String(content || '').toLowerCase();
+  const signals = [];
+
+  if (/\b(todo|fixme|tbd|stub|placeholder)\b/.test(lowered)) signals.push('todo_marker');
+  if (/throw\s+new\s+error\s*\(\s*['"`](?:not implemented|todo|unimplemented|stub)/i.test(content)) {
+    signals.push('not_implemented_throw');
+  }
+  if (/return\s+null\s*;/.test(lowered)) signals.push('returns_null');
+  if (/return\s+undefined\s*;/.test(lowered)) signals.push('returns_undefined');
+
+  return Array.from(new Set(signals));
+}
+
+function isLikelyEntrypoint(relPath, role) {
+  const normalized = normalizePath(relPath).toLowerCase();
+  const base = path.basename(normalized);
+
+  if (role === 'route' || role === 'page') return true;
+  if (normalized.startsWith('scripts/')) return true;
+  if (normalized.includes('/cli/')) return true;
+  if (base === 'main.ts' || base === 'main.js' || base === 'index.ts' || base === 'index.js') return true;
+  return false;
+}
+
+function classifyLiveness({ placeholderSignals = [], inboundCount = 0, outboundCount = 0, churn = 0, daysSinceLastCommit = null, entrypoint = false }) {
+  const incomplete = Array.isArray(placeholderSignals) && placeholderSignals.length > 0;
+  const wired = entrypoint || inboundCount > 0;
+  const stale = Number.isFinite(daysSinceLastCommit) && daysSinceLastCommit >= DEFAULT_INACTIVITY_DAYS;
+
+  if (incomplete && wired) return 'Misleading';
+  if (incomplete) return 'Scaffold';
+  if (!entrypoint && inboundCount === 0 && outboundCount === 0 && churn === 0 && stale) return 'Dead';
+  if (!entrypoint && inboundCount === 0 && outboundCount === 0 && churn === 0 && stale && (!Number.isFinite(daysSinceLastCommit) || daysSinceLastCommit >= 45)) {
+    return 'Dead';
+  }
+  return 'Active';
+}
+
 const CONTRACT_SIGNALS = [
   { pattern: /SessionTracker|session tracker/i, role: 'session_contract' },
   { pattern: /detectGaps|gap detector/i, role: 'gap_contract' },
@@ -269,7 +387,7 @@ function detectContractAnchors(content) {
   return anchors;
 }
 
-function buildNarrative(modules, edges, fragileFiles, zoneStats, contractAnchors) {
+function buildNarrative(modules, edges, fragileFiles, zoneStats, contractAnchors, livenessCounts) {
   const roleGroups = {};
   for (const mod of modules) {
     roleGroups[mod.role] = (roleGroups[mod.role] || 0) + 1;
@@ -286,6 +404,14 @@ function buildNarrative(modules, edges, fragileFiles, zoneStats, contractAnchors
 
   if (fragileFiles.length > 0) {
     lines.push(`- ${fragileFiles.length} file${fragileFiles.length > 1 ? 's' : ''} with elevated fragility`);
+  }
+
+  if (livenessCounts) {
+    const livenessSummary = Object.entries(livenessCounts)
+      .filter(([, count]) => count > 0)
+      .map(([label, count]) => `${count} ${label.toLowerCase()}`)
+      .join(', ');
+    if (livenessSummary) lines.push(`- Liveness profile: ${livenessSummary}`);
   }
 
   if (zoneStats.covered > 0) {
@@ -313,6 +439,7 @@ function generateSelfModel(repoRoot, options = {}) {
   const zones = Array.isArray(contextMap?.zones) ? contextMap.zones : [];
   const churnData = gitChurnTop(repoRoot, churnDays, 200);
   const churnMap = new Map(churnData.map(item => [normalizePath(item.file), item.commits]));
+  const activityMap = gitFileActivity(repoRoot);
 
   const modules = [];
   const allEdges = [];
@@ -339,9 +466,10 @@ function generateSelfModel(repoRoot, options = {}) {
         sourceRoots: normalizedSourceRoots,
       });
       const churn = churnMap.get(relPath) || 0;
-      const fragility = computeFragility(lineCount, exports.length, importEdges.length, churn);
+      const activity = activityMap.get(relPath) || null;
       const zone = resolveZoneOwnership(relPath, zones);
       const anchors = detectContractAnchors(content);
+      const placeholderSignals = detectPlaceholderSignals(content);
 
       modules.push({
         path: relPath,
@@ -349,13 +477,12 @@ function generateSelfModel(repoRoot, options = {}) {
         lines: lineCount,
         exports: exports.length > 0 ? exports : undefined,
         export_count: exports.length,
-        import_count: importEdges.length,
         churn,
-        fragility: {
-          score: fragility,
-          label: fragilityLabel(fragility),
-        },
+        placeholder_signals: placeholderSignals.length > 0 ? placeholderSignals : undefined,
+        activity: activity || undefined,
         zone: zone || undefined,
+        _outbound_count: importEdges.length,
+        _entrypoint: isLikelyEntrypoint(relPath, role),
       });
 
       allEdges.push(...importEdges);
@@ -364,6 +491,69 @@ function generateSelfModel(repoRoot, options = {}) {
       }
     });
   }
+
+  const normalizedEdges = allEdges
+    .map(edge => ({
+      ...edge,
+      from: normalizePath(edge.from),
+      resolved_to: edge.resolved_to ? normalizePath(edge.resolved_to) : null,
+    }))
+    .filter(edge => edge.from && edge.resolved_to);
+
+  const inboundCounts = new Map();
+  const outboundCounts = new Map();
+  normalizedEdges.forEach(edge => {
+    inboundCounts.set(edge.resolved_to, (inboundCounts.get(edge.resolved_to) || 0) + 1);
+    outboundCounts.set(edge.from, (outboundCounts.get(edge.from) || 0) + 1);
+  });
+
+  const livenessCounts = {
+    Active: 0,
+    Scaffold: 0,
+    Dead: 0,
+    Misleading: 0,
+  };
+
+  modules.forEach(mod => {
+    const inboundCount = inboundCounts.get(mod.path) || 0;
+    const outboundCount = outboundCounts.get(mod.path) || 0;
+    const daysSinceLastCommit = Number.isFinite(mod.activity?.days_since_last_commit)
+      ? Number(mod.activity.days_since_last_commit)
+      : null;
+    const liveness = classifyLiveness({
+      placeholderSignals: mod.placeholder_signals || [],
+      inboundCount,
+      outboundCount,
+      churn: mod.churn,
+      daysSinceLastCommit,
+      entrypoint: mod._entrypoint === true,
+    });
+    const fragility = computeFragility(mod.lines, mod.export_count, outboundCount, mod.churn, inboundCount);
+
+    mod.import_count = outboundCount;
+    mod.inbound_count = inboundCount;
+    mod.outbound_count = outboundCount;
+    mod.coupling = {
+      inbound: inboundCount,
+      outbound: outboundCount,
+      total: inboundCount + outboundCount,
+    };
+    mod.fragility = {
+      score: fragility,
+      label: fragilityLabel(fragility),
+    };
+    mod.liveness = {
+      category: liveness,
+      entrypoint: mod._entrypoint === true,
+      inactivity_days_threshold: DEFAULT_INACTIVITY_DAYS,
+      placeholder_signals: mod.placeholder_signals || [],
+    };
+
+    delete mod._outbound_count;
+    delete mod._entrypoint;
+    if (!mod.placeholder_signals) delete mod.placeholder_signals;
+    livenessCounts[liveness] = (livenessCounts[liveness] || 0) + 1;
+  });
 
   modules.sort((left, right) => right.fragility.score - left.fragility.score);
 
@@ -375,6 +565,8 @@ function generateSelfModel(repoRoot, options = {}) {
       label: mod.fragility.label,
       lines: mod.lines,
       churn: mod.churn,
+      liveness: mod.liveness.category,
+      coupling: mod.coupling.total,
     }));
 
   const zoneStats = {
@@ -388,17 +580,17 @@ function generateSelfModel(repoRoot, options = {}) {
     })),
   };
 
-  const inboundCounts = new Map();
-  for (const edge of allEdges) {
-    const target = edge.resolved_to || edge.to;
-    inboundCounts.set(target, (inboundCounts.get(target) || 0) + 1);
-  }
   const dependencyHubs = Array.from(inboundCounts.entries())
     .sort((left, right) => right[1] - left[1])
     .slice(0, 10)
     .map(([target, count]) => ({ target, inbound_count: count }));
 
-  const narrative = buildNarrative(modules, allEdges, fragileFiles, zoneStats, contractAnchorFiles);
+  const narrative = buildNarrative(modules, normalizedEdges, fragileFiles, zoneStats, contractAnchorFiles, livenessCounts);
+  const liveStaleFiles = modules.filter(mod => {
+    const category = mod?.liveness?.category;
+    const days = Number(mod?.activity?.days_since_last_commit);
+    return (category === 'Active' || category === 'Misleading') && Number.isFinite(days) && days >= DEFAULT_INACTIVITY_DAYS;
+  });
 
   return {
     version: 1,
@@ -407,20 +599,28 @@ function generateSelfModel(repoRoot, options = {}) {
     source_roots: sourceRoots,
     summary: {
       total_modules: modules.length,
-      total_edges: allEdges.length,
+      total_edges: normalizedEdges.length,
       fragile_file_count: fragileFiles.length,
       contract_anchor_count: contractAnchorFiles.length,
       zone_coverage_pct: modules.length > 0 ? Math.round((zoneStats.covered / modules.length) * 100) : 0,
+      liveness_counts: livenessCounts,
+      dead_or_scaffold_files: (livenessCounts.Dead || 0) + (livenessCounts.Scaffold || 0),
+      stale_live_file_count: liveStaleFiles.length,
     },
     narrative,
     modules,
-    edges: allEdges,
+    edges: normalizedEdges,
     fragile_files: fragileFiles,
     dependency_hubs: dependencyHubs,
     contract_anchors: contractAnchorFiles,
     zone_ownership: zoneStats,
     churn_window_days: churnDays,
     churn_hotspots: churnData.slice(0, 15),
+    stale_live_files: liveStaleFiles.map(mod => ({
+      path: mod.path,
+      days_since_last_commit: mod.activity.days_since_last_commit,
+      liveness: mod.liveness.category,
+    })),
   };
 }
 
@@ -464,6 +664,9 @@ function renderSelfModel(model) {
   lines.push(`  Fragile files: ${model.summary.fragile_file_count}`);
   lines.push(`  Contract anchors: ${model.summary.contract_anchor_count}`);
   lines.push(`  Zone coverage: ${model.summary.zone_coverage_pct}%`);
+  if (model.summary.liveness_counts) {
+    lines.push(`  Liveness: active ${model.summary.liveness_counts.Active || 0}, misleading ${model.summary.liveness_counts.Misleading || 0}, scaffold ${model.summary.liveness_counts.Scaffold || 0}, dead ${model.summary.liveness_counts.Dead || 0}`);
+  }
   lines.push('');
 
   if (model.fragile_files.length > 0) {

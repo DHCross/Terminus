@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/mcp-tools.schema.json",
+  "title": "Sherlog MCP Tool Capability Manifest",
+  "description": "Describes the JSON-RPC tools exposed by the Sherlog MCP server. AI agents can load this file as a capability manifest.",
+  "type": "object",
+  "required": ["server", "tools"],
+  "properties": {
+    "server": {
+      "type": "object",
+      "description": "MCP server identity.",
+      "required": ["name", "version", "protocol_version", "transport"],
+      "properties": {
+        "name": { "type": "string", "const": "sherlog" },
+        "version": { "type": "string" },
+        "protocol_version": { "type": "string", "description": "MCP protocol version (e.g. 2024-11-05)" },
+        "transport": { "type": "string", "const": "stdio" }
+      },
+      "additionalProperties": false
+    },
+    "tools": {
+      "type": "array",
+      "description": "Available tool definitions.",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "inputSchema", "outputRef"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "inputSchema": { "type": "object" },
+          "outputRef": {
+            "type": "string",
+            "description": "Relative path to the JSON Schema describing the tool's output structure."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+
+  "examples": [
+    {
+      "server": {
+        "name": "sherlog",
+        "version": "0.1.0",
+        "protocol_version": "2024-11-05",
+        "transport": "stdio"
+      },
+      "tools": [
+        {
+          "name": "sherlog_get_gaps",
+          "description": "Detect implementation, test, and documentation gaps for a given feature.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["feature"],
+            "properties": {
+              "feature": { "type": "string" },
+              "zones": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "outputRef": "sherlog.gaps-output.schema.json"
+        },
+        {
+          "name": "sherlog_get_bounds",
+          "description": "Generate a static boundary model for a set of files.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["feature", "files"],
+            "properties": {
+              "feature": { "type": "string" },
+              "files": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "outputRef": "sherlog.bounds-output.schema.json"
+        },
+        {
+          "name": "sherlog_get_blast_radius",
+          "description": "Return the exact set of consumers and test files affected when a single file changes.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["file"],
+            "properties": {
+              "file": { "type": "string" },
+              "threshold": { "type": "number" }
+            }
+          },
+          "outputRef": "sherlog.blast-radius-output.schema.json"
+        },
+        {
+          "name": "sherlog_get_prompt",
+          "description": "Generate the full AI execution prompt for a feature, including verification commands.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["feature"],
+            "properties": {
+              "feature": { "type": "string" },
+              "zones": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "outputRef": null
+        },
+        {
+          "name": "sherlog_lint_plan",
+          "description": "Validate an agent plan against current architectural constraints before code changes begin.",
+          "inputSchema": {
+            "type": "object",
+            "required": ["plan"],
+            "properties": {
+              "plan": {
+                "type": "object",
+                "required": ["feature", "steps"],
+                "properties": {
+                  "feature": { "type": "string" },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["action", "files"],
+                      "properties": {
+                        "action": { "type": "string" },
+                        "files": { "type": "array", "items": { "type": "string" } },
+                        "rationale": { "type": "string" },
+                        "type": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              "threshold": { "type": "number" }
+            }
+          },
+          "outputRef": null
+        }
+      ]
+    }
+  ]
+}

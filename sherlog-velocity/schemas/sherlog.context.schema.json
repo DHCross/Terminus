@@ -22,6 +22,20 @@
             "type": "string",
             "description": "ISO date or date-time string (e.g. 2026-02-06)"
           },
+          "verify_commands": {
+            "type": "array",
+            "description": "Copy-pasteable commands an agent can run to verify changes in this zone (e.g. test execution strings). Included verbatim in sherlog:prompt output.",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "test_root": {
+            "type": "string",
+            "description": "Root directory for tests in this zone. Used as a fallback to derive a verify command when verify_commands is not set."
+          },
+          "test_globs": {
+            "type": "array",
+            "description": "Glob patterns for test files in this zone. Used as a fallback to derive a verify command when verify_commands is not set.",
+            "items": { "type": "string", "minLength": 1 }
+          },
           "ship_ready": {
             "type": "boolean",
             "default": false,

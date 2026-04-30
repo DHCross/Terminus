@@ -3,6 +3,7 @@ const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const test = require('node:test');
+const { execSync } = require('node:child_process');
 
 const {
   classifyRole,
@@ -161,6 +162,70 @@ test('getSelfModel persists and reloads the cached index artifact', () => {
 
     assert.equal(second.source, 'cache');
     assert.equal(second.model.summary.total_modules, first.model.summary.total_modules);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('generateSelfModel captures CommonJS edges and liveness buckets', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-self-model-liveness-'));
+  try {
+    fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'src', 'consumer.js'),
+      [
+        'const runScaffold = require("./scaffold");',
+        'module.exports = function consumer() {',
+        '  return runScaffold();',
+        '};',
+      ].join('\n') + '\n',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(tmpDir, 'src', 'scaffold.js'),
+      [
+        '// TODO: replace scaffold',
+        'module.exports = function runScaffold() {',
+        '  return null;',
+        '};',
+      ].join('\n') + '\n',
+      'utf8'
+    );
+    fs.writeFileSync(path.join(tmpDir, 'src', 'dead.js'), 'module.exports = {};\n', 'utf8');
+    fs.writeFileSync(path.join(tmpDir, 'sherlog.context.json'), JSON.stringify({ zones: [] }), 'utf8');
+
+    execSync('git init', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git config user.email "sherlog@test.local"', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git config user.name "Sherlog Test"', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git add .', { cwd: tmpDir, stdio: 'ignore' });
+    execSync('git commit -m "seed"', {
+      cwd: tmpDir,
+      stdio: 'ignore',
+      env: {
+        ...process.env,
+        GIT_AUTHOR_DATE: '2026-01-01T10:00:00Z',
+        GIT_COMMITTER_DATE: '2026-01-01T10:00:00Z',
+      },
+    });
+
+    const model = generateSelfModel(tmpDir, {
+      sourceRoots: ['src'],
+      contextMapPath: path.join(tmpDir, 'sherlog.context.json'),
+    });
+
+    assert.ok(model.edges.some(edge => edge.resolved_to === 'src/scaffold.js'));
+    const consumer = model.modules.find(mod => mod.path === 'src/consumer.js');
+    const scaffold = model.modules.find(mod => mod.path === 'src/scaffold.js');
+    const dead = model.modules.find(mod => mod.path === 'src/dead.js');
+
+    assert.ok(consumer);
+    assert.ok(scaffold);
+    assert.ok(dead);
+    assert.equal(consumer.liveness.category, 'Active');
+    assert.equal(scaffold.liveness.category, 'Misleading');
+    assert.equal(dead.liveness.category, 'Dead');
+    assert.ok(Number(scaffold.coupling.total) >= 1);
+    assert.ok(Number(model.summary.liveness_counts.Dead || 0) >= 1);
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

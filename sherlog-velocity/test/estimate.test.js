@@ -217,4 +217,32 @@ describe('estimate payload fallback', () => {
     assert.ok(!prompt.includes('initial scan — no velocity baseline yet'));
     assert.ok(!prompt.includes('INITIAL SCAN SOURCES:'));
   });
+
+  test('does not persist the self-model unless explicitly requested', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-estimate-self-model-'));
+    seedRepo(repoRoot);
+    initGitRepo(repoRoot);
+    commitAll(repoRoot, 'seed repo', '2026-02-24T10:00:00Z');
+
+    const config = makeConfig(repoRoot);
+    const defaultModelPath = path.join(repoRoot, 'sherlog-velocity', 'data', 'self-model.json');
+
+    const payload = createEstimatePayload({
+      feature: 'Prompt Safety',
+      config,
+      autoGaps: true,
+    });
+
+    assert.ok(payload.self_model, 'self-model should still be available in-memory');
+    assert.equal(fs.existsSync(defaultModelPath), false);
+
+    createEstimatePayload({
+      feature: 'Prompt Safety',
+      config,
+      autoGaps: true,
+      persistSelfModel: true,
+    });
+
+    assert.equal(fs.existsSync(defaultModelPath), true);
+  });
 });

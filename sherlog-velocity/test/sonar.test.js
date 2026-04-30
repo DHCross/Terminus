@@ -138,6 +138,8 @@ describe('sherlog:sonar registration', () => {
 
   test('detectGaps surfaces active open sonar acknowledgements as first-class gaps', () => {
     const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-sonar-gap-'));
+    const recordedAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
     fs.writeFileSync(path.join(repoRoot, 'src', 'feature.js'), 'module.exports = true;\n', 'utf8');
     fs.writeFileSync(path.join(repoRoot, 'sherlog.acknowledgements.json'), JSON.stringify({
@@ -148,8 +150,8 @@ describe('sherlog:sonar registration', () => {
           gap: 'security_exposure',
           status: 'open',
           reason: 'SonarCloud gate failed',
-          recorded_at: '2026-03-07T00:00:00.000Z',
-          expires_at: '2026-03-21T00:00:00.000Z',
+          recorded_at: recordedAt,
+          expires_at: expiresAt,
           source: 'sonarcloud',
           source_ref: {
             scope_type: 'branch',

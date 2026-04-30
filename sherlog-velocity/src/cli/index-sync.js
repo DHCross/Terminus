@@ -11,7 +11,7 @@ const {
   ensureContextMap,
   normalizePath,
 } = require('../../install');
-const { readJson, toPortableConfig } = require('../core/shared');
+const { loadRuntimeConfig, toPortableConfig } = require('../core/shared');
 const { getSelfModel, resolveSelfModelPath } = require('../core/self-model');
 
 function parseArgs(argv) {
@@ -56,10 +56,10 @@ function normalizeSourceRoot(repoRoot, value) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
   return {
-    configPath,
-    config: readJson(configPath, null),
+    configPath: runtime.configPath,
+    config: runtime.config,
   };
 }
 

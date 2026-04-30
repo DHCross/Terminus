@@ -16,11 +16,7 @@ This file captures failure patterns seen during real cross-repo installations.
 - Missing or overly broad roots (for example `"."`) cause false `missing_implementation` and noisy matches.
 - Result: low trust in gap output.
 
-4. Forced repomix mode without artifacts
-- `repomix-compat` mode without a valid manifest raises unnecessary `integration` / `missing_bundle`.
-- Result: context errors dominate real code signals.
-
-5. Archive folders pollute feature scanning
+4. Archive folders pollute feature scanning
 - Archived/legacy directories can contain feature-like tokens and inflate `context_drift`.
 - Result: contradictions appear where none exist in active code.
 

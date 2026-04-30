@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const {
+  loadRuntimeConfig,
   readJson,
   readJsonLines,
   repoRelativePathVariants,
@@ -27,6 +28,15 @@ const DEFAULT_IGNORED_DIRS = new Set([
   'build',
   'coverage',
   'out',
+  'archive',
+  'archives',
+  'archived',
+  'attic',
+  'obsolete',
+  'retired',
+  'inspiration folder',
+  'inspiration-folder',
+  'inspiration_folder',
 ]);
 
 const DEFAULT_IGNORED_PREFIXES = [
@@ -190,20 +200,47 @@ const GENERIC_SIGNAL_TOKENS = new Set([
   'precision',
 ]);
 
+const LOW_SIGNAL_REQUEST_TOKENS = new Set([
+  'better',
+  'cleanup',
+  'enhance',
+  'enhancement',
+  'enhancements',
+  'fix',
+  'fixes',
+  'improve',
+  'improved',
+  'improvement',
+  'improvements',
+  'polish',
+  'refine',
+  'refinement',
+  'streamline',
+  'tuning',
+  'upgrade',
+  'usability',
+]);
+
 function signalTokens(values = []) {
   const tokens = dedupeTokens(values);
   const strong = tokens.filter(token => {
     const compact = collapseAlphaNumeric(token);
     if (!compact) return false;
     if (GENERIC_SIGNAL_TOKENS.has(compact)) return false;
+    if (LOW_SIGNAL_REQUEST_TOKENS.has(compact) && !token.includes('-') && !token.includes('_')) return false;
     if (token.includes('-') || token.includes('_')) return true;
     if (compact.length >= 4) return !WEAK_SIGNAL_TOKENS.has(compact);
     return !WEAK_SIGNAL_TOKENS.has(compact) && compact.length >= 3;
   });
-  const nonGeneric = tokens.filter(token => !GENERIC_SIGNAL_TOKENS.has(collapseAlphaNumeric(token)));
+  const nonGeneric = tokens.filter(token => {
+    const compact = collapseAlphaNumeric(token);
+    if (GENERIC_SIGNAL_TOKENS.has(compact)) return false;
+    if (LOW_SIGNAL_REQUEST_TOKENS.has(compact) && !token.includes('-') && !token.includes('_')) return false;
+    return true;
+  });
   if (strong.length > 0) return strong;
   if (nonGeneric.length > 0) return nonGeneric;
-  return tokens;
+  return tokens.filter(token => token.includes('-') || token.includes('_'));
 }
 
 function featureScopedEntries(table, featureName) {
@@ -230,12 +267,10 @@ function normalizeProbeMetadataEntry(entry) {
       implementation: [],
       tests: [],
       docs: [],
-      repomix: [],
       shared_paths: [],
       implementation_paths: [],
       test_paths: [],
       doc_paths: [],
-      repomix_paths: [],
       export_hints: [],
       callsite_hints: [],
       scope_mode: null,
@@ -327,10 +362,6 @@ function normalizeProbeMetadataEntry(entry) {
       ...toStringArray(entry.documentation_tokens),
       ...toStringArray(entry.documentation),
     ],
-    repomix: [
-      ...toStringArray(entry.repomix_tokens),
-      ...toStringArray(entry.repomix),
-    ],
     shared_paths: [
       ...toStringArray(entry.path_hints),
       ...toStringArray(entry.paths),
@@ -351,10 +382,6 @@ function normalizeProbeMetadataEntry(entry) {
       ...toStringArray(entry.doc_paths),
       ...toStringArray(entry.docs_paths),
       ...toStringArray(entry.documentation_paths),
-    ],
-    repomix_paths: [
-      ...toStringArray(entry.repomix_path_hints),
-      ...toStringArray(entry.repomix_paths),
     ],
     export_hints: [
       ...toStringArray(entry.export_hints),
@@ -386,12 +413,10 @@ function mergeProbeMetadata(entries = []) {
     implementation: [],
     tests: [],
     docs: [],
-    repomix: [],
     shared_paths: [],
     implementation_paths: [],
     test_paths: [],
     doc_paths: [],
-    repomix_paths: [],
     export_hints: [],
     callsite_hints: [],
     scope_mode: null,
@@ -409,12 +434,10 @@ function mergeProbeMetadata(entries = []) {
       merged.implementation.push(...entry.implementation);
       merged.tests.push(...entry.tests);
       merged.docs.push(...entry.docs);
-      merged.repomix.push(...entry.repomix);
       merged.shared_paths.push(...entry.shared_paths);
       merged.implementation_paths.push(...entry.implementation_paths);
       merged.test_paths.push(...entry.test_paths);
       merged.doc_paths.push(...entry.doc_paths);
-      merged.repomix_paths.push(...entry.repomix_paths);
       merged.export_hints.push(...entry.export_hints);
       merged.callsite_hints.push(...entry.callsite_hints);
       merged.lanes.push(...entry.lanes);
@@ -430,12 +453,10 @@ function mergeProbeMetadata(entries = []) {
     implementation: dedupeCaseInsensitive(merged.implementation),
     tests: dedupeCaseInsensitive(merged.tests),
     docs: dedupeCaseInsensitive(merged.docs),
-    repomix: dedupeCaseInsensitive(merged.repomix),
     shared_paths: dedupeCaseInsensitive(merged.shared_paths),
     implementation_paths: dedupeCaseInsensitive(merged.implementation_paths),
     test_paths: dedupeCaseInsensitive(merged.test_paths),
     doc_paths: dedupeCaseInsensitive(merged.doc_paths),
-    repomix_paths: dedupeCaseInsensitive(merged.repomix_paths),
     export_hints: dedupeCaseInsensitive(merged.export_hints),
     callsite_hints: dedupeCaseInsensitive(merged.callsite_hints),
     scope_mode: merged.scope_mode,
@@ -535,7 +556,6 @@ function resolveFeatureProbes(featureName, config, options = {}) {
   const implementationTokens = collectTokenVariants(metadata.implementation);
   const testTokens = collectTokenVariants(metadata.tests);
   const docTokens = collectTokenVariants(metadata.docs);
-  const repomixTokens = collectTokenVariants(metadata.repomix);
 
   const featureProbeTokens = dedupeTokens([
     ...baseTokens,
@@ -556,13 +576,11 @@ function resolveFeatureProbes(featureName, config, options = {}) {
     implementation_tokens: dedupeTokens([...featureProbeTokens, ...implementationTokens]),
     test_tokens: dedupeTokens([...featureProbeTokens, ...testTokens]),
     doc_tokens: dedupeTokens([...featureProbeTokens, ...docTokens]),
-    repomix_tokens: dedupeTokens([...featureProbeTokens, ...repomixTokens]),
     path_hints: {
       shared: dedupeCaseInsensitive(metadata.shared_paths),
       implementation: dedupeCaseInsensitive([...metadata.shared_paths, ...metadata.implementation_paths]),
       tests: dedupeCaseInsensitive([...metadata.shared_paths, ...metadata.test_paths]),
       docs: dedupeCaseInsensitive([...metadata.shared_paths, ...metadata.doc_paths]),
-      repomix: dedupeCaseInsensitive([...metadata.shared_paths, ...metadata.repomix_paths]),
     },
     export_hints: collectTokenVariants(metadata.export_hints),
     callsite_hints: collectTokenVariants(metadata.callsite_hints),
@@ -758,7 +776,7 @@ function buildIndexMatcher(featureName, aliases = []) {
     strictTokenSet.add(words.join('-'));
     strictTokenSet.add(words.join(''));
     words
-      .filter(word => word.length >= 3 && !GENERIC_SIGNAL_TOKENS.has(word))
+      .filter(word => word.length >= 3 && !GENERIC_SIGNAL_TOKENS.has(word) && !LOW_SIGNAL_REQUEST_TOKENS.has(word))
       .forEach(word => wordTokenSet.add(word));
   });
 
@@ -913,11 +931,141 @@ function analyzeFeatureIndex(selfModel, matcher, pathHints, directMatches) {
   };
 }
 
+function summarizeFeatureRisk(selfModel, candidateFiles = []) {
+  if (!selfModel || !Array.isArray(selfModel.modules)) {
+    return {
+      available: false,
+      matched_files: [],
+      matched_modules: [],
+      summary: null,
+    };
+  }
+
+  const moduleByPath = new Map(
+    selfModel.modules
+      .filter(mod => mod && typeof mod === 'object')
+      .map(mod => [normalizePath(mod.path), mod])
+      .filter(([file]) => Boolean(file))
+  );
+
+  const matchedFiles = Array.from(new Set((candidateFiles || []).map(normalizePath).filter(file => moduleByPath.has(file))))
+    .sort((left, right) => left.localeCompare(right));
+  const matchedModules = matchedFiles.map(file => moduleByPath.get(file)).filter(Boolean);
+  const livenessCounts = {
+    Active: 0,
+    Scaffold: 0,
+    Dead: 0,
+    Misleading: 0,
+  };
+
+  if (matchedModules.length === 0) {
+    return {
+      available: true,
+      matched_files: [],
+      matched_modules: [],
+      summary: {
+        matched_modules: 0,
+        liveness_counts: livenessCounts,
+        dead_or_scaffold_files: 0,
+        misleading_files: 0,
+        average_fragility: 0,
+        peak_fragility: 0,
+        peak_fragility_files: [],
+        average_coupling: 0,
+        peak_coupling: 0,
+        peak_coupling_files: [],
+        max_live_days_since_touch: 0,
+        stale_live_files: [],
+      },
+    };
+  }
+
+  let fragilityTotal = 0;
+  let couplingTotal = 0;
+  let peakFragility = 0;
+  let peakCoupling = 0;
+
+  matchedModules.forEach(mod => {
+    const category = String(mod?.liveness?.category || 'Active');
+    if (!Object.prototype.hasOwnProperty.call(livenessCounts, category)) {
+      livenessCounts[category] = 0;
+    }
+    livenessCounts[category] += 1;
+
+    const fragility = Number(mod?.fragility?.score || 0);
+    const coupling = Number(mod?.coupling?.total || 0);
+    fragilityTotal += fragility;
+    couplingTotal += coupling;
+    peakFragility = Math.max(peakFragility, fragility);
+    peakCoupling = Math.max(peakCoupling, coupling);
+  });
+
+  const peakFragilityFiles = matchedModules
+    .filter(mod => Number(mod?.fragility?.score || 0) === peakFragility)
+    .map(mod => mod.path)
+    .slice(0, 5);
+  const peakCouplingFiles = matchedModules
+    .filter(mod => Number(mod?.coupling?.total || 0) === peakCoupling)
+    .map(mod => mod.path)
+    .slice(0, 5);
+  const staleLiveFiles = matchedModules
+    .filter(mod => {
+      const category = String(mod?.liveness?.category || 'Active');
+      const days = Number(mod?.activity?.days_since_last_commit);
+      return (category === 'Active' || category === 'Misleading') && Number.isFinite(days) && days >= 30;
+    })
+    .map(mod => ({
+      path: mod.path,
+      days_since_last_commit: Number(mod.activity.days_since_last_commit),
+      liveness: mod.liveness.category,
+    }))
+    .sort((left, right) => right.days_since_last_commit - left.days_since_last_commit);
+  const maxLiveDaysSinceTouch = staleLiveFiles.length > 0
+    ? Number(staleLiveFiles[0].days_since_last_commit || 0)
+    : 0;
+
+  return {
+    available: true,
+    matched_files: matchedFiles,
+    matched_modules: matchedModules.map(mod => ({
+      path: mod.path,
+      lines: Number(mod?.lines || 0),
+      fragility: mod?.fragility || { score: 0, label: 'low' },
+      coupling: mod?.coupling || { inbound: 0, outbound: 0, total: 0 },
+      liveness: mod?.liveness || { category: 'Active' },
+      activity: mod?.activity || null,
+    })),
+    summary: {
+      matched_modules: matchedModules.length,
+      liveness_counts: livenessCounts,
+      dead_or_scaffold_files: Number(livenessCounts.Dead || 0) + Number(livenessCounts.Scaffold || 0),
+      misleading_files: Number(livenessCounts.Misleading || 0),
+      average_fragility: round(fragilityTotal / matchedModules.length, 2),
+      peak_fragility: peakFragility,
+      peak_fragility_files: peakFragilityFiles,
+      average_coupling: round(couplingTotal / matchedModules.length, 2),
+      peak_coupling: peakCoupling,
+      peak_coupling_files: peakCouplingFiles,
+      max_live_days_since_touch: maxLiveDaysSinceTouch,
+      stale_live_files: staleLiveFiles,
+    },
+  };
+}
+
 function pathIncludesToken(filePath, lowerName, tokens, extensions = null, pathHints = []) {
   if (extensions && !extensions.some(ext => lowerName.endsWith(ext))) return false;
   const lowerPath = filePath.toLowerCase();
   if (tokens.some(token => textMatchesToken(lowerName, token) || textMatchesToken(lowerPath, token))) return true;
   return pathHints.some(hint => pathMatchesHint(lowerPath, hint));
+}
+
+function matchingPathTriggers(relPath, tokens = [], pathHints = []) {
+  const lowerPath = normalizePath(relPath).toLowerCase();
+  const matchedTokens = dedupeTokens(tokens.filter(token => textMatchesToken(lowerPath, token))).slice(0, 6);
+  const matchedHints = dedupeCaseInsensitive((pathHints || []).filter(hint => pathMatchesHint(lowerPath, hint))).slice(0, 4);
+  const triggers = matchedTokens.map(token => `token:${token}`);
+  matchedHints.forEach(hint => triggers.push(`path_hint:${hint}`));
+  return triggers;
 }
 
 function normalizeLaneMode(value) {
@@ -1230,22 +1378,19 @@ function resolveConvergenceConfig(config, probes = {}) {
       implementation: 0.5,
       tests: 0.45,
       docs: 0.5,
-      repomix: 0.4,
       overall: 0.45,
     },
     weights: {
       implementation: { path: 0.45, export: 0.35, callsite: 0.2 },
       tests: { path: 0.65, content: 0.35 },
       docs: { path: 0.55, content: 0.45 },
-      repomix: { path: 0.35, content: 0.35, bundle: 0.3 },
-      overall: { implementation: 0.4, tests: 0.25, docs: 0.2, repomix: 0.15 },
+      overall: { implementation: 0.45, tests: 0.3, docs: 0.25 },
     },
     saturation: {
       path: 1,
       export: 1,
       callsite: 2,
       content: 1,
-      bundle: 1,
     },
   };
 
@@ -1378,10 +1523,6 @@ function resolveContextMapCandidates(repoRoot, config) {
 
   candidates.push(path.join(repoRoot, 'sherlog.context.json'));
 
-  const repomixManifest = resolvePath(repoRoot, config?.paths?.repomix_manifest);
-  if (repomixManifest) candidates.push(repomixManifest);
-  candidates.push(path.join(repoRoot, 'repomix-manifest.json'));
-
   const seen = new Set();
   return candidates.filter(candidate => {
     const key = normalizePath(candidate);
@@ -1417,18 +1558,7 @@ function loadContextMap(repoRoot, config) {
       };
     }
 
-    if (Array.isArray(parsed.bundles)) {
-      return {
-        map_path: candidate,
-        map_mode: 'repomix-compat',
-        map_exists: true,
-        map_valid: true,
-        areas: parsed.bundles.map(normalizeArea).filter(Boolean),
-        notes,
-      };
-    }
-
-    notes.push(`map_missing_zones_or_bundles:${path.basename(candidate)}`);
+    notes.push(`map_missing_zones:${path.basename(candidate)}`);
   }
 
   return {
@@ -1522,7 +1652,6 @@ function isGeneratedOrArtifactPath(relPath) {
     || normalized.startsWith('velocity-artifacts/')
     || normalized.startsWith('.logs/')
     || normalized.startsWith('coverage/')
-    || normalized === 'repomix-sherlog-starter.xml'
     || normalized.endsWith('.code-workspace')
   );
 }
@@ -1668,75 +1797,10 @@ function analyzeChangelogAudit(repoRoot, sourcePrefixes = [], scopedFeatureFiles
   };
 }
 
-function findRepomixEvidence(
-  repoRoot,
-  tokens,
-  pathHints,
-  config,
-  ignoreRules = { names: DEFAULT_IGNORED_DIRS, prefixes: [] },
-  laneByFile = new Map()
-) {
-  const contextMode = config?.context?.mode;
-  const enabled = contextMode === 'repomix-compat' || config?.bundler?.type === 'repomix';
-  const result = {
-    enabled,
-    path_hits: [],
-    content_hits: [],
-    bundle_hits: [],
-  };
-  if (!enabled) return result;
-
-  const repomixDirs = [path.join(repoRoot, '.repomix'), path.join(repoRoot, 'repomix')];
-  for (const dir of repomixDirs) {
-    if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) continue;
-    walk(dir, (fullPath, lowerName) => {
-      const rel = normalizePath(path.relative(repoRoot, fullPath));
-      if (!pathIncludesToken(rel, lowerName, tokens, null, pathHints)) return;
-      const lane = laneByFile.get(rel) || { name: 'core', mode: 'strict' };
-      result.path_hits.push({
-        file: rel,
-        lane: lane.name,
-        lane_mode: lane.mode,
-      });
-    }, 10000, ignoreRules, repoRoot);
-  }
-
-  const repomixConfigs = [
-    path.join(repoRoot, 'repomix.config.json'),
-    path.join(repoRoot, 'repomix.config.js'),
-    path.join(repoRoot, 'repomix.config.cjs'),
-    resolvePath(repoRoot, config?.paths?.repomix_manifest),
-  ].filter(Boolean);
-
-  for (const cfg of repomixConfigs) {
-    if (!fs.existsSync(cfg) || fs.statSync(cfg).isDirectory()) continue;
-    let content = '';
-    try {
-      content = fs.readFileSync(cfg, 'utf8').toLowerCase();
-    } catch {
-      content = '';
-    }
-    if (textIncludesAny(content, [...tokens, ...pathHints])) {
-      result.content_hits.push({
-        file: normalizePath(path.relative(repoRoot, cfg)),
-      });
-    }
-  }
-
-  const bundles = Array.isArray(config?.bundler?.bundles) ? config.bundler.bundles : [];
-  bundles.forEach(bundle => {
-    const text = String(bundle || '').toLowerCase();
-    if (!textIncludesAny(text, tokens)) return;
-    result.bundle_hits.push({ bundle: String(bundle) });
-  });
-
-  return result;
-}
-
 function analyzeContextMap(repoRoot, config, tokens, featureFiles, allFiles, filterZones = []) {
   const loaded = loadContextMap(repoRoot, config);
   const configuredMode = config?.context?.mode || 'none';
-  const enabled = configuredMode !== 'none' || loaded.map_mode !== 'none' || config?.bundler?.type === 'repomix';
+  const enabled = configuredMode !== 'none' || loaded.map_mode !== 'none';
 
   // If --zone filter(s) provided, restrict areas to only those named zones
   let areas = loaded.areas;
@@ -1893,32 +1957,6 @@ function analyzeContextMap(repoRoot, config, tokens, featureFiles, allFiles, fil
   return analysis;
 }
 
-function toLegacyRepomix(contextAnalysis) {
-  const isRepomix = contextAnalysis.map_mode === 'repomix-compat';
-  return {
-    enabled: contextAnalysis.enabled && isRepomix,
-    manifest_path: isRepomix ? contextAnalysis.map_path : null,
-    manifest_exists: isRepomix ? contextAnalysis.map_exists : false,
-    manifest_valid: isRepomix ? contextAnalysis.map_valid : false,
-    bundles_count: contextAnalysis.areas_count,
-    stale_bundles: contextAnalysis.stale_areas.map(item => ({
-      bundle: item.area,
-      last_updated: item.last_updated,
-      latest_commit_epoch: item.latest_commit_epoch,
-      lag_days: item.lag_days,
-    })),
-    drift_bundles: contextAnalysis.drift_areas.map(item => ({
-      bundle: item.area,
-      reason: item.reason,
-    })),
-    covered_feature_files: contextAnalysis.covered_feature_files,
-    uncovered_feature_files: contextAnalysis.uncovered_feature_files,
-    feature_file_count: contextAnalysis.feature_file_count,
-    notes: contextAnalysis.notes,
-    warnings: contextAnalysis.warnings,
-  };
-}
-
 function normalizeGapType(gap) {
   return String(gap || '')
     .trim()
@@ -1963,6 +2001,9 @@ function mapHygieneFindingsToGapKeys(hygieneSummary = {}) {
   if ((byType.monolith || 0) > 0 || (byType.monolith_size || 0) > 0) mapped.add('arch_monolith');
   if ((byType.nesting_depth || 0) > 0) mapped.add('arch_complexity_hotspot');
   if ((byType.missing_docs || 0) > 0) mapped.add('arch_missing_docs');
+  if ((byType.unreachable_code || 0) > 0) mapped.add('dead_code_unreachable');
+  if ((byType.unused_variable || 0) > 0 || (byType.unused_function || 0) > 0) mapped.add('dead_code_unused_symbol');
+  if ((byType.dead_branch || 0) > 0) mapped.add('dead_code_dead_branch');
 
   return Array.from(mapped);
 }
@@ -2262,6 +2303,77 @@ function persistencePressure(consecutiveRuns) {
   return round(1 + Math.min(1.5, Math.max(0, consecutiveRuns - 1) * 0.18));
 }
 
+const STRUCTURAL_GAPS = new Set([
+  'missing_implementation',
+  'test_coverage',
+  'documentation',
+  'arch_monolith',
+  'arch_complexity_hotspot',
+  'arch_missing_docs',
+  'hygiene_todo_cluster',
+  'hygiene_console_log',
+  'hygiene_any_abuse',
+  'dead_code_unreachable',
+  'dead_code_unused_symbol',
+  'dead_code_dead_branch',
+  'dead_code_stale_module',
+  'dead_code_misleading_module',
+]);
+
+function structuralGapUsesCodeIndex(gap) {
+  return STRUCTURAL_GAPS.has(normalizeGapType(gap));
+}
+
+function featureRiskSummaryFromEvidence(evidence) {
+  return evidence?.code_index?.feature_risk?.summary || null;
+}
+
+function fragilityRiskMultiplier(gap, featureRiskSummary) {
+  if (!structuralGapUsesCodeIndex(gap) || !featureRiskSummary) return 1;
+  const matchedModules = Number(featureRiskSummary.matched_modules || 0);
+  if (matchedModules <= 0) return 1;
+
+  const averageFragility = Number(featureRiskSummary.average_fragility || 0);
+  const peakFragility = Number(featureRiskSummary.peak_fragility || 0);
+  const peakCoupling = Number(featureRiskSummary.peak_coupling || 0);
+  const misleadingFiles = Number(featureRiskSummary.misleading_files || 0);
+
+  let multiplier = 1;
+  multiplier += Math.min(0.6, (averageFragility / 7) * 0.45);
+  multiplier += Math.min(0.25, (peakFragility / 7) * 0.2);
+  multiplier += Math.min(0.3, peakCoupling / 24);
+  if (misleadingFiles > 0) {
+    multiplier += Math.min(0.35, (misleadingFiles / matchedModules) * 0.5);
+  }
+
+  return round(clamp(multiplier, 1, 2.25));
+}
+
+function noiseAdjustmentMultiplier(gap, featureRiskSummary) {
+  if (!structuralGapUsesCodeIndex(gap) || !featureRiskSummary) return 1;
+  const matchedModules = Number(featureRiskSummary.matched_modules || 0);
+  if (matchedModules <= 0) return 1;
+
+  const deadOrScaffold = Number(featureRiskSummary.dead_or_scaffold_files || 0);
+  const misleading = Number(featureRiskSummary.misleading_files || 0);
+  const activeLike = Math.max(0, matchedModules - deadOrScaffold);
+  if (deadOrScaffold <= 0) return 1;
+  if (activeLike <= 0 && misleading <= 0) return 0.4;
+
+  const ratio = deadOrScaffold / matchedModules;
+  return round(clamp(1 - (ratio * 0.45), 0.55, 1));
+}
+
+function codeRotMultiplier(gap, featureRiskSummary) {
+  if (!structuralGapUsesCodeIndex(gap) || !featureRiskSummary) return 1;
+  const maxDays = Number(featureRiskSummary.max_live_days_since_touch || 0);
+  if (!Number.isFinite(maxDays) || maxDays < 30) return 1;
+
+  const periods = Math.max(0, (maxDays - 30) / 15);
+  const multiplier = 1 + Math.min(2.5, Math.pow(1.35, periods + 1) - 1);
+  return round(clamp(multiplier, 1, 3.5));
+}
+
 function classifyTrend(delta) {
   if (!Number.isFinite(delta)) return 'new';
   if (delta > 0.5) return 'worsening';
@@ -2296,6 +2408,7 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
   const now = new Date();
   const nowEpoch = Math.floor(now.getTime() / 1000);
   const metrics = contextMetrics(evidence);
+  const featureRiskSummary = featureRiskSummaryFromEvidence(evidence);
 
   const weightsPath = resolvePath(repoRoot, config?.paths?.gap_weights) || path.resolve(__dirname, '../../config/gap-weights.json');
   const rawWeights = readJson(weightsPath, { unknown: 10 }) || { unknown: 10 };
@@ -2400,9 +2513,21 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
     const persistence = persistencePressure(consecutiveRuns);
     const ackEntry = selectAcknowledgement(acknowledgements.entries, featureKey, gap);
     const ackState = evaluateAcknowledgement(ackEntry, nowEpoch);
+    const riskMultiplier = fragilityRiskMultiplier(gap, featureRiskSummary);
+    const noiseMultiplier = noiseAdjustmentMultiplier(gap, featureRiskSummary);
+    const rotMultiplier = codeRotMultiplier(gap, featureRiskSummary);
 
     const blastMultiplier = round(1 + ((blast.level - 1) * 0.25));
-    const score = round(baseWeight * blastMultiplier * temporal * persistence * ackState.score_multiplier);
+    const score = round(
+      baseWeight
+      * blastMultiplier
+      * temporal
+      * persistence
+      * riskMultiplier
+      * noiseMultiplier
+      * rotMultiplier
+      * ackState.score_multiplier
+    );
     const previousScore = previousByGap.has(gap) ? previousByGap.get(gap) : null;
     const deltaScore = previousScore === null ? null : round(score - previousScore);
 
@@ -2417,6 +2542,9 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
       base_weight: baseWeight,
       blast_radius: blast,
       temporal_pressure: temporal,
+      risk_multiplier: riskMultiplier,
+      noise_multiplier: noiseMultiplier,
+      code_rot_multiplier: rotMultiplier,
       persistence: {
         consecutive_runs: consecutiveRuns,
         age_days: ageDays,
@@ -2457,6 +2585,8 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
   const maxAgeDays = ranked.reduce((max, item) => Math.max(max, Number(item?.persistence?.age_days || 0)), 0);
   const expiredAckCount = ranked.filter(item => item?.acknowledgement?.expired).length;
   const overdueAuditCount = ranked.filter(item => item?.acknowledgement?.audit_due).length;
+  const peakCodeRotMultiplier = ranked.reduce((max, item) => Math.max(max, Number(item?.code_rot_multiplier || 1)), 1);
+  const peakRiskMultiplier = ranked.reduce((max, item) => Math.max(max, Number(item?.risk_multiplier || 1)), 1);
 
   const salience = {
     feature: featureName,
@@ -2485,6 +2615,13 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
       previous_convergence_entropy: Number.isFinite(previousConvergenceEntropy) ? round(previousConvergenceEntropy, 3) : null,
       convergence_entropy_delta: entropyDelta,
       convergence_entropy_trend: entropyTrend(entropyDelta),
+      feature_fragility_avg: Number.isFinite(featureRiskSummary?.average_fragility) ? round(featureRiskSummary.average_fragility, 2) : null,
+      feature_peak_fragility: Number.isFinite(featureRiskSummary?.peak_fragility) ? Number(featureRiskSummary.peak_fragility) : null,
+      dead_scaffold_feature_files: Number(featureRiskSummary?.dead_or_scaffold_files || 0),
+      misleading_feature_files: Number(featureRiskSummary?.misleading_files || 0),
+      code_rot_max_days: Number(featureRiskSummary?.max_live_days_since_touch || 0),
+      code_rot_peak_multiplier: peakCodeRotMultiplier,
+      feature_risk_peak_multiplier: peakRiskMultiplier,
     },
     ranked,
     resolved,
@@ -2515,6 +2652,13 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
           delta_score: item.delta_score,
           trend: item.trend,
           blast_level: item.blast_radius.level,
+          tier: item.tier,
+          blocks_ship: item.blocks_ship,
+          temporal_pressure: item.temporal_pressure,
+          risk_multiplier: item.risk_multiplier,
+          noise_multiplier: item.noise_multiplier,
+          code_rot_multiplier: item.code_rot_multiplier,
+          persistence: item.persistence,
         })),
       },
       evidence: {
@@ -2525,6 +2669,7 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
         convergence_score: Number.isFinite(convergenceScore) ? round(convergenceScore, 3) : null,
         convergence_entropy: Number.isFinite(convergenceEntropy) ? round(convergenceEntropy, 3) : null,
         lane_summary: evidence?.convergence?.lane_summary || null,
+        code_index: evidence?.code_index?.feature_risk?.summary || null,
       },
     });
     salience.history.recorded = persisted;
@@ -2536,8 +2681,8 @@ function buildSalience(featureName, gaps, evidence, config, options = {}) {
 }
 
 function detectGaps(featureName, configInput = null, options = {}) {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = resolveRuntimeConfig(configInput || readJson(configPath, null));
+  const rawConfig = configInput || loadRuntimeConfig({ fromDir: __dirname }).config;
+  const config = resolveRuntimeConfig(rawConfig);
   if (!config) return { gaps: [], evidence: { reason: 'missing_config' }, salience: null };
 
   const repoRoot = resolveRepoRoot(config);
@@ -2548,12 +2693,10 @@ function detectGaps(featureName, configInput = null, options = {}) {
   const implementationTokens = probes.implementation_tokens;
   const testTokens = probes.test_tokens;
   const docTokens = probes.doc_tokens;
-  const repomixTokens = probes.repomix_tokens;
   const featureSignalTokens = signalTokens(tokens);
   const implementationSignalTokens = signalTokens(implementationTokens);
   const testSignalTokens = signalTokens(testTokens);
   const docSignalTokens = signalTokens(docTokens);
-  const repomixSignalTokens = signalTokens(repomixTokens);
 
   if (!tokens.length) {
     return {
@@ -2633,7 +2776,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
     ...(probes.path_hints?.implementation || []),
     ...(probes.path_hints?.tests || []),
     ...(probes.path_hints?.docs || []),
-    ...(probes.path_hints?.repomix || []),
   ]);
   const scopeMode = probes?.scope?.mode || null;
   const enforceScopedPaths = probes?.scope?.enforced === true && featurePathHints.length > 0;
@@ -2642,14 +2784,12 @@ function detectGaps(featureName, configInput = null, options = {}) {
     implementation: dedupeCaseInsensitive(probes.path_hints?.implementation || []),
     tests: dedupeCaseInsensitive(probes.path_hints?.tests || []),
     docs: dedupeCaseInsensitive(probes.path_hints?.docs || []),
-    repomix: dedupeCaseInsensitive(probes.path_hints?.repomix || []),
   };
   const ignoredOutOfScope = {
     feature: new Set(),
     implementation: new Set(),
     tests: new Set(),
     docs: new Set(),
-    repomix: new Set(),
   };
 
   function scopeHintsFor(kind) {
@@ -2692,7 +2832,7 @@ function detectGaps(featureName, configInput = null, options = {}) {
     config,
     sourceRoots: sourcePrefixes.length > 0 ? sourcePrefixes : ['.'],
     contextMapPath: resolveContextMapPath(repoRoot, config),
-    persist: true,
+    persist: options?.persistSelfModel === true,
   });
   const indexMatcher = buildIndexMatcher(featureName, probes.aliases);
   const indexAnalysis = analyzeFeatureIndex(selfModelResult.model, indexMatcher, featurePathHints, directFeatureMatches);
@@ -2709,6 +2849,10 @@ function detectGaps(featureName, configInput = null, options = {}) {
     if (lane.mode === 'relaxed') scopedRelaxedFeatureFiles.push(rel);
     else scopedStrictFeatureFiles.push(rel);
   });
+  const featureRisk = summarizeFeatureRisk(selfModelResult.model, scopedFeatureFiles);
+  const indexedMatchMap = new Map(
+    (indexAnalysis.indexed_feature_matches || []).map(item => [normalizePath(item.path), Array.isArray(item.reasons) ? item.reasons.slice() : []])
+  );
 
   const contentCache = new Map();
   const exportProbes = dedupeTokens([...implementationSignalTokens, ...probes.export_hints]);
@@ -2840,22 +2984,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
     });
   }
 
-  const repomixEvidence = findRepomixEvidence(
-    repoRoot,
-    repomixSignalTokens,
-    probes.path_hints?.repomix || [],
-    config,
-    ignoredDirs,
-    laneByFile
-  );
-  if (enforceScopedPaths) {
-    repomixEvidence.path_hits = repomixEvidence.path_hits.filter(hit => {
-      if (inScopedPaths(hit.file, 'repomix')) return true;
-      trackOutOfScope('repomix', hit.file);
-      return false;
-    });
-  }
-
   const implementationPathSummary = summarizeHits(
     implementationPathHits,
     laneMultipliers,
@@ -2894,30 +3022,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
     convergence.saturation.content
   );
 
-  const repomixPathSummary = summarizeHits(
-    repomixEvidence.path_hits,
-    laneMultipliers,
-    convergence.saturation.path
-  );
-  const repomixContentSummary = summarizeHits(
-    repomixEvidence.content_hits.map(hit => ({
-      ...hit,
-      lane: pathLanes.default_lane,
-      lane_mode: 'strict',
-    })),
-    laneMultipliers,
-    convergence.saturation.content
-  );
-  const repomixBundleSummary = summarizeHits(
-    repomixEvidence.bundle_hits.map(hit => ({
-      ...hit,
-      lane: pathLanes.default_lane,
-      lane_mode: 'strict',
-    })),
-    laneMultipliers,
-    convergence.saturation.bundle
-  );
-
   const implementationScore = weightedAverage({
     path: implementationPathSummary.score,
     export: implementationExportSummary.score,
@@ -2934,12 +3038,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
     content: docsContentSummary.score,
   }, convergence.weights.docs);
 
-  const repomixScore = weightedAverage({
-    path: repomixPathSummary.score,
-    content: repomixContentSummary.score,
-    bundle: repomixBundleSummary.score,
-  }, convergence.weights.repomix);
-
   const hasImplementation = implementationScore >= Number(convergence.thresholds.implementation ?? 0.5);
   const hasTests = testsScore >= Number(convergence.thresholds.tests ?? 0.45);
   const docsThreshold = Number(convergence.thresholds.docs ?? 0.5);
@@ -2949,25 +3047,12 @@ function detectGaps(featureName, configInput = null, options = {}) {
 
   const filterZones = Array.isArray(options.zones) ? options.zones : [];
   const contextMap = analyzeContextMap(repoRoot, config, featureSignalTokens, scopedStrictFeatureFiles, allFiles, filterZones);
-  const repomixMode = contextMap.map_mode === 'repomix-compat' || config?.bundler?.type === 'repomix';
-  const repomixCoverageCount = Array.isArray(contextMap.covered_feature_files)
-    ? contextMap.covered_feature_files.length
-    : 0;
-  const hasRepomixMention = (
-    repomixEvidence.path_hits.length
-    + repomixEvidence.content_hits.length
-    + repomixEvidence.bundle_hits.length
-  ) > 0 || (repomixMode && repomixCoverageCount > 0);
-
-  const repomixThreshold = Number(convergence.thresholds.repomix ?? 0.4);
-  const hasRepomixConvergence = repomixScore >= repomixThreshold || (repomixMode && repomixCoverageCount > 0);
   const changelogAudit = analyzeChangelogAudit(repoRoot, sourcePrefixes, scopedFeatureFiles);
 
   const overallComponents = {
     implementation: implementationScore,
     tests: testsScore,
     docs: docsRoot ? docsScore : 1,
-    repomix: repomixMode ? repomixScore : 1,
   };
   const overallScore = weightedAverage(overallComponents, convergence.weights.overall);
   const overallThreshold = Number(convergence.thresholds.overall ?? 0.45);
@@ -2986,10 +3071,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
   if (!hasImplementation) gaps.add('missing_implementation');
   if (!hasTests) gaps.add('test_coverage');
   if (docsRoot && !hasDocs) gaps.add('documentation');
-
-  if (repomixMode && !hasRepomixConvergence) {
-    gaps.add('integration');
-  }
 
   if (Array.isArray(changelogAudit.implementation_changes) && changelogAudit.implementation_changes.length > 0) {
     gaps.add('changelog_stale_after_feature_change');
@@ -3044,14 +3125,12 @@ function detectGaps(featureName, configInput = null, options = {}) {
       implementation: implementationTokens,
       tests: testTokens,
       docs: docTokens,
-      repomix: repomixTokens,
     },
     effective_probe_tokens: {
       feature: featureSignalTokens,
       implementation: implementationSignalTokens,
       tests: testSignalTokens,
       docs: docSignalTokens,
-      repomix: repomixSignalTokens,
     },
     probe_metadata: probes.metadata,
     probe_path_hints: probes.path_hints,
@@ -3072,7 +3151,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
     has_implementation: hasImplementation,
     has_tests: hasTests,
     has_docs: hasDocs,
-    has_repomix_mention: hasRepomixMention,
     path_lanes: {
       default_lane: pathLanes.default_lane,
       lanes: pathLanes.lanes,
@@ -3094,14 +3172,12 @@ function detectGaps(featureName, configInput = null, options = {}) {
         implementation: Array.from(ignoredOutOfScope.implementation).sort(),
         tests: Array.from(ignoredOutOfScope.tests).sort(),
         docs: Array.from(ignoredOutOfScope.docs).sort(),
-        repomix: Array.from(ignoredOutOfScope.repomix).sort(),
       },
       ignored_out_of_scope_counts: {
         feature: ignoredOutOfScope.feature.size,
         implementation: ignoredOutOfScope.implementation.size,
         tests: ignoredOutOfScope.tests.size,
         docs: ignoredOutOfScope.docs.size,
-        repomix: ignoredOutOfScope.repomix.size,
       },
     },
     convergence: {
@@ -3138,16 +3214,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
             content: docsContentSummary,
           },
         },
-        repomix: {
-          threshold: repomixThreshold,
-          score: round(repomixScore, 3),
-          meets: repomixMode ? hasRepomixConvergence : null,
-          components: {
-            path: repomixPathSummary,
-            content: repomixContentSummary,
-            bundle: repomixBundleSummary,
-          },
-        },
       },
       overall: {
         threshold: overallThreshold,
@@ -3158,7 +3224,6 @@ function detectGaps(featureName, configInput = null, options = {}) {
           implementation: round(overallComponents.implementation, 3),
           tests: round(overallComponents.tests, 3),
           docs: round(overallComponents.docs, 3),
-          repomix: round(overallComponents.repomix, 3),
         },
       },
     },
@@ -3179,17 +3244,23 @@ function detectGaps(featureName, configInput = null, options = {}) {
       indexed_modules: Number(selfModelResult.model?.summary?.total_modules || 0),
       dependency_edges: Number(selfModelResult.model?.summary?.total_edges || 0),
       used_for_scope: indexedFeatureFiles.length > 0,
+      feature_risk: featureRisk,
     },
+    matched_feature_files: scopedFeatureFiles.map(relPath => {
+      const lane = laneByFile.get(relPath) || laneForPath(relPath, pathLanes);
+      const indexedReasons = indexedMatchMap.get(normalizePath(relPath)) || [];
+      const directTriggers = matchingPathTriggers(relPath, featureSignalTokens, featurePathHints);
+      const matchSource = indexedFeatureFiles.includes(relPath) ? 'code_index' : 'direct_scan';
+      return {
+        path: relPath,
+        lane: lane.mode,
+        match_source: matchSource,
+        triggers: uniqueSorted(matchSource === 'code_index'
+          ? [...indexedReasons, ...directTriggers]
+          : directTriggers),
+      };
+    }),
     context_map: contextMap,
-    repomix: {
-      ...toLegacyRepomix(contextMap),
-      evidence: repomixEvidence,
-      convergence: {
-        score: round(repomixScore, 3),
-        threshold: repomixThreshold,
-        meets: repomixMode ? hasRepomixConvergence : null,
-      },
-    },
     changelog: changelogAudit,
   };
   const salience = buildSalience(featureName, normalizedGaps, evidence, config, options);

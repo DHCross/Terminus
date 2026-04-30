@@ -15,14 +15,16 @@ const PORTABLE_CONFIG_PATH_KEYS = [
   'context_map',
   'generated_context_map',
   'self_model_index',
-  'repomix_manifest',
   'hygiene_history_log',
+  'dead_code_history_log',
   'retrospective_log',
 ];
 const PORTABLE_CONFIG_ARRAY_KEYS = [
   'source_roots',
   'test_roots',
 ];
+const SHERLOG_STATE_DIR = 'sherlog-velocity';
+const RUNTIME_CONFIG_RELATIVE_PATH = path.join('config', 'sherlog.config.json');
 
 function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
@@ -199,6 +201,62 @@ function isDirectory(dirPath) {
   }
 }
 
+function isInsidePath(parentPath, childPath) {
+  const parent = path.resolve(parentPath);
+  const child = path.resolve(childPath);
+  if (parent === child) return true;
+  const relative = path.relative(parent, child);
+  return Boolean(relative) && !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
+function detectGitRepoRoot(cwd = process.cwd()) {
+  const root = path.resolve(String(cwd || process.cwd()));
+  try {
+    return runGit(root, 'git rev-parse --show-toplevel');
+  } catch {
+    return root;
+  }
+}
+
+function detectPackageRoot(fromDir = __dirname) {
+  return path.resolve(fromDir, '../..');
+}
+
+function resolveSherlogStateRoot(repoRoot, options = {}) {
+  const resolvedRepoRoot = resolveRepoRoot(repoRoot, options.cwd || process.cwd());
+  const packageRoot = path.resolve(options.packageRoot || detectPackageRoot(options.fromDir || __dirname));
+  const packageStateRoot = path.join(packageRoot, SHERLOG_STATE_DIR);
+  const packageInRepo = isInsidePath(resolvedRepoRoot, packageRoot);
+  const nestedPackageState = path.basename(packageRoot) === SHERLOG_STATE_DIR;
+
+  if (packageInRepo && nestedPackageState) return packageRoot;
+  if (packageInRepo && isDirectory(packageStateRoot)) return packageStateRoot;
+  return path.join(resolvedRepoRoot, SHERLOG_STATE_DIR);
+}
+
+function findRuntimeConfigPath(options = {}) {
+  const cwd = path.resolve(String(options.cwd || process.cwd()));
+  const repoRoot = detectGitRepoRoot(cwd);
+  const packageRoot = path.resolve(options.packageRoot || detectPackageRoot(options.fromDir || __dirname));
+  const stateRoot = resolveSherlogStateRoot(repoRoot, { cwd, packageRoot });
+  const candidates = [
+    options.configPath,
+    path.join(stateRoot, RUNTIME_CONFIG_RELATIVE_PATH),
+    path.join(repoRoot, RUNTIME_CONFIG_RELATIVE_PATH),
+    path.join(packageRoot, RUNTIME_CONFIG_RELATIVE_PATH),
+  ].filter(Boolean).map(candidate => path.resolve(candidate));
+
+  const configPath = candidates.find(candidate => fs.existsSync(candidate)) || candidates[0];
+  return {
+    cwd,
+    repoRoot,
+    packageRoot,
+    stateRoot,
+    configPath,
+    installedPackageMode: stateRoot !== packageRoot,
+  };
+}
+
 function resolveRepoRoot(configuredRepoRoot, fallbackRoot = process.cwd()) {
   const fallback = path.resolve(String(fallbackRoot || process.cwd()));
   const configured = String(configuredRepoRoot || '').trim();
@@ -211,6 +269,16 @@ function resolveRepoRoot(configuredRepoRoot, fallbackRoot = process.cwd()) {
   }
 
   return fallback;
+}
+
+function loadRuntimeConfig(options = {}) {
+  const runtime = findRuntimeConfigPath(options);
+  const config = readJson(runtime.configPath, null);
+
+  return {
+    ...runtime,
+    config: config ? resolveRuntimeConfig(config, { cwd: runtime.repoRoot }) : null,
+  };
 }
 
 function resolveConfigPath(repoRoot, value) {
@@ -304,16 +372,21 @@ function toPortableConfig(configInput, repoRootInput = null) {
 
 module.exports = {
   confidenceFromSample,
+  detectGitRepoRoot,
+  detectPackageRoot,
   detectBranchHead,
   ensureDir,
   ensureFile,
+  findRuntimeConfigPath,
   getGitWindowMetrics,
+  loadRuntimeConfig,
   readJson,
   readJsonLines,
   repoRelativePathVariants,
   resolveConfigPath,
   resolveRepoRoot,
   resolveRuntimeConfig,
+  resolveSherlogStateRoot,
   rolling,
   toPortableConfig,
 };

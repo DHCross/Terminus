@@ -11,8 +11,10 @@ const {
   ensureFile,
   rolling,
   confidenceFromSample,
+  findRuntimeConfigPath,
   repoRelativePathVariants,
   resolveRepoRoot,
+  resolveSherlogStateRoot,
   resolveRuntimeConfig,
   toPortableConfig,
 } = require('../src/core/shared');
@@ -195,6 +197,27 @@ describe('resolveRuntimeConfig', () => {
       path.join(repoRoot, 'sherlog.acknowledgements.json')
     );
     fs.rmSync(repoRoot, { recursive: true });
+  });
+});
+
+describe('runtime layout', () => {
+  test('resolves repo-local sherlog state for installed-package mode', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-runtime-layout-'));
+    const packageRoot = path.join(os.tmpdir(), `sherlog-package-${Date.now()}`);
+    fs.mkdirSync(path.join(repoRoot, 'sherlog-velocity', 'config'), { recursive: true });
+    fs.mkdirSync(packageRoot, { recursive: true });
+    const expectedConfig = path.join(repoRoot, 'sherlog-velocity', 'config', 'sherlog.config.json');
+    fs.writeFileSync(expectedConfig, JSON.stringify({ repo_root: '.' }), 'utf8');
+
+    const stateRoot = resolveSherlogStateRoot(repoRoot, { packageRoot });
+    const runtime = findRuntimeConfigPath({ cwd: repoRoot, packageRoot });
+
+    assert.strictEqual(stateRoot, path.join(repoRoot, 'sherlog-velocity'));
+    assert.strictEqual(runtime.configPath, expectedConfig);
+    assert.equal(runtime.installedPackageMode, true);
+
+    fs.rmSync(repoRoot, { recursive: true, force: true });
+    fs.rmSync(packageRoot, { recursive: true, force: true });
   });
 });
 

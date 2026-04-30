@@ -128,7 +128,6 @@ function makeConfig(repoRoot, overrides = {}) {
       source_roots: ['src'],
       docs_dir: 'docs',
       context_map: path.join(repoRoot, 'sherlog.context.json'),
-      repomix_manifest: path.join(repoRoot, 'repomix-manifest.json'),
     },
     settings: {
       gap_scan_ignore_dirs: [],
@@ -170,7 +169,6 @@ describe('detectGaps advanced behavior', () => {
         source_roots: ['src'],
         docs_dir: 'docs',
         context_map: path.join(repoRoot, 'sherlog.context.json'),
-        repomix_manifest: path.join(repoRoot, 'repomix-manifest.json'),
         gap_weights: gapWeightsPath,
       },
       settings: {
@@ -501,7 +499,6 @@ describe('detectGaps advanced behavior', () => {
         source_roots: ['src'],
         docs_dir: 'docs',
         context_map: path.join(repoRoot, 'sherlog.context.json'),
-        repomix_manifest: path.join(repoRoot, 'repomix-manifest.json'),
       },
       settings: {
         gap_scan_ignore_dirs: [],
@@ -752,6 +749,35 @@ describe('detectGaps advanced behavior', () => {
     assert.equal(second.salience.summary.convergence_entropy_trend, 'improving');
   });
 
+  test('stays read-only unless history or self-model persistence is requested', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-gap-readonly-'));
+    fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(repoRoot, 'src', 'payments-engine.js'), 'export const value = 1;\n', 'utf8');
+    initGitRepo(repoRoot);
+    commitAll(repoRoot, 'seed', '2026-01-18T10:00:00Z');
+
+    const historyPath = path.join(repoRoot, 'gap-history.jsonl');
+    const selfModelPath = path.join(repoRoot, 'sherlog-velocity', 'data', 'self-model.json');
+    const config = makeConfig(repoRoot, {
+      paths: {
+        source_roots: ['src'],
+        docs_dir: 'docs',
+        gap_history_log: historyPath,
+      },
+      settings: {
+        gap_scan_ignore_dirs: [],
+      },
+    });
+
+    detectGaps('Payments Engine', config, { record: false, persistSelfModel: false });
+    assert.equal(fs.existsSync(historyPath), false);
+    assert.equal(fs.existsSync(selfModelPath), false);
+
+    detectGaps('Payments Engine', config, { record: true, persistSelfModel: true });
+    assert.equal(fs.existsSync(historyPath), true);
+    assert.equal(fs.existsSync(selfModelPath), true);
+  });
+
   test('maps hygiene nesting depth findings to arch_complexity_hotspot', () => {
     const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-nesting-gap-'));
     fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
@@ -787,5 +813,63 @@ describe('detectGaps advanced behavior', () => {
 
     const result = detectGaps('Payments', config, { record: false });
     assert.ok(result.gaps.includes('arch_complexity_hotspot'));
+  });
+
+  test('suppresses dead scaffold noise while escalating stale live code rot', () => {
+    const activeRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-live-rot-'));
+    fs.mkdirSync(path.join(activeRepo, 'src'), { recursive: true });
+    fs.writeFileSync(
+      path.join(activeRepo, 'src', 'payments-engine.js'),
+      [
+        'export function runPayments() { return 1; }',
+        'export function settlePayments() { return 2; }',
+        'export function refundPayments() { return 3; }',
+        'export function auditPayments() { return 4; }',
+        'export function listPayments() { return 5; }',
+        'export function archivePayments() { return 6; }',
+        'export function verifyPayments() { return 7; }',
+        'export function authorizePayments() { return 8; }',
+        'export function syncPayments() { return 9; }',
+        'export function hydratePayments() { return 10; }',
+        'export function closePayments() { return 11; }',
+        'export function reopenPayments() { return 12; }',
+      ].join('\n') + '\n',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(activeRepo, 'src', 'payments-page.js'),
+      'import { runPayments } from "./payments-engine.js";\nexport const page = () => runPayments();\n',
+      'utf8'
+    );
+    initGitRepo(activeRepo);
+    commitAll(activeRepo, 'seed', '2026-01-01T10:00:00Z');
+
+    const deadRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-dead-scaffold-'));
+    fs.mkdirSync(path.join(deadRepo, 'src'), { recursive: true });
+    fs.writeFileSync(
+      path.join(deadRepo, 'src', 'payments-scaffold.js'),
+      [
+        '// TODO: implement payments service',
+        'export function runPayments() {',
+        '  return null;',
+        '}',
+      ].join('\n') + '\n',
+      'utf8'
+    );
+    initGitRepo(deadRepo);
+    commitAll(deadRepo, 'seed', '2026-01-01T10:00:00Z');
+
+    const activeResult = detectGaps('Payments', makeConfig(activeRepo), { record: false });
+    const deadResult = detectGaps('Payments', makeConfig(deadRepo), { record: false });
+    const activeGap = activeResult.salience.ranked.find(item => item.gap === 'test_coverage');
+    const deadGap = deadResult.salience.ranked.find(item => item.gap === 'test_coverage');
+
+    assert.ok(activeGap);
+    assert.ok(deadGap);
+    assert.ok(Number(activeGap.code_rot_multiplier || 1) > 1);
+    assert.ok(Number(deadGap.noise_multiplier || 1) < 1);
+    assert.ok(Number(activeGap.score || 0) > Number(deadGap.score || 0));
+    assert.equal(activeResult.evidence.code_index.feature_risk.summary.dead_or_scaffold_files, 0);
+    assert.equal(deadResult.evidence.code_index.feature_risk.summary.dead_or_scaffold_files, 1);
   });
 });

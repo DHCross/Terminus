@@ -9,6 +9,9 @@ const { analyzeConsumers, buildConsumerGraph, summarizeConsumersForFile } = requ
 function makeConfig(repoRoot) {
   return {
     repo_root: repoRoot,
+    paths: {
+      source_roots: ['src'],
+    },
     settings: {
       gap_scan_ignore_dirs: [],
     },
@@ -103,5 +106,27 @@ describe('consumer tracing', () => {
     assert.equal(summary.target_file, 'src/core.ts');
     assert.ok(summary.downstream_count >= 1);
     assert.ok(summary.consumers.includes('src/consumer.ts'));
+  });
+
+  test('limits graph construction to configured source roots', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-consumers-roots-'));
+    fs.mkdirSync(path.join(repoRoot, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(repoRoot, 'packages', 'other'), { recursive: true });
+
+    fs.writeFileSync(
+      path.join(repoRoot, 'src', 'core.ts'),
+      'export const alpha = 1;\n',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(repoRoot, 'packages', 'other', 'core.ts'),
+      'export const beta = 2;\n',
+      'utf8'
+    );
+
+    const graph = buildConsumerGraph(makeConfig(repoRoot));
+
+    assert.ok(graph.files.includes('src/core.ts'));
+    assert.ok(!graph.files.includes('packages/other/core.ts'));
   });
 });

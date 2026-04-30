@@ -3,8 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { readJson, resolveRuntimeConfig } = require('../core/shared');
-const { analyzeRepomixBundles } = require('../core/repomix');
+const { loadRuntimeConfig, readJson, resolveRuntimeConfig } = require('../core/shared');
 
 const IGNORED_DIRS = new Set([
   '.git',
@@ -26,11 +25,20 @@ const IGNORED_DIRS = new Set([
 ]);
 
 const ARCHIVE_HINT_DIRS = new Set(['archive', 'archives', 'attic', 'legacy', 'deprecated', 'old']);
-const REPOMIX_XML_RE = /^repomix-(.+)\.xml$/i;
-const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DEFAULT_GAP_SCAN_IGNORES = new Set([
+  'archive',
+  'archives',
+  'archived',
+  'attic',
+  'obsolete',
+  'retired',
+  'inspiration folder',
+  'inspiration-folder',
+  'inspiration_folder',
+]);
 
-function normalizePath(p) {
-  return String(p || '').replace(/\\/g, '/').replace(/^\.\/+/, '').replace(/\/+$/, '');
+function normalizePath(value) {
+  return String(value || '').replace(/\\/g, '/').replace(/^\.\/+/, '').replace(/\/+$/, '');
 }
 
 function parseArgs(argv) {
@@ -39,7 +47,7 @@ function parseArgs(argv) {
     strict: false,
   };
 
-  for (let i = 2; i < argv.length; i++) {
+  for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--json') out.json = true;
     else if (arg === '--strict') out.strict = true;
@@ -63,7 +71,8 @@ function walkFiles(root, visit, maxFiles = 120000) {
     }
 
     for (const entry of entries) {
-      if (seen++ > maxFiles) return;
+      seen += 1;
+      if (seen > maxFiles) return;
       const fullPath = path.join(current, entry.name);
       if (entry.isDirectory()) {
         if (!IGNORED_DIRS.has(entry.name)) stack.push(fullPath);
@@ -80,10 +89,10 @@ function discoverArchiveLikeDirs(repoRoot) {
     const rel = normalizePath(path.relative(repoRoot, fullPath));
     if (!rel) return;
     const segments = rel.split('/').slice(0, -1);
-    for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i];
+    for (let index = 0; index < segments.length; index += 1) {
+      const seg = segments[index];
       if (ARCHIVE_HINT_DIRS.has(seg.toLowerCase())) {
-        found.push(segments.slice(0, i + 1).join('/'));
+        found.push(segments.slice(0, index + 1).join('/'));
         break;
       }
     }
@@ -92,8 +101,11 @@ function discoverArchiveLikeDirs(repoRoot) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const rawConfig = readJson(configPath, null);
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  const configPath = runtime.configPath;
+  const rawConfig = runtime.config
+    ? JSON.parse(JSON.stringify(runtime.config))
+    : null;
   if (!rawConfig) {
     return {
       configPath,
@@ -160,313 +172,6 @@ function safeReadText(filePath) {
   } catch {
     return '';
   }
-}
-
-function normalizeBundleId(value) {
-  const id = String(value || '').trim();
-  if (!id) return null;
-  return id.toLowerCase();
-}
-
-function uniqueSorted(values) {
-  return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
-}
-
-function resolveRepoPath(repoRoot, candidatePath) {
-  if (!candidatePath) return null;
-  return path.isAbsolute(candidatePath) ? candidatePath : path.join(repoRoot, candidatePath);
-}
-
-function collectBundleIdsFromBundleIndex(repoRoot) {
-  const indexPath = path.join(repoRoot, '.repomix', 'bundles.json');
-  const exists = fs.existsSync(indexPath);
-  if (!exists) {
-    return {
-      path: indexPath,
-      exists,
-      valid: false,
-      ids: [],
-      invalid_reason: 'missing_file',
-    };
-  }
-
-  const payload = readJson(indexPath, null);
-  const bundles = payload && typeof payload === 'object' && payload.bundles && typeof payload.bundles === 'object'
-    ? payload.bundles
-    : null;
-  if (!bundles) {
-    return {
-      path: indexPath,
-      exists,
-      valid: false,
-      ids: [],
-      invalid_reason: 'missing_bundles_object',
-    };
-  }
-
-  const ids = Object.keys(bundles)
-    .map(id => normalizeBundleId(id))
-    .filter(Boolean);
-
-  return {
-    path: indexPath,
-    exists,
-    valid: true,
-    ids: uniqueSorted(ids),
-    invalid_reason: null,
-  };
-}
-
-function resolveRepomixManifestPath(repoRoot, config) {
-  const configuredPath = config?.paths?.repomix_manifest || config?.context?.map_file || config?.paths?.context_map || null;
-  const candidates = [
-    { source: configuredPath ? 'config' : 'root_default', path: resolveRepoPath(repoRoot, configuredPath) || path.join(repoRoot, 'repomix-manifest.json') },
-    { source: 'root_default', path: path.join(repoRoot, 'repomix-manifest.json') },
-    { source: 'vessel_legacy', path: path.join(repoRoot, 'vessel', 'repomix-manifest.json') },
-  ];
-
-  const dedupedCandidates = [];
-  const seen = new Set();
-  candidates.forEach(candidate => {
-    const normalized = normalizePath(candidate.path);
-    if (!candidate.path || seen.has(normalized)) return;
-    seen.add(normalized);
-    dedupedCandidates.push(candidate);
-  });
-
-  const expected = dedupedCandidates[0];
-  const selected = dedupedCandidates.find(candidate => fs.existsSync(candidate.path)) || expected;
-
-  return {
-    expected_path: expected.path,
-    expected_source: expected.source,
-    selected_path: selected.path,
-    selected_source: selected.source,
-    used_fallback: normalizePath(selected.path) !== normalizePath(expected.path),
-    candidates: dedupedCandidates.map(candidate => ({
-      source: candidate.source,
-      path: candidate.path,
-      exists: fs.existsSync(candidate.path),
-    })),
-  };
-}
-
-function collectBundleIdsFromManifest(manifestPath) {
-  const exists = fs.existsSync(manifestPath);
-  if (!exists) {
-    return {
-      path: manifestPath,
-      exists,
-      valid: false,
-      ids: [],
-      missing_id_entries: [],
-      last_updated_by_id: {},
-      invalid_reason: 'missing_file',
-    };
-  }
-
-  const payload = readJson(manifestPath, null);
-  const bundles = Array.isArray(payload?.bundles) ? payload.bundles : null;
-  if (!bundles) {
-    return {
-      path: manifestPath,
-      exists,
-      valid: false,
-      ids: [],
-      missing_id_entries: [],
-      last_updated_by_id: {},
-      invalid_reason: 'missing_bundles_array',
-    };
-  }
-
-  const ids = [];
-  const missingIdEntries = [];
-  const lastUpdatedById = {};
-
-  bundles.forEach((bundle, index) => {
-    const rawId = bundle?.id ?? bundle?.bundle_id ?? bundle?.bundleId ?? null;
-    const normalizedId = normalizeBundleId(rawId);
-    if (!normalizedId) {
-      missingIdEntries.push({
-        index,
-        name: bundle?.name || null,
-      });
-      return;
-    }
-
-    ids.push(normalizedId);
-    if (!(normalizedId in lastUpdatedById)) {
-      lastUpdatedById[normalizedId] = bundle?.last_updated ?? null;
-    }
-  });
-
-  return {
-    path: manifestPath,
-    exists,
-    valid: true,
-    ids: uniqueSorted(ids),
-    missing_id_entries: missingIdEntries,
-    last_updated_by_id: lastUpdatedById,
-    invalid_reason: null,
-  };
-}
-
-function scanRepomixXmlArtifacts(repoRoot) {
-  const ids = [];
-  const filesById = {};
-
-  walkFiles(repoRoot, fullPath => {
-    const baseName = path.basename(fullPath);
-    const match = baseName.match(REPOMIX_XML_RE);
-    if (!match) return;
-
-    const normalizedId = normalizeBundleId(match[1]);
-    if (!normalizedId) return;
-
-    let stats = null;
-    try {
-      stats = fs.statSync(fullPath);
-    } catch {
-      stats = null;
-    }
-
-    const relPath = normalizePath(path.relative(repoRoot, fullPath));
-    ids.push(normalizedId);
-    if (!filesById[normalizedId]) filesById[normalizedId] = [];
-    filesById[normalizedId].push({
-      path: relPath,
-      mtime_ms: Number.isFinite(stats?.mtimeMs) ? stats.mtimeMs : null,
-      mtime: Number.isFinite(stats?.mtimeMs) ? new Date(stats.mtimeMs).toISOString() : null,
-    });
-  }, 140000);
-
-  return {
-    ids: uniqueSorted(ids),
-    files_by_id: filesById,
-  };
-}
-
-function parseLastUpdated(rawValue) {
-  const raw = String(rawValue || '').trim();
-  if (!raw) {
-    return {
-      raw: null,
-      epoch_ms: null,
-      granularity: null,
-      valid: false,
-    };
-  }
-
-  const normalized = DATE_ONLY_RE.test(raw) ? `${raw}T00:00:00Z` : raw;
-  const epochMs = new Date(normalized).getTime();
-  return {
-    raw,
-    epoch_ms: Number.isFinite(epochMs) ? epochMs : null,
-    granularity: DATE_ONLY_RE.test(raw) ? 'date' : 'datetime',
-    valid: Number.isFinite(epochMs),
-  };
-}
-
-function isMtimeAligned(xmlMtimeMs, lastUpdated) {
-  if (!Number.isFinite(xmlMtimeMs) || !lastUpdated?.valid || !Number.isFinite(lastUpdated?.epoch_ms)) return false;
-
-  if (lastUpdated.granularity === 'date') {
-    const xmlDay = new Date(xmlMtimeMs).toISOString().slice(0, 10);
-    const updatedDay = new Date(lastUpdated.epoch_ms).toISOString().slice(0, 10);
-    return xmlDay === updatedDay;
-  }
-
-  return Math.abs(xmlMtimeMs - lastUpdated.epoch_ms) <= 1000;
-}
-
-function checkRepomixBundleConsistency({ repoRoot, config, contextMode }) {
-  const analysis = analyzeRepomixBundles({ repoRoot, config, contextMode });
-  if (!analysis) return null;
-
-  const bundleIndex = analysis.bundle_index;
-  const manifestPath = analysis.manifest_resolution;
-  const manifest = analysis.manifest;
-  const xmlArtifacts = analysis.xml_artifacts;
-  const missingInManifest = analysis.mismatches.missing_in_manifest;
-  const missingInBundleIndex = analysis.mismatches.missing_in_bundle_index;
-  const missingXmlForManifest = analysis.mismatches.missing_xml_for_manifest;
-  const orphanXmlArtifacts = analysis.mismatches.orphan_xml_artifacts;
-  const mtimeMismatches = analysis.mismatches.mtime_mismatches;
-  const sourceFreshnessMismatches = analysis.mismatches.source_freshness_mismatches;
-
-  const issues = [];
-  if (!bundleIndex.exists) issues.push('.repomix/bundles.json is missing');
-  else if (!bundleIndex.valid) issues.push('.repomix/bundles.json is invalid');
-
-  const expectedManifestRel = normalizePath(path.relative(repoRoot, manifestPath.expected_path));
-  const selectedManifestRel = normalizePath(path.relative(repoRoot, manifest.path));
-  if (!manifest.exists) issues.push(`manifest file missing at ${expectedManifestRel}`);
-  else if (manifestPath.expected_source === 'config' && manifestPath.used_fallback) {
-    issues.push(`configured manifest missing at ${expectedManifestRel}; using fallback ${selectedManifestRel}`);
-  }
-  else if (!manifest.valid) issues.push('manifest is invalid or missing bundles[]');
-
-  if (manifest.valid && manifest.missing_id_entries.length > 0) {
-    issues.push('manifest bundles are missing required id fields');
-  }
-
-  if (missingInManifest.length > 0) issues.push(`bundle IDs missing in manifest: ${missingInManifest.join(', ')}`);
-  if (missingInBundleIndex.length > 0) issues.push(`manifest IDs missing in .repomix index: ${missingInBundleIndex.join(', ')}`);
-  if (missingXmlForManifest.length > 0) issues.push(`manifest IDs missing XML artifacts: ${missingXmlForManifest.join(', ')}`);
-  if (orphanXmlArtifacts.length > 0) issues.push(`orphan XML artifacts not declared in manifest: ${orphanXmlArtifacts.join(', ')}`);
-  if (mtimeMismatches.length > 0) issues.push(`manifest/XML timestamp mismatches: ${mtimeMismatches.length}`);
-  if (sourceFreshnessMismatches.length > 0) issues.push(`XML freshness mismatches vs source: ${sourceFreshnessMismatches.length}`);
-
-  const checkStatus = issues.length > 0 ? 'fail' : 'pass';
-
-  return {
-    id: 'repomix_bundle_consistency',
-    status: checkStatus,
-    message: checkStatus === 'pass'
-      ? 'Repomix bundle IDs, manifest timestamps, and XML freshness are consistent across bundle index, source, manifest, and artifacts.'
-      : `Repomix consistency issues detected (${issues.length}).`,
-    fix: checkStatus === 'fail'
-      ? `Synchronize .repomix/bundles.json with ${selectedManifestRel} IDs, regenerate repomix-*.xml artifacts so each XML mtime is at least as new as its latest source commit, then run \`task repomix-sync -- --write\` to stamp manifest last_updated from the XML artifacts.`
-      : null,
-    evidence: {
-      bundle_index: {
-        path: normalizePath(path.relative(repoRoot, bundleIndex.path)),
-        exists: bundleIndex.exists,
-        valid: bundleIndex.valid,
-        ids: bundleIndex.ids,
-      },
-      manifest: {
-        expected_path: expectedManifestRel,
-        expected_source: manifestPath.expected_source,
-        selected_path: selectedManifestRel,
-        selected_source: manifestPath.selected_source,
-        used_fallback: manifestPath.used_fallback,
-        candidates: manifestPath.candidates.map(candidate => ({
-          source: candidate.source,
-          path: normalizePath(path.relative(repoRoot, candidate.path)),
-          exists: candidate.exists,
-        })),
-        exists: manifest.exists,
-        valid: manifest.valid,
-        ids: manifest.ids,
-        missing_id_entries: manifest.missing_id_entries,
-      },
-      xml_artifacts: {
-        ids: xmlArtifacts.ids,
-        files_by_id: xmlArtifacts.files_by_id,
-      },
-      mismatches: {
-        missing_in_manifest: missingInManifest,
-        missing_in_bundle_index: missingInBundleIndex,
-        missing_xml_for_manifest: missingXmlForManifest,
-        orphan_xml_artifacts: orphanXmlArtifacts,
-        mtime_mismatches: mtimeMismatches,
-        source_freshness_mismatches: sourceFreshnessMismatches,
-      },
-      bundle_freshness: analysis.bundle_evaluations,
-      issues,
-    },
-  };
 }
 
 function checkVelocityPanelMount(repoRoot) {
@@ -614,7 +319,7 @@ function checkOperationalWiring(context) {
       id: 'source_roots_present',
       status: 'fail',
       message: 'paths.source_roots is empty; gap detection will produce false missing_implementation.',
-      fix: 'Set paths.source_roots to real code roots (for example: ["vessel/src"]).',
+      fix: 'Set paths.source_roots to real code roots.',
       evidence: { source_roots: sourceRoots },
     });
   } else {
@@ -634,46 +339,27 @@ function checkOperationalWiring(context) {
         id: 'source_roots_breadth',
         status: 'warn',
         message: 'Source root includes "." which can over-broaden gap matching.',
-        fix: 'Prefer explicit roots like src/, app/, or vessel/src for precision.',
+        fix: 'Prefer explicit roots like src/, app/, or server/ for precision.',
         evidence: { source_roots: sourceRoots },
       });
     }
   }
 
   const contextMode = config?.context?.mode || 'none';
+  if (contextMode !== 'none' && contextMode !== 'sherlog-map') {
+    checks.push({
+      id: 'context_mode_supported',
+      status: 'warn',
+      message: `Unsupported context mode "${contextMode}" found in config.`,
+      fix: 'Switch context.mode to "sherlog-map" or "none".',
+      evidence: { context_mode: contextMode },
+    });
+  }
+
   const mapFile = config?.context?.map_file || config?.paths?.context_map || null;
   const mapPath = mapFile
     ? (path.isAbsolute(mapFile) ? mapFile : path.join(repoRoot, mapFile))
     : (contextMode === 'sherlog-map' ? path.join(repoRoot, 'sherlog.context.json') : null);
-
-  if (contextMode === 'repomix-compat') {
-    const manifestPath = mapPath || path.join(repoRoot, 'repomix-manifest.json');
-    if (!manifestPath || !fs.existsSync(manifestPath)) {
-      checks.push({
-        id: 'repomix_manifest_available',
-        status: 'warn',
-        message: 'Context mode is repomix-compat but repomix manifest is missing.',
-        fix: 'Provide repomix-manifest.json or switch to sherlog-map mode.',
-        evidence: { context_mode: contextMode, manifest_path: manifestPath },
-      });
-    } else {
-      const manifest = readJson(manifestPath, null);
-      checks.push({
-        id: 'repomix_manifest_available',
-        status: manifest ? 'pass' : 'warn',
-        message: manifest ? 'Repomix manifest found and parseable.' : 'Repomix manifest exists but could not be parsed.',
-        fix: manifest ? null : 'Fix JSON formatting in repomix manifest.',
-        evidence: { manifest_path: manifestPath },
-      });
-    }
-  }
-
-  const repomixConsistencyCheck = checkRepomixBundleConsistency({
-    repoRoot,
-    config,
-    contextMode,
-  });
-  if (repomixConsistencyCheck) checks.push(repomixConsistencyCheck);
 
   if (contextMode === 'sherlog-map') {
     if (!mapPath || !fs.existsSync(mapPath)) {
@@ -704,7 +390,11 @@ function checkOperationalWiring(context) {
     : [];
   const archiveDirs = discoverArchiveLikeDirs(repoRoot);
   if (archiveDirs.length > 0) {
-    const uncovered = archiveDirs.filter(dir => !ignored.includes(dir));
+    const uncovered = archiveDirs.filter((dir) => {
+      if (ignored.includes(dir)) return false;
+      const base = path.basename(dir).toLowerCase();
+      return !DEFAULT_GAP_SCAN_IGNORES.has(base);
+    });
     checks.push({
       id: 'archive_scan_scope',
       status: uncovered.length ? 'warn' : 'pass',
@@ -723,12 +413,11 @@ function checkOperationalWiring(context) {
 }
 
 function summarize(checks) {
-  const counts = {
+  return {
     pass: checks.filter(item => item.status === 'pass').length,
     warn: checks.filter(item => item.status === 'warn').length,
     fail: checks.filter(item => item.status === 'fail').length,
   };
-  return counts;
 }
 
 function printHuman(checks, counts) {
@@ -770,5 +459,4 @@ if (require.main === module) main();
 
 module.exports = {
   checkOperationalWiring,
-  checkRepomixBundleConsistency,
 };

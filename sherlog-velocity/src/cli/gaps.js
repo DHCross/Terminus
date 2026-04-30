@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const path = require('path');
-const { readJson, resolveRuntimeConfig } = require('../core/shared');
+const { loadRuntimeConfig } = require('../core/shared');
 const { detectGaps } = require('../core/gap-detector');
 const { scanCodeGaps, scanCodeGapDiff } = require('../core/code-gaps');
 const { buildConsumerGraph, summarizeConsumersForFile } = require('../core/consumers');
@@ -15,7 +14,8 @@ function parseArgs(argv) {
     includeSuppressed: false,
     json: false,
     summaryOnly: false,
-    record: true,
+    record: false,
+    persistSelfModel: false,
     zones: [],
     aliases: [],
     metadata: {
@@ -23,7 +23,6 @@ function parseArgs(argv) {
       implementation_tokens: [],
       test_tokens: [],
       doc_tokens: [],
-      repomix_tokens: [],
     },
   };
 
@@ -42,11 +41,12 @@ function parseArgs(argv) {
     else if ((arg === '--implementation-token' || arg === '--impl-token') && argv[i + 1]) out.metadata.implementation_tokens.push(argv[++i]);
     else if (arg === '--test-token' && argv[i + 1]) out.metadata.test_tokens.push(argv[++i]);
     else if ((arg === '--doc-token' || arg === '--docs-token') && argv[i + 1]) out.metadata.doc_tokens.push(argv[++i]);
-    else if (arg === '--repomix-token' && argv[i + 1]) out.metadata.repomix_tokens.push(argv[++i]);
     else if (arg === '--json') out.json = true;
     else if (arg === '--summary-only') out.summaryOnly = true;
     else if (arg === '--no-record') out.record = false;
     else if (arg === '--record') out.record = true;
+    else if (arg === '--no-persist-self-model') out.persistSelfModel = false;
+    else if (arg === '--persist-self-model') out.persistSelfModel = true;
     else if (!arg.startsWith('-')) out.feature = out.feature ? `${out.feature} ${arg}` : arg;
   }
 
@@ -54,13 +54,12 @@ function parseArgs(argv) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) {
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) {
     console.error('Config not found. Run `node sherlog-velocity/install.js` first.');
     process.exit(1);
   }
-  return resolveRuntimeConfig(config);
+  return runtime.config;
 }
 
 function formatDelta(value) {
@@ -218,6 +217,7 @@ function main() {
   const config = loadConfig();
   const result = detectGaps(feature, config, {
     record: args.record,
+    persistSelfModel: args.persistSelfModel,
     zones: args.zones,
     aliases: args.aliases,
     profile: args.profile || undefined,
@@ -328,6 +328,22 @@ function main() {
     console.log(`Docs present: ${evidence.has_docs ? 'yes' : 'no'} (${evidence.docs_root})`);
   }
 
+  const matchedFeatureFiles = Array.isArray(evidence.matched_feature_files) ? evidence.matched_feature_files : [];
+  console.log('');
+  console.log('Matched feature files:');
+  if (matchedFeatureFiles.length === 0) {
+    console.log('- none');
+  } else {
+    matchedFeatureFiles.slice(0, 20).forEach(item => {
+      const lane = item?.lane ? ` [${item.lane}]` : '';
+      const source = item?.match_source ? ` via ${item.match_source}` : '';
+      const triggers = Array.isArray(item?.triggers) && item.triggers.length > 0
+        ? ` (${item.triggers.join(', ')})`
+        : '';
+      console.log(`- ${item.path}${lane}${source}${triggers}`);
+    });
+  }
+
   if (contextMap && contextMap.enabled) {
     console.log('');
     console.log('Context map checks:');
@@ -356,6 +372,12 @@ function main() {
     if (Number(summary.context_max_lag_days || 0) > 0) {
       console.log(`- Max temporal drift: ${Number(summary.context_max_lag_days).toFixed(1)} day(s)`);
     }
+    if (Number(summary.code_rot_max_days || 0) >= 30) {
+      console.log(`- Code rot: ${Number(summary.code_rot_max_days).toFixed(1)} untouched day(s) on live risk surfaces, peak multiplier ${Number(summary.code_rot_peak_multiplier || 1).toFixed(2)}x`);
+    }
+    if (Number(summary.dead_scaffold_feature_files || 0) > 0 || Number(summary.misleading_feature_files || 0) > 0) {
+      console.log(`- Noise filter: ${summary.dead_scaffold_feature_files || 0} dead/scaffold, ${summary.misleading_feature_files || 0} misleading`);
+    }
     if (Number(summary.expired_acknowledgements || 0) > 0 || Number(summary.audit_overdue_exemptions || 0) > 0) {
       console.log(`- Acknowledgement pressure: expired ${summary.expired_acknowledgements || 0}, audits overdue ${summary.audit_overdue_exemptions || 0}`);
     }
@@ -367,8 +389,9 @@ function main() {
         const blastLevel = Number(item?.blast_radius?.level || 0);
         const blastScope = item?.blast_radius?.scope || 'local';
         const persistenceRuns = Number(item?.persistence?.consecutive_runs || 1);
+        const codeRot = Number(item?.code_rot_multiplier || 1);
         console.log(
-          `${index + 1}. ${item.gap} | score ${Number(item.score || 0).toFixed(2)} | Δ ${formatDelta(item.delta_score)} | blast L${blastLevel} (${blastScope}) | persistence ${persistenceRuns} run(s)`
+          `${index + 1}. ${item.gap} | score ${Number(item.score || 0).toFixed(2)} | Δ ${formatDelta(item.delta_score)} | blast L${blastLevel} (${blastScope}) | persistence ${persistenceRuns} run(s)${codeRot > 1 ? ` | code rot ${codeRot.toFixed(2)}x` : ''}`
         );
       });
     }

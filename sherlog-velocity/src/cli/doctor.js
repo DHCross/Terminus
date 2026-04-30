@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const path = require('path');
 const {
-  readJson,
+  loadRuntimeConfig,
   readJsonLines,
   rolling,
   confidenceFromSample,
-  resolveRuntimeConfig,
 } = require('../core/shared');
 const { detectGaps } = require('../core/gap-detector');
 const { createEstimatePayload } = require('../core/estimate');
@@ -26,7 +24,6 @@ function parseArgs(argv) {
       implementation_tokens: [],
       test_tokens: [],
       doc_tokens: [],
-      repomix_tokens: [],
     },
   };
 
@@ -43,7 +40,6 @@ function parseArgs(argv) {
     else if ((arg === '--implementation-token' || arg === '--impl-token') && argv[i + 1]) out.metadata.implementation_tokens.push(argv[++i]);
     else if (arg === '--test-token' && argv[i + 1]) out.metadata.test_tokens.push(argv[++i]);
     else if ((arg === '--doc-token' || arg === '--docs-token') && argv[i + 1]) out.metadata.doc_tokens.push(argv[++i]);
-    else if (arg === '--repomix-token' && argv[i + 1]) out.metadata.repomix_tokens.push(argv[++i]);
     else if (arg === '--json') out.json = true;
     else if (arg === '--strict') out.strict = true;
     else if (!arg.startsWith('-')) out.feature = out.feature ? `${out.feature} ${arg}` : arg;
@@ -53,10 +49,9 @@ function parseArgs(argv) {
 }
 
 function loadConfig() {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const config = readJson(configPath, null);
-  if (!config) throw new Error('Config not found. Run `node sherlog-velocity/install.js` first.');
-  return resolveRuntimeConfig(config);
+  const runtime = loadRuntimeConfig({ fromDir: __dirname });
+  if (!runtime.config) throw new Error('Config not found. Run `node sherlog-velocity/install.js` first.');
+  return runtime.config;
 }
 
 function chooseVelocity(entries) {
@@ -248,6 +243,7 @@ function main() {
 
   const detection = detectGaps(feature, config, {
     record: false,
+    persistSelfModel: false,
     zones: args.zones,
     aliases: args.aliases,
     profile: args.profile || undefined,
@@ -263,6 +259,7 @@ function main() {
       const payload = createEstimatePayload({
         feature,
         autoGaps: true,
+        persistSelfModel: false,
         config,
         entries,
         zones: args.zones,
@@ -308,6 +305,12 @@ function main() {
       source_roots: detection?.evidence?.source_roots || [],
       docs_root: detection?.evidence?.docs_root || null,
     },
+    feature_match: {
+      total: Array.isArray(detection?.evidence?.matched_feature_files) ? detection.evidence.matched_feature_files.length : 0,
+      strict_total: Number(detection?.evidence?.feature_file_count || 0),
+      relaxed_total: Number(detection?.evidence?.feature_file_count_relaxed || 0),
+      files: detection?.evidence?.matched_feature_files || [],
+    },
     diagnostics,
     context_health: ctxHealth,
     estimate,
@@ -334,6 +337,7 @@ function main() {
     console.log(`Feature: ${feature}`);
     console.log(`Velocity: ${velocity.commits_per_day} commits/day (${velocity.runs} run(s), ${velocity.confidence})`);
     console.log(`Gaps: ${gaps.length}`);
+    console.log(`Matched feature files: ${output.feature_match.total}`);
     console.log(`Context mode: ${output.context.mode}`);
     console.log(`Diagnostics: ${diagnostics.pass} pass, ${diagnostics.warn} warn, ${diagnostics.fail} fail`);
     console.log(`Recommended action: ${recommendation.action} (${recommendation.priority})`);

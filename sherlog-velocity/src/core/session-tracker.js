@@ -68,7 +68,7 @@ class SessionTracker {
       const current = readJson(this.activeSessionPath);
       // Check if file is valid JSON
       if (current && current.feature) {
-          throw new Error(`Session already active for '${current.feature}' (started ${current.startTime}). Please end it first.`);
+          throw new Error(`Session already active for '${current.feature}' (started ${current.startTime}). End it first or intentionally replace it; do not silently inherit it for new work.`);
       }
     }
 

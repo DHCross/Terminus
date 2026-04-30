@@ -4,12 +4,14 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync, execFileSync } = require('child_process');
-const { toPortableConfig } = require('./src/core/shared');
+const {
+  detectGitRepoRoot,
+  findRuntimeConfigPath,
+  resolveSherlogStateRoot,
+  toPortableConfig,
+} = require('./src/core/shared');
 
 const DROP_ROOT = __dirname;
-const CONFIG_DIR = path.join(DROP_ROOT, 'config');
-const DATA_DIR = path.join(DROP_ROOT, 'data');
-const CONFIG_PATH = path.join(CONFIG_DIR, 'sherlog.config.json');
 const DROP_PACKAGE_PATH = path.join(DROP_ROOT, 'package.json');
 
 const REQUIRED_DROP_FILES = [
@@ -17,23 +19,28 @@ const REQUIRED_DROP_FILES = [
   'src/core/reporter.js',
   'src/core/estimate.js',
   'src/core/gap-detector.js',
+  'src/core/digest.js',
   'src/core/self-model.js',
   'src/core/consumers.js',
+  'src/core/dead-code.js',
   'src/core/boundary-mapper.js',
   'src/cli/doctor.js',
   'src/cli/verify.js',
   'src/cli/gaps.js',
+  'src/cli/digest.js',
   'src/cli/consumers.js',
+  'src/cli/dead-code.js',
   'src/cli/bounds.js',
   'src/cli/prompt.js',
   'src/cli/init-context.js',
   'src/cli/index-sync.js',
-  'src/cli/repomix-sync.js',
   'src/cli/ack.js',
   'src/cli/hygiene.js',
+  'src/cli/skills.js',
   'src/cli/retrospective.js',
   'src/cli/session.js',
   'src/cli/bridge.js',
+  'src/cli/setup.js',
   'config/gap-weights.json',
   'schemas/sherlog.context.schema.json',
   'schemas/sherlog.gaps-output.schema.json',
@@ -77,6 +84,52 @@ function readJson(filePath, fallback = null) {
   } catch {
     return fallback;
   }
+}
+
+function mergeValues(preferred, fallback) {
+  return preferred === undefined ? fallback : preferred;
+}
+
+function mergeRecords(base = {}, existing = {}) {
+  return {
+    ...(base || {}),
+    ...(existing || {}),
+  };
+}
+
+function preserveExistingConfig(baseConfig, existingConfig) {
+  if (!existingConfig || typeof existingConfig !== 'object') return baseConfig;
+
+  const merged = {
+    ...baseConfig,
+    version: Math.max(Number(baseConfig.version || 0), Number(existingConfig.version || 0) || 0),
+    repo_root: mergeValues(existingConfig.repo_root, baseConfig.repo_root),
+    installed_at: mergeValues(existingConfig.installed_at, baseConfig.installed_at),
+    stack: mergeRecords(baseConfig.stack, existingConfig.stack),
+    bundler: mergeRecords(baseConfig.bundler, existingConfig.bundler),
+    context: mergeRecords(baseConfig.context, existingConfig.context),
+    paths: mergeRecords(baseConfig.paths, existingConfig.paths),
+    settings: mergeRecords(baseConfig.settings, existingConfig.settings),
+  };
+
+  if (Array.isArray(existingConfig.settings?.path_lanes) && existingConfig.settings.path_lanes.length > 0) {
+    merged.settings.path_lanes = existingConfig.settings.path_lanes;
+  }
+  if (Array.isArray(existingConfig.settings?.gap_scan_ignore_dirs) && existingConfig.settings.gap_scan_ignore_dirs.length > 0) {
+    merged.settings.gap_scan_ignore_dirs = existingConfig.settings.gap_scan_ignore_dirs;
+  }
+  if (Array.isArray(existingConfig.paths?.source_roots) && existingConfig.paths.source_roots.length > 0) {
+    merged.paths.source_roots = existingConfig.paths.source_roots;
+  }
+  if (Array.isArray(existingConfig.paths?.test_roots) && existingConfig.paths.test_roots.length > 0) {
+    merged.paths.test_roots = existingConfig.paths.test_roots;
+  }
+  if (existingConfig.context?.map_file) {
+    merged.context.map_file = existingConfig.context.map_file;
+    merged.paths.context_map = existingConfig.context.map_file;
+  }
+
+  return merged;
 }
 
 function normalizePath(p) {
@@ -479,15 +532,7 @@ function loadDropVersion() {
 }
 
 function detectRepoRoot() {
-  try {
-    return execSync('git rev-parse --show-toplevel', {
-      cwd: process.cwd(),
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return path.resolve(DROP_ROOT, '..');
-  }
+  return detectGitRepoRoot(process.cwd());
 }
 
 function detectStack(root) {
@@ -498,6 +543,10 @@ function detectStack(root) {
       const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
       const framework =
         deps.next ? 'Next.js' :
+        deps.astro ? 'Astro' :
+        deps.express ? 'Express' :
+        deps['@remix-run/react'] ? 'Remix' :
+        deps['@nestjs/core'] ? 'NestJS' :
         deps.electron ? 'Electron' :
         deps.react ? 'React' :
         null;
@@ -526,36 +575,7 @@ function detectCI(root) {
   return null;
 }
 
-function detectRepomixBundles(root) {
-  const candidates = [
-    path.join(root, '.repomix'),
-    path.join(root, 'repomix'),
-  ];
-
-  for (const dir of candidates) {
-    if (!fs.existsSync(dir) || !isDirectory(dir)) continue;
-    const files = fs.readdirSync(dir).filter(name => name.endsWith('.xml') || name.endsWith('.txt') || name.endsWith('.md'));
-    if (!files.length) continue;
-    return files.map(name => name.replace(/\.(xml|txt|md)$/i, ''));
-  }
-
-  return [];
-}
-
 function detectBundler(root) {
-  const hasRepomixConfig =
-    fs.existsSync(path.join(root, '.repomix')) ||
-    fs.existsSync(path.join(root, 'repomix.config.js')) ||
-    fs.existsSync(path.join(root, 'repomix.config.cjs')) ||
-    fs.existsSync(path.join(root, 'repomix.config.json'));
-
-  if (hasRepomixConfig) {
-    return {
-      type: 'repomix',
-      bundles: detectRepomixBundles(root),
-    };
-  }
-
   if (fs.existsSync(path.join(root, 'context.json'))) {
     return { type: 'context.ai', bundles: [] };
   }
@@ -565,14 +585,9 @@ function detectBundler(root) {
 
 function detectContext(root) {
   const sherlogMap = path.join(root, 'sherlog.context.json');
-  const repomixManifest = path.join(root, 'repomix-manifest.json');
 
   if (fs.existsSync(sherlogMap)) {
     return { mode: 'sherlog-map', map_file: sherlogMap };
-  }
-
-  if (fs.existsSync(repomixManifest)) {
-    return { mode: 'repomix-compat', map_file: repomixManifest };
   }
 
   return { mode: 'sherlog-map', map_file: sherlogMap };
@@ -587,16 +602,131 @@ function detectDocsDir(root) {
   return 'docs';
 }
 
+function pathPatternForRoot(root) {
+  const normalized = normalizePath(root);
+  if (!normalized || normalized === '.') return '**/*';
+  return `${normalized}/**`;
+}
+
+function inferPathLanes(repoRoot, options = {}) {
+  const sourceRoots = uniquePaths(options.sourceRoots || detectSourceRoots(repoRoot));
+  const testRoots = uniquePaths(options.testRoots || detectTestRoots(repoRoot, sourceRoots));
+  const archiveRoots = uniquePaths(options.archiveRoots || detectArchiveLikeDirs(repoRoot));
+  const generatedRoots = uniquePaths(options.generatedRoots || [
+    'dist',
+    'build',
+    'coverage',
+    'out',
+    'generated',
+    'velocity-artifacts',
+    '.astro',
+    '.next',
+  ]);
+  const lanes = [
+    {
+      name: 'core',
+      mode: 'strict',
+      include: [],
+      exclude: [],
+    },
+  ];
+
+  if (testRoots.length > 0) {
+    lanes.push({
+      name: 'tests',
+      mode: 'strict',
+      include: testRoots.map(pathPatternForRoot),
+      exclude: [],
+    });
+  }
+
+  if (isDirectory(path.join(repoRoot, 'scripts'))) {
+    lanes.push({
+      name: 'scripts',
+      mode: 'relaxed',
+      include: ['scripts/**'],
+      exclude: [],
+    });
+  }
+
+  const legacyPatterns = uniquePaths([
+    ...archiveRoots.map(pathPatternForRoot),
+    'legacy/**',
+    'archive/**',
+    'deprecated/**',
+    'prototype/**',
+    'prototypes/**',
+    'experimental/**',
+    'sandbox/**',
+  ]);
+  if (legacyPatterns.length > 0) {
+    lanes.push({
+      name: 'legacy',
+      mode: 'relaxed',
+      include: legacyPatterns,
+      exclude: [],
+    });
+  }
+
+  const generatedPatterns = uniquePaths([
+    ...generatedRoots.map(pathPatternForRoot),
+    '**/*.generated.js',
+    '**/*.generated.ts',
+    '**/*.generated.jsx',
+    '**/*.generated.tsx',
+  ]);
+  if (generatedPatterns.length > 0) {
+    lanes.push({
+      name: 'generated',
+      mode: 'excluded',
+      include: generatedPatterns,
+      exclude: [],
+    });
+  }
+
+  return {
+    default_lane: 'core',
+    lanes,
+  };
+}
+
+function buildAutoContextGuess(repoRoot, options = {}) {
+  const stack = detectStack(repoRoot);
+  const docsDir = options.docsDir || detectDocsDir(repoRoot);
+  const sourceRoots = uniquePaths(options.sourceRoots || detectSourceRoots(repoRoot));
+  const testRoots = uniquePaths(options.testRoots || detectTestRoots(repoRoot, sourceRoots));
+  const archiveRoots = uniquePaths(options.archiveRoots || detectArchiveLikeDirs(repoRoot));
+  const pathLanes = inferPathLanes(repoRoot, {
+    sourceRoots,
+    testRoots,
+    archiveRoots,
+  });
+
+  return {
+    stack,
+    docs_dir: docsDir,
+    source_roots: sourceRoots,
+    test_roots: testRoots,
+    archive_roots: archiveRoots,
+    path_lanes_default: pathLanes.default_lane,
+    path_lanes: pathLanes.lanes,
+  };
+}
+
 function parseInstallArgs(argv) {
   const out = {
     sourceRoots: [],
     forceContext: false,
+    auto: false,
+    targetRepo: '',
   };
 
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--source-root' && argv[i + 1]) out.sourceRoots.push(argv[++i]);
     else if (arg === '--force-context') out.forceContext = true;
+    else if (arg === '--auto') out.auto = true;
+    else if (arg === '--target-repo' && argv[i + 1]) out.targetRepo = argv[++i];
   }
 
   return out;
@@ -620,11 +750,50 @@ function nodeScriptCommand(relDropPath, scriptPath) {
   return `node ${full}`;
 }
 
+function cliScriptCommand(command, suffix = '') {
+  return `sherlog ${command}${suffix ? ` ${suffix}` : ''}`;
+}
+
 function canonicalScriptCommand(command) {
   return String(command || '')
     .trim()
     .replace(/['"]/g, '')
     .replace(/\s+/g, ' ');
+}
+
+function isWithin(parentPath, childPath) {
+  const relative = path.relative(parentPath, childPath);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
+function shouldBootstrapLocalInstall(repoRoot) {
+  if (DROP_ROOT === repoRoot) return false;
+  const localDropRoot = path.join(repoRoot, 'sherlog-velocity');
+  const nodeModulesDropRoot = path.join(repoRoot, 'node_modules', 'sherlog-velocity');
+  if (DROP_ROOT === localDropRoot || DROP_ROOT === nodeModulesDropRoot) return false;
+  return !isWithin(repoRoot, DROP_ROOT);
+}
+
+function bootstrapInstalledPackage(repoRoot, cliArgs) {
+  const pkg = readJson(DROP_PACKAGE_PATH, {});
+  const packageName = String(pkg.name || 'sherlog-velocity');
+  const packageVersion = String(pkg.version || 'latest');
+  const installTarget = `${packageName}@${packageVersion}`;
+
+  console.log(`Bootstrapping local Sherlog package in ${repoRoot}...`);
+  execSync(`npm install --save-dev ${installTarget}`, { cwd: repoRoot, stdio: 'inherit' });
+
+  const delegatedInstallPath = path.join(repoRoot, 'node_modules', packageName, 'install.js');
+  const delegatedArgs = [];
+  if (cliArgs.auto) delegatedArgs.push('--auto');
+  if (cliArgs.forceContext) delegatedArgs.push('--force-context');
+  cliArgs.sourceRoots.forEach(root => delegatedArgs.push('--source-root', root));
+  delegatedArgs.push('--target-repo', repoRoot);
+
+  execFileSync(process.execPath, [delegatedInstallPath, ...delegatedArgs], {
+    cwd: repoRoot,
+    stdio: 'inherit',
+  });
 }
 
 function wireHostScripts(repoRoot) {
@@ -642,28 +811,39 @@ function wireHostScripts(repoRoot) {
     return;
   }
 
+  const { installedPackageMode } = findRuntimeConfigPath({ cwd: repoRoot, packageRoot: DROP_ROOT });
   const relDropPath = normalizePath(path.relative(repoRoot, DROP_ROOT)) || '.';
+  const commandFor = (command, scriptPath, suffix = '') =>
+    installedPackageMode
+      ? cliScriptCommand(command, suffix)
+      : `${nodeScriptCommand(relDropPath, scriptPath)}${suffix ? ` ${suffix}` : ''}`;
   const desiredScripts = {
-    'velocity:run': nodeScriptCommand(relDropPath, 'src/core/analyzer.js'),
-    'velocity:report': nodeScriptCommand(relDropPath, 'src/core/reporter.js'),
-    'velocity:estimate': nodeScriptCommand(relDropPath, 'src/core/estimate.js'),
-    'sherlog:verify': `${nodeScriptCommand(relDropPath, 'src/cli/verify.js')} --strict`,
-    'sherlog:doctor': nodeScriptCommand(relDropPath, 'src/cli/doctor.js'),
-    'sherlog:gaps': nodeScriptCommand(relDropPath, 'src/cli/gaps.js'),
-    'sherlog:consumers': nodeScriptCommand(relDropPath, 'src/cli/consumers.js'),
-    'sherlog:bounds': nodeScriptCommand(relDropPath, 'src/cli/bounds.js'),
-    'sherlog:prompt': nodeScriptCommand(relDropPath, 'src/cli/prompt.js'),
-    'sherlog:init-context': nodeScriptCommand(relDropPath, 'src/cli/init-context.js'),
-    'sherlog:index-sync': nodeScriptCommand(relDropPath, 'src/cli/index-sync.js'),
-    'sherlog:repomix-sync': nodeScriptCommand(relDropPath, 'src/cli/repomix-sync.js'),
-    'sherlog:bridge': nodeScriptCommand(relDropPath, 'src/cli/bridge.js'),
-    'sherlog:retrospective': nodeScriptCommand(relDropPath, 'src/cli/retrospective.js'),
-    'sherlog:hygiene': nodeScriptCommand(relDropPath, 'src/cli/hygiene.js'),
-    'sherlog:session:start': nodeScriptCommand(relDropPath, 'src/cli/session.js start'),
-    'sherlog:session:end': nodeScriptCommand(relDropPath, 'src/cli/session.js end'),
-    'sherlog:session:report': nodeScriptCommand(relDropPath, 'src/cli/session.js report'),
-    'sherlog:session:status': nodeScriptCommand(relDropPath, 'src/cli/session.js status'),
-    'sherlog:session:note': nodeScriptCommand(relDropPath, 'src/cli/session.js note'),
+    'velocity:run': commandFor('analyze', 'src/core/analyzer.js'),
+    'velocity:report': commandFor('report', 'src/core/reporter.js'),
+    'velocity:estimate': commandFor('estimate', 'src/core/estimate.js'),
+    'sherlog:init': commandFor('init', 'src/cli/init-context.js'),
+    'sherlog:verify': commandFor('verify', 'src/cli/verify.js', '--strict'),
+    'sherlog:doctor': commandFor('doctor', 'src/cli/doctor.js'),
+    'sherlog:gaps': commandFor('gaps', 'src/cli/gaps.js'),
+    'sherlog:digest': commandFor('digest', 'src/cli/digest.js'),
+    'sherlog:update': commandFor('update', 'src/cli/update.js'),
+    'sherlog:setup': commandFor('setup', 'src/cli/setup.js'),
+    'sherlog:consumers': commandFor('consumers', 'src/cli/consumers.js'),
+    'sherlog:bounds': commandFor('bounds', 'src/cli/bounds.js'),
+    'sherlog:prompt': commandFor('prompt', 'src/cli/prompt.js'),
+    'sherlog:init-context': commandFor('init-context', 'src/cli/init-context.js'),
+    'sherlog:index-sync': commandFor('index-sync', 'src/cli/index-sync.js'),
+    'sherlog:bridge': commandFor('bridge', 'src/cli/bridge.js'),
+    'sherlog:retrospective': commandFor('retrospective', 'src/cli/retrospective.js'),
+    'sherlog:hygiene': commandFor('hygiene', 'src/cli/hygiene.js'),
+    'sherlog:dead-code': commandFor('dead-code', 'src/cli/dead-code.js'),
+    'sherlog:skills:suggest': commandFor('skills', 'src/cli/skills.js', '--suggest'),
+    'sherlog:skills:generate': commandFor('skills', 'src/cli/skills.js', '--generate'),
+    'sherlog:session:start': commandFor('session', 'src/cli/session.js', 'start'),
+    'sherlog:session:end': commandFor('session', 'src/cli/session.js', 'end'),
+    'sherlog:session:report': commandFor('session', 'src/cli/session.js', 'report'),
+    'sherlog:session:status': commandFor('session', 'src/cli/session.js', 'status'),
+    'sherlog:session:note': commandFor('session', 'src/cli/session.js', 'note'),
     'velocity:all': 'npm run velocity:run && npm run velocity:report',
   };
 
@@ -793,11 +973,7 @@ These are the most common reasons Sherlog appears installed but is not truly ope
 - Symptom: constant \`missing_implementation\` false positives.
 - Fix: set \`paths.source_roots\` to real code roots (for example \`vessel/src\`), avoid \`.\` when possible.
 
-## 4) Forced repomix mode without matching artifacts
-- Symptom: recurring \`integration\` / \`missing_bundle\` pressure even when feature code exists.
-- Fix: only use repomix-compatible mode when manifest/config is present and maintained.
-
-## 5) Archive directories inflate drift
+## 4) Archive directories inflate drift
 - Symptom: \`context_drift\` triggered by legacy/archived files unrelated to current work.
 - Fix: add archive paths to \`settings.gap_scan_ignore_dirs\` in Sherlog config.
 
@@ -847,7 +1023,9 @@ function ensureAgentsInstructions(repoRoot, docsDir) {
     'npm run sherlog:session:end',
     '```',
     '',
-    'If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`prompt`/`estimate` should auto-start a session when none is active.',
+    'The agent should explicitly start the current coding session instead of inheriting an unrelated active session.',
+    '',
+    'If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`prompt`/`estimate` may auto-start a session when none is active, but that mode is optional and still command-time only.',
     '',
     `Use \`${nextStepsPath}\` and \`${whyPath}\` as the local operating guide.`,
     markerEnd,
@@ -880,22 +1058,36 @@ function main() {
   validateDropIntegrity();
   const cliArgs = parseInstallArgs(process.argv);
 
-  const repoRoot = detectRepoRoot();
+  const repoRoot = cliArgs.targetRepo
+    ? path.resolve(cliArgs.targetRepo)
+    : detectRepoRoot();
+  if (shouldBootstrapLocalInstall(repoRoot)) {
+    bootstrapInstalledPackage(repoRoot, cliArgs);
+    return;
+  }
+  const stateRoot = resolveSherlogStateRoot(repoRoot, { packageRoot: DROP_ROOT, cwd: repoRoot });
+  const configDir = path.join(stateRoot, 'config');
+  const dataDir = path.join(stateRoot, 'data');
+  const configPath = path.join(configDir, 'sherlog.config.json');
   const docsDir = detectDocsDir(repoRoot);
-  const stack = detectStack(repoRoot);
+  const autoGuess = buildAutoContextGuess(repoRoot, {
+    docsDir,
+    sourceRoots: cliArgs.sourceRoots
+      .map(item => normalizeSourceRootArg(repoRoot, item))
+      .filter(Boolean),
+  });
+  const stack = autoGuess.stack;
   const ci = detectCI(repoRoot);
   const bundler = detectBundler(repoRoot);
-  const explicitSourceRoots = cliArgs.sourceRoots
-    .map(item => normalizeSourceRootArg(repoRoot, item))
-    .filter(Boolean);
-  const sourceRoots = explicitSourceRoots.length > 0 ? explicitSourceRoots : detectSourceRoots(repoRoot);
-  const testRoots = detectTestRoots(repoRoot, sourceRoots);
-  const archiveIgnoreDirs = detectArchiveLikeDirs(repoRoot);
+  const sourceRoots = autoGuess.source_roots;
+  const testRoots = autoGuess.test_roots;
+  const archiveIgnoreDirs = autoGuess.archive_roots;
   const context = detectContext(repoRoot);
   const dropVersion = loadDropVersion();
 
-  ensureDir(CONFIG_DIR);
-  ensureDir(DATA_DIR);
+  ensureDir(configDir);
+  ensureDir(dataDir);
+  const existingConfig = readJson(configPath, null);
 
   let contextMapUpdate = { created: false, updated: false, mapPath: context.map_file, zones: 0 };
   if (context.mode === 'sherlog-map') {
@@ -908,7 +1100,7 @@ function main() {
     context.map_file = contextMapUpdate.mapPath;
   }
 
-  const config = {
+  const generatedConfig = {
     version: 2,
     drop_version: dropVersion,
     repo_root: repoRoot,
@@ -918,41 +1110,27 @@ function main() {
     bundler,
     context,
     paths: {
-      velocity_log: path.join(DATA_DIR, 'velocity-log.jsonl'),
-      gap_history_log: path.join(DATA_DIR, 'gap-history.jsonl'),
+      velocity_log: path.join(dataDir, 'velocity-log.jsonl'),
+      gap_history_log: path.join(dataDir, 'gap-history.jsonl'),
       gap_acknowledgements: path.join(repoRoot, 'sherlog.acknowledgements.json'),
-      profile_run_history_log: path.join(DATA_DIR, 'profile-run-history.jsonl'),
+      profile_run_history_log: path.join(dataDir, 'profile-run-history.jsonl'),
       profile_run_artifacts_dir: path.join(repoRoot, 'velocity-artifacts', 'sherlog-runs'),
-      core_suite_history_log: path.join(DATA_DIR, 'core-suite-history.jsonl'),
+      core_suite_history_log: path.join(dataDir, 'core-suite-history.jsonl'),
       report_output_markdown: path.join(repoRoot, docsDir, 'velocity-forecast.md'),
       summary_output_json: path.join(repoRoot, 'velocity-artifacts', 'velocity-summary.json'),
-      gap_weights: path.join(CONFIG_DIR, 'gap-weights.json'),
+      gap_weights: path.join(configDir, 'gap-weights.json'),
       docs_dir: docsDir,
       source_roots: sourceRoots,
       test_roots: testRoots,
       context_map: context.map_file,
-      repomix_manifest: path.join(repoRoot, 'repomix-manifest.json'),
     },
     settings: {
       window_days: Number(process.env.VELOCITY_WINDOW_DAYS || 7),
-      session_autostart_on_feature_commands: true,
+      session_autostart_on_feature_commands: false,
       gap_analysis: Boolean(bundler.type) || context.mode !== 'none',
       gap_scan_ignore_dirs: archiveIgnoreDirs,
-      path_lanes_default: 'core',
-      path_lanes: [
-        {
-          name: 'core',
-          mode: 'strict',
-          include: [],
-          exclude: [],
-        },
-        {
-          name: 'legacy',
-          mode: 'relaxed',
-          include: ['legacy/**', 'archive/**', 'deprecated/**', 'prototype/**', 'prototypes/**', 'experimental/**', 'sandbox/**'],
-          exclude: [],
-        },
-      ],
+      path_lanes_default: autoGuess.path_lanes_default,
+      path_lanes: autoGuess.path_lanes,
       lane_multipliers: {
         strict: 1,
         relaxed: 0.35,
@@ -962,15 +1140,13 @@ function main() {
         implementation: 0.5,
         tests: 0.45,
         docs: 0.5,
-        repomix: 0.4,
         overall: 0.45,
       },
       convergence_weights: {
         implementation: { path: 0.45, export: 0.35, callsite: 0.2 },
         tests: { path: 0.65, content: 0.35 },
         docs: { path: 0.55, content: 0.45 },
-        repomix: { path: 0.35, content: 0.35, bundle: 0.3 },
-        overall: { implementation: 0.4, tests: 0.25, docs: 0.2, repomix: 0.15 },
+        overall: { implementation: 0.45, tests: 0.3, docs: 0.25 },
       },
       core_suite_features: [
         'Sherlog Control Center UI',
@@ -992,8 +1168,9 @@ function main() {
     },
   };
 
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(toPortableConfig(config, repoRoot), null, 2) + '\n', 'utf8');
-  console.log(`Config written: ${CONFIG_PATH}`);
+  const config = preserveExistingConfig(generatedConfig, existingConfig);
+  fs.writeFileSync(configPath, JSON.stringify(toPortableConfig(config, repoRoot), null, 2) + '\n', 'utf8');
+  console.log(`Config written: ${configPath}`);
   console.log(`Drop version: ${dropVersion}`);
   console.log(`Detected stack: ${stack.language}${stack.framework ? ` (${stack.framework})` : ''}`);
   console.log(`Detected CI: ${ci || 'none'}`);
@@ -1007,6 +1184,7 @@ function main() {
   }
   console.log(`Detected context mode: ${context.mode}`);
   console.log(`Context map file: ${context.map_file}`);
+  console.log(`Sherlog state root: ${stateRoot}`);
 
   if (context.mode === 'sherlog-map') {
     if (contextMapUpdate.created) {
@@ -1048,12 +1226,16 @@ function main() {
 if (require.main === module) main();
 
 module.exports = {
+  buildAutoContextGuess,
   buildContextZones,
   detectDocsDir,
   detectRepoRoot,
   detectSourceRoots,
   detectTestRoots,
   detectArchiveLikeDirs,
+  detectStack,
   ensureContextMap,
+  inferPathLanes,
   normalizePath,
+  wireHostScripts,
 };

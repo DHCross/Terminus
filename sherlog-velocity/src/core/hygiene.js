@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const {
-  readJson,
   readJsonLines,
   ensureFile,
+  loadRuntimeConfig,
   resolveRuntimeConfig,
 } = require('./shared');
 const { detectSourceRoots: detectInstalledSourceRoots } = require('../../install');
@@ -44,7 +44,7 @@ const DEFAULT_IGNORED_PREFIXES = [
 
 const CONSOLE_SKIP_SEGMENTS = ['test/', 'tests/', '__tests__/', 'scripts/'];
 
-const ALL_FINDING_TYPES = ['todo_cluster', 'console_log', 'excessive_any', 'monolith', 'monolith_size', 'missing_docs', 'nesting_depth'];
+const ALL_FINDING_TYPES = ['todo_cluster', 'console_log', 'excessive_any', 'monolith', 'monolith_size', 'missing_docs', 'nesting_depth', 'unreachable_code', 'unused_variable', 'unused_function', 'dead_branch'];
 
 const THRESHOLD_MAP = {
   todo_cluster: 'todo_cluster_threshold',
@@ -451,6 +451,9 @@ function mapFindingsToGaps(findings) {
     if (f.type === 'monolith' || f.type === 'monolith_size') gaps.add('architectural_limit_exceeded');
     if (f.type === 'missing_docs') gaps.add('undocumented_module');
     if (f.type === 'nesting_depth') gaps.add('architectural_limit_exceeded');
+    if (f.type === 'unreachable_code') gaps.add('dead_code_unreachable');
+    if (f.type === 'unused_variable' || f.type === 'unused_function') gaps.add('dead_code_unused_symbol');
+    if (f.type === 'dead_branch') gaps.add('dead_code_dead_branch');
   }
   return Array.from(gaps);
 }
@@ -584,8 +587,7 @@ function suggestTuning(history, thresholds) {
 // ── Main scan ────────────────────────────────────────────────────────
 
 function scanHygiene(configInput, options = {}) {
-  const configPath = path.resolve(__dirname, '../../config/sherlog.config.json');
-  const rawConfig = configInput || readJson(configPath, null);
+  const rawConfig = configInput || loadRuntimeConfig({ fromDir: __dirname }).config;
   const config = rawConfig ? resolveRuntimeConfig(rawConfig) : rawConfig;
   if (!config) {
     return {
@@ -639,6 +641,17 @@ function scanHygiene(configInput, options = {}) {
 
   const docFindings = checkMissingDocs(repoRoot, sourceFileInfo, thresholds, config);
   allFindings.push(...docFindings);
+
+  // Fold dead-code findings in unless explicitly excluded
+  if (config?.settings?.hygiene?.include_dead_code !== false) {
+    const { scanDeadCode } = require('./dead-code');
+    const dcResult = scanDeadCode(config, {
+      record: false,
+      ...(options.feature ? { feature: options.feature } : {}),
+      ...(options.types ? { types: options.types.filter(t => ['unreachable_code', 'unused_variable', 'unused_function', 'dead_branch'].includes(t)) } : {}),
+    });
+    allFindings.push(...dcResult.findings);
+  }
 
   const filtered = typeFilter
     ? allFindings.filter(f => typeFilter.has(f.type))

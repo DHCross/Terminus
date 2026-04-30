@@ -11,21 +11,31 @@
     "developer-tools"
   ],
   "main": "src/core/analyzer.js",
+  "bin": {
+    "sherlog": "bin/sherlog.js",
+    "sherlog-velocity": "bin/sherlog.js"
+  },
   "scripts": {
     "velocity:run": "node src/core/analyzer.js",
     "velocity:report": "node src/core/reporter.js",
     "velocity:estimate": "node src/core/estimate.js",
+    "sherlog:init": "node src/cli/init-context.js",
     "sherlog:verify": "node src/cli/verify.js --strict",
     "sherlog:doctor": "node src/cli/doctor.js",
     "sherlog:gaps": "node src/cli/gaps.js",
+    "sherlog:digest": "node src/cli/digest.js",
+    "sherlog:update": "node src/cli/update.js",
+    "sherlog:setup": "node src/cli/setup.js",
     "sherlog:consumers": "node src/cli/consumers.js",
     "sherlog:bounds": "node src/cli/bounds.js",
     "sherlog:prompt": "node src/cli/prompt.js",
     "sherlog:hygiene": "node src/cli/hygiene.js",
+    "sherlog:skills:suggest": "node src/cli/skills.js --suggest",
+    "sherlog:skills:generate": "node src/cli/skills.js --generate",
     "sherlog:init-context": "node src/cli/init-context.js",
     "sherlog:index-sync": "node src/cli/index-sync.js",
-    "sherlog:repomix-sync": "node src/cli/repomix-sync.js",
     "sherlog:bridge": "node src/cli/bridge.js",
+    "sherlog:dead-code": "node src/cli/dead-code.js",
     "velocity:all": "npm run velocity:run && npm run velocity:report",
     "test": "node --test test/*.test.js"
   },
