@@ -1,4 +1,4 @@
-.PHONY: launch launch-browser mirror sync-context install-desktop-launcher stop logs setup seed-coherence-lab verify doctor gaps hygiene journal traces health backup-state
+.PHONY: launch launch-browser mirror sync-context install-desktop-launcher stop logs setup seed-coherence-lab refresh-continuity-rag verify doctor gaps hygiene journal traces health backup-state
 
 # Resolve native Terminus directory from .env or use default
 SAPPHIRE_NATIVE_DIR ?= $(shell grep -E '^SAPPHIRE_NATIVE_DIR=' .env 2>/dev/null | cut -d= -f2- || echo "/Volumes/My Passport/Sapphire-native")
@@ -56,6 +56,9 @@ setup:
 
 seed-coherence-lab:
 	./scripts/install-coherence-lab.sh
+
+refresh-continuity-rag:
+	bash ./scripts/refresh-continuity-rag.sh
 
 journal:
 	open "$(SAPPHIRE_NATIVE_DIR)/user/continuity/journal"

@@ -24,6 +24,10 @@ function writeJson(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 }
 
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
 describe('Continuity Snapshot Tooling', () => {
   test('reads compact persisted continuity snapshots', () => {
     const tempDir = makeTempDir('reader');
@@ -121,6 +125,42 @@ describe('Continuity Snapshot Tooling', () => {
 
     assert.equal(sourceFiles.length > 0, true);
     assert.equal(ingestLog.length > 0, true);
+
+    fs.rmSync(tempDir, { recursive: true });
+  });
+
+  test('refresh script updates persisted continuity snapshots without reinstalling seed assets', () => {
+    const tempDir = makeTempDir('refresh');
+    const dataDir = path.join(tempDir, 'user');
+    const knowledgeDir = path.join(tempDir, 'knowledge');
+    const refreshScriptPath = path.join(__dirname, '..', '..', 'scripts', 'refresh-continuity-rag.sh');
+
+    fs.mkdirSync(knowledgeDir, { recursive: true });
+    fs.writeFileSync(path.join(knowledgeDir, 'notes.md'), '# Notes\nA claim is formed here.', 'utf8');
+
+    execFileSync('bash', [refreshScriptPath, dataDir, knowledgeDir], {
+      encoding: 'utf8',
+      env: process.env,
+    });
+
+    fs.writeFileSync(path.join(knowledgeDir, 'notes.md'), '# Notes\nA claim is refined here.\n## Delta\nA new section appears.', 'utf8');
+
+    execFileSync('bash', [refreshScriptPath, dataDir, knowledgeDir], {
+      encoding: 'utf8',
+      env: process.env,
+    });
+
+    const sourcesDir = path.join(dataDir, 'continuity', 'rag', 'sources');
+    const sourceFiles = fs.readdirSync(sourcesDir);
+    const sourceIndexPath = path.join(sourcesDir, sourceFiles[0]);
+    const sourceIndex = readJson(sourceIndexPath);
+    const ingestLogPath = path.join(dataDir, 'continuity', 'rag', 'ingests.jsonl');
+    const ingestLog = fs.readFileSync(ingestLogPath, 'utf8').trim().split('\n');
+
+    assert.equal(sourceFiles.length, 1);
+    assert.equal(sourceIndex.versions.length, 2);
+    assert.match(sourceIndex.latest_snapshot.summary, /refined/);
+    assert.equal(ingestLog.length, 2);
 
     fs.rmSync(tempDir, { recursive: true });
   });

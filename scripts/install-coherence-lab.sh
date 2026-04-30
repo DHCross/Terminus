@@ -114,11 +114,7 @@ cp "$PLUGIN_SRC/hooks/post_llm.py" "$PLUGIN_DST/hooks/post_llm.py"
 cp "$PLUGIN_SRC/hooks/post_execute.py" "$PLUGIN_DST/hooks/post_execute.py"
 cp "$PLUGIN_SRC/tools/trace_tools.py" "$PLUGIN_DST/tools/trace_tools.py"
 
-RAG_STATE_DIR="$DATA_DIR/continuity/rag"
-RAG_INGESTER="$SEED_DIR/knowledge/rag_ingester.py"
-while IFS= read -r -d '' note_path; do
-    python3 "$RAG_INGESTER" --file "$note_path" --state-dir "$RAG_STATE_DIR" >/dev/null
-done < <(find "$SEED_DIR/knowledge" -maxdepth 1 -type f -name '*.md' -print0)
+bash "$ROOT_DIR/scripts/refresh-continuity-rag.sh" "$DATA_DIR" "$SEED_DIR/knowledge" >/dev/null
 
 cat <<EOF
 Installed Coherence Lab seed into:
