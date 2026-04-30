@@ -1,8 +1,8 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 const { resolveRuntimeConfig, resolveRepoRoot } = require('../src/core/shared');
 const { checkOperationalWiring } = require('../src/cli/verify');
@@ -38,6 +38,43 @@ function makeContext(repoRoot, rawConfig) {
 }
 
 describe('verify operational wiring', () => {
+  test('does not warn for portable relative config paths', () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-verify-relative-'));
+    seedPortableRepo(repoRoot, {
+      'sherlog:verify': 'node sherlog-velocity/src/cli/verify.js --strict',
+      'sherlog:doctor': 'node sherlog-velocity/src/cli/doctor.js',
+      'sherlog:gaps': 'node sherlog-velocity/src/cli/gaps.js',
+      'sherlog:bounds': 'node sherlog-velocity/src/cli/bounds.js',
+      'sherlog:prompt': 'node sherlog-velocity/src/cli/prompt.js',
+      'velocity:estimate': 'node sherlog-velocity/src/core/estimate.js',
+    });
+
+    const rawConfig = {
+      repo_root: '.',
+      context: {
+        mode: 'sherlog-map',
+        map_file: 'sherlog.context.json',
+      },
+      paths: {
+        source_roots: ['src'],
+        test_roots: ['test'],
+        velocity_log: 'sherlog-velocity/data/velocity-log.jsonl',
+      },
+      settings: {
+        gap_scan_ignore_dirs: [],
+      },
+    };
+
+    const checks = checkOperationalWiring(makeContext(repoRoot, rawConfig));
+    const portability = checks.find(check => check.id === 'portable_config_paths');
+
+    assert.ok(portability);
+    assert.equal(portability.status, 'pass');
+    assert.deepStrictEqual(portability.evidence.issues, []);
+
+    fs.rmSync(repoRoot, { recursive: true });
+  });
+
   test('warns when config contains dead absolute machine-specific paths', () => {
     const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sherlog-verify-portability-'));
     seedPortableRepo(repoRoot, {
@@ -102,8 +139,11 @@ describe('verify operational wiring', () => {
     assert.equal(requiredScripts.status, 'fail');
     assert.deepStrictEqual(requiredScripts.evidence.missing_scripts.sort(), [
       'sherlog:bounds',
+      'sherlog:dependency-graph',
       'sherlog:doctor',
+      'sherlog:frontier',
       'sherlog:gaps',
+      'sherlog:hygiene',
       'sherlog:prompt',
       'velocity:estimate',
     ]);

@@ -1,10 +1,13 @@
 # tools/trace_tools.py — reasoning-trace plugin
-# Exposes three tools to the LLM:
+# Exposes four tools to the LLM:
 #   commit_claim(question, claim, confidence, retraction_check) — log a committed position before responding
+#   read_continuity_snapshot(source_id, limit) — read compact persisted continuity state
 #   read_trace(date)         — read today's (or any date's) reasoning trace
 #   write_journal(content, date) — write a journal entry to the journal directory
 
+import json
 import logging
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -12,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 ENABLED = True
 EMOJI = "\U0001f9e0"
-AVAILABLE_FUNCTIONS = ["commit_claim", "read_trace", "write_journal"]
+AVAILABLE_FUNCTIONS = ["commit_claim", "read_continuity_snapshot", "read_trace", "write_journal"]
 
 TOOLS = [
     {
@@ -50,6 +53,32 @@ TOOLS = [
                     },
                 },
                 "required": ["question", "claim", "confidence", "retraction_check"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "is_local": True,
+        "function": {
+            "name": "read_continuity_snapshot",
+            "description": (
+                "Read compact persisted continuity snapshots from the local continuity state store. "
+                "Use this before opening raw traces or large documents when you need a low-token summary "
+                "of recent changes, promoted anchors, open questions, and the current next step."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source_id": {
+                        "type": "string",
+                        "description": "Optional source id to filter to a single persisted snapshot.",
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Maximum number of snapshots to return. Defaults to 3.",
+                    },
+                },
+                "required": [],
             },
         },
     },
@@ -110,8 +139,86 @@ TOOLS = [
 
 
 def _user_dir() -> Path:
+    override = os.environ.get("TERMINUS_USER_DIR")
+    if override:
+        return Path(override)
     # tools/trace_tools.py -> tools/ -> reasoning-trace/ -> plugins/ -> user/
     return Path(__file__).parent.parent.parent.parent
+
+
+def _continuity_rag_dir() -> Path:
+    override = os.environ.get("TERMINUS_CONTINUITY_STATE_DIR")
+    if override:
+        return Path(override)
+    return _user_dir() / "continuity" / "rag"
+
+
+def _load_json(path: Path):
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _latest_snapshot_records(source_id: str = ""):
+    sources_dir = _continuity_rag_dir() / "sources"
+    if not sources_dir.exists():
+        return []
+
+    records = []
+    for path in sources_dir.glob("*.json"):
+        try:
+            record = _load_json(path)
+        except Exception:
+            continue
+        if not isinstance(record, dict):
+            continue
+        if source_id and record.get("source_id") != source_id:
+            continue
+        if not isinstance(record.get("latest_snapshot"), dict):
+            continue
+        records.append(record)
+
+    return sorted(records, key=lambda item: item.get("last_ingested_at") or "", reverse=True)
+
+
+def _format_changed_sections(snapshot: dict) -> str:
+    sections = snapshot.get("continuity_cockpit", {}).get("what_changed", [])
+    formatted = []
+    for section in sections[:3]:
+        heading = section.get("section_heading", "Unknown")
+        change_type = section.get("change_type", "changed")
+        formatted.append(f"{heading} ({change_type})")
+    return "; ".join(formatted) if formatted else "No recent changes recorded."
+
+
+def _format_list(items, empty_text: str) -> str:
+    filtered = [item for item in items if item]
+    return "; ".join(filtered[:3]) if filtered else empty_text
+
+
+def _format_snapshot_record(record: dict) -> str:
+    snapshot = record.get("latest_snapshot", {})
+    morning_summary = snapshot.get("morning_summary", {})
+    research_state = snapshot.get("research_state", {})
+    evaluation_signals = snapshot.get("evaluation_signals", {})
+
+    title = record.get("title", record.get("source_id", "Unknown source"))
+    source_id = record.get("source_id", "unknown")
+    changed_sections = _format_changed_sections(snapshot)
+    anchors = _format_list(morning_summary.get("promoted_anchors", []), "No promoted anchors.")
+    questions = _format_list(research_state.get("open_questions", []), "No open questions.")
+    next_step = morning_summary.get("suggested_next_step") or research_state.get("next_discriminating_experiment") or snapshot.get("continuity_cockpit", {}).get("next_action") or "No next step recorded."
+    correction_count = research_state.get("correction_event_count", 0)
+    stale_risk = evaluation_signals.get("stale_retrieval_risk", "unknown")
+
+    return (
+        f"## {title} ({source_id})\n"
+        f"- Summary: {snapshot.get('summary', 'No summary recorded.')}\n"
+        f"- Changed: {changed_sections}\n"
+        f"- Anchors: {anchors}\n"
+        f"- Open questions: {questions}\n"
+        f"- Next step: {next_step}\n"
+        f"- Signals: stale retrieval risk={stale_risk}; correction events={correction_count}"
+    )
 
 
 def _resolve_date(date_str: str) -> str:
@@ -171,7 +278,28 @@ def read_trace(date: str = "today") -> str:
     return f"# Reasoning Trace — {resolved}\n\n{content}"
 
 
-def execute(function_name, arguments, config):
+def read_continuity_snapshot(source_id: str = "", limit: int = 3) -> str:
+    try:
+        requested_limit = max(1, min(int(limit), 10))
+    except (TypeError, ValueError):
+        requested_limit = 3
+
+    records = _latest_snapshot_records(source_id)
+    if not records:
+        rag_dir = _continuity_rag_dir()
+        if source_id:
+            return f"No continuity snapshot found for source_id '{source_id}' in {rag_dir}."
+        return f"No continuity snapshots are available in {rag_dir}. Ingest documents first or fall back to traces and raw knowledge."
+
+    body = "\n\n".join(_format_snapshot_record(record) for record in records[:requested_limit])
+    return (
+        "# Continuity Snapshots\n\n"
+        "Use this compact state as the default continuity substrate before widening to full traces or raw documents.\n\n"
+        f"{body}"
+    )
+
+
+def execute(function_name, arguments, _config):
     """Dispatcher required by Sapphire's FunctionManager."""
     try:
         if function_name == "commit_claim":
@@ -180,6 +308,11 @@ def execute(function_name, arguments, config):
                 claim=arguments.get("claim", ""),
                 confidence=arguments.get("confidence", "medium"),
                 retraction_check=arguments.get("retraction_check", "no"),
+            ), True
+        elif function_name == "read_continuity_snapshot":
+            return read_continuity_snapshot(
+                source_id=arguments.get("source_id", ""),
+                limit=arguments.get("limit", 3),
             ), True
         elif function_name == "read_trace":
             return read_trace(arguments.get("date", "today")), True

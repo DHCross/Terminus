@@ -28,9 +28,14 @@
     "gap_weights": "sherlog-velocity/config/gap-weights.json",
     "docs_dir": "docs",
     "source_roots": [
-      "."
+      "scripts",
+      "seed",
+      "experiments",
+      "sherlog-velocity/src"
     ],
-    "test_roots": [],
+    "test_roots": [
+      "sherlog-velocity/test"
+    ],
     "context_map": "sherlog.context.json",
     "generated_context_map": "sherlog.generated.context.json",
     "self_model_index": "sherlog-velocity/data/self-model.json",

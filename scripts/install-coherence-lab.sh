@@ -15,6 +15,7 @@ mkdir -p \
   "$DATA_DIR/prompts" \
   "$DATA_DIR/toolsets" \
   "$DATA_DIR/continuity" \
+    "$DATA_DIR/continuity/rag" \
   "$DATA_DIR/plugins" \
   "$DATA_DIR/continuity/traces" \
   "$DATA_DIR/continuity/journal" \
@@ -113,6 +114,12 @@ cp "$PLUGIN_SRC/hooks/post_llm.py" "$PLUGIN_DST/hooks/post_llm.py"
 cp "$PLUGIN_SRC/hooks/post_execute.py" "$PLUGIN_DST/hooks/post_execute.py"
 cp "$PLUGIN_SRC/tools/trace_tools.py" "$PLUGIN_DST/tools/trace_tools.py"
 
+RAG_STATE_DIR="$DATA_DIR/continuity/rag"
+RAG_INGESTER="$SEED_DIR/knowledge/rag_ingester.py"
+while IFS= read -r -d '' note_path; do
+    python3 "$RAG_INGESTER" --file "$note_path" --state-dir "$RAG_STATE_DIR" >/dev/null
+done < <(find "$SEED_DIR/knowledge" -maxdepth 1 -type f -name '*.md' -print0)
+
 cat <<EOF
 Installed Coherence Lab seed into:
   $DATA_DIR
@@ -126,7 +133,8 @@ Seeded items:
   - toolset: coherence_lab
   - continuity task: Terminus Daily Brief (9 AM)
   - continuity task: Terminus Daily Journal (10 PM)
-  - plugin: reasoning-trace (post_llm + post_execute hooks + read_trace/write_journal tools)
+    - plugin: reasoning-trace (post_llm + post_execute hooks + commit_claim/read_continuity_snapshot/read_trace/write_journal tools)
+    - continuity snapshot store: $DATA_DIR/continuity/rag/
   - traces directory: $DATA_DIR/continuity/traces/
   - journal directory: $DATA_DIR/continuity/journal/
 

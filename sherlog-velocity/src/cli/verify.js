@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { loadRuntimeConfig, readJson, resolveRuntimeConfig } = require('../core/shared');
 
 const IGNORED_DIRS = new Set([
@@ -103,24 +103,23 @@ function discoverArchiveLikeDirs(repoRoot) {
 function loadConfig() {
   const runtime = loadRuntimeConfig({ fromDir: __dirname });
   const configPath = runtime.configPath;
-  const rawConfig = runtime.config
-    ? JSON.parse(JSON.stringify(runtime.config))
+  const rawConfig = readJson(configPath, null);
+  const config = runtime.config
+    ? structuredClone(runtime.config)
     : null;
   if (!rawConfig) {
     return {
       configPath,
       rawConfig: null,
-      config: null,
+      config,
       repoRoot: process.cwd(),
     };
   }
-
-  const config = resolveRuntimeConfig(rawConfig);
   return {
     configPath,
     rawConfig,
     config,
-    repoRoot: config.repo_root || process.cwd(),
+    repoRoot: config?.repo_root || process.cwd(),
   };
 }
 
@@ -282,7 +281,7 @@ function checkOperationalWiring(context) {
     });
 
     const requiredScripts = ['sherlog:verify', 'sherlog:doctor', 'sherlog:gaps', 'sherlog:bounds', 'sherlog:frontier', 'sherlog:prompt', 'sherlog:dependency-graph', 'sherlog:hygiene', 'velocity:estimate'];
-    const missingScripts = requiredScripts.filter(name => !hostPkg.scripts || !hostPkg.scripts[name]);
+    const missingScripts = requiredScripts.filter(name => !hostPkg.scripts?.[name]);
     checks.push({
       id: 'required_scripts',
       status: missingScripts.length ? 'fail' : 'pass',
@@ -295,7 +294,7 @@ function checkOperationalWiring(context) {
 
     const agentsPath = path.join(repoRoot, 'AGENTS.md');
     const agentsText = safeReadText(agentsPath);
-    if (agentsText.includes('sherlog:doctor') && (!hostPkg.scripts || !hostPkg.scripts['sherlog:doctor'])) {
+    if (agentsText.includes('sherlog:doctor') && !hostPkg.scripts?.['sherlog:doctor']) {
       checks.push({
         id: 'agents_script_alignment',
         status: 'fail',
