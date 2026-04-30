@@ -2,8 +2,6 @@
 
 Sherlog is a context-intelligence layer for planning and execution.
 
-It should be treated as an on-demand instrument the agent calls, not a supervising background process. The goal is to help vibe coders keep the AI in charge of the active workflow while still giving that AI sharper delivery grounding, gap detection, and context control.
-
 1. Personalized velocity:
    it uses your repository history to estimate timelines from real delivery pace.
 2. Explicit gaps:

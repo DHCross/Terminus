@@ -281,7 +281,7 @@ function checkOperationalWiring(context) {
       evidence: { package_json: hostPkgPath },
     });
 
-    const requiredScripts = ['sherlog:verify', 'sherlog:doctor', 'sherlog:gaps', 'sherlog:bounds', 'sherlog:prompt', 'velocity:estimate'];
+    const requiredScripts = ['sherlog:verify', 'sherlog:doctor', 'sherlog:gaps', 'sherlog:bounds', 'sherlog:frontier', 'sherlog:prompt', 'sherlog:dependency-graph', 'sherlog:hygiene', 'velocity:estimate'];
     const missingScripts = requiredScripts.filter(name => !hostPkg.scripts || !hostPkg.scripts[name]);
     checks.push({
       id: 'required_scripts',

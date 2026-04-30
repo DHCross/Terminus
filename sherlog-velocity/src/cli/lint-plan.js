@@ -130,7 +130,7 @@ function pathMatchesGlob(relPath, pattern) {
       return false;
     }
     if (fi >= fileSegs.length) return false;
-    const pat = `^${gs.replace(/[|\\{}()[\]^$+?.]/g, '\\$&').replace(/\\\*/g, '[^/]*')}$`;
+    const pat = `^${gs.replace(/[|\\{}()[\]^$+?.*]/g, '\\$&').replace(/\\\*/g, '.*')}$`;
     if (!new RegExp(pat).test(fileSegs[fi])) return false;
     return match(fi + 1, gi + 1);
   }

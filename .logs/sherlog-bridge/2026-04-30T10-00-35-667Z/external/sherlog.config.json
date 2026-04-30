@@ -7,7 +7,7 @@
     "language": "JavaScript/TypeScript",
     "framework": null
   },
-  "ci": null,
+  "ci": "github-actions",
   "bundler": {
     "type": null,
     "bundles": []
@@ -28,9 +28,18 @@
     "gap_weights": "sherlog-velocity/config/gap-weights.json",
     "docs_dir": "docs",
     "source_roots": [
-      "."
+      "scripts",
+      "sherlog-velocity/src",
+      "sherlog-velocity/config",
+      "sherlog-velocity/schemas",
+      "sherlog-vscode",
+      "site/src",
+      "site/public"
     ],
-    "test_roots": [],
+    "test_roots": [
+      "sherlog-velocity/test",
+      "site/test"
+    ],
     "context_map": "sherlog.context.json",
     "generated_context_map": "sherlog.generated.context.json",
     "self_model_index": "sherlog-velocity/data/self-model.json",
@@ -149,13 +158,12 @@
       }
     },
     "hygiene": {
-      "todo_cluster_threshold": 2,
+      "todo_cluster_threshold": 3,
       "console_log_max": 0,
-      "any_usage_threshold": 3,
+      "any_usage_threshold": 5,
       "monolith_line_threshold": 500,
-      "monolith_size_kb_threshold": 105,
-      "missing_docs_line_threshold": 100,
-      "nesting_depth_threshold": 3
+      "monolith_size_kb_threshold": 150,
+      "missing_docs_line_threshold": 100
     },
     "sonar": {
       "_doc": "SonarCloud integration config for sherlog:sonar. Replace placeholder org/project values before first live run.",

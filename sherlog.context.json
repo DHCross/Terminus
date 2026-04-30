@@ -1,28 +1,12 @@
 {
   "zones": [
     {
-      "name": "Scripts Zone",
+      "name": "Repository Core",
       "paths": [
-        "scripts/**/*"
+        "**/*"
       ],
-      "belief": "Deployment and environment setup scripts for launching the Terminus client and the native Terminus backend.",
-      "last_updated": "2026-03-20"
-    },
-    {
-      "name": "Seed Zone",
-      "paths": [
-        "seed/**/*"
-      ],
-      "belief": "Coherence lab context injections, configuration presets, and toolset definitions imported directly into the user’s mind.",
-      "last_updated": "2026-03-20"
-    },
-    {
-      "name": "User Zone",
-      "paths": [
-        "user/**/*"
-      ],
-      "belief": "The active continuity footprint: contains persistent runtime state, conversation traces, dynamically loaded plugins, custom prompt pieces, and workspace databases.",
-      "last_updated": "2026-03-18"
+      "belief": "TODO: Describe what this zone governs.",
+      "last_updated": "2026-04-30"
     },
     {
       "name": "Documentation",
@@ -30,15 +14,7 @@
         "docs/**/*"
       ],
       "belief": "User-facing and internal documentation for this codebase.",
-      "last_updated": "2026-03-20"
-    },
-    {
-      "name": "Velocity Artifacts",
-      "paths": [
-        "velocity-artifacts/**/*"
-      ],
-      "belief": "Sherlog diagnostic telemetry artifacts used as lightweight project memory for creator-mirror reads, including velocity summaries and future sherlog-runs outputs.",
-      "last_updated": "2026-03-20"
+      "last_updated": "2026-04-30"
     }
   ]
 }

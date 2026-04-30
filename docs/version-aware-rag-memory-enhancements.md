@@ -394,3 +394,7 @@ If the goal is to get signal fast, the first slice should be:
 5. test a handful of retrieval prompts against the result
 
 That is enough to validate the model before building a larger RAG substrate around it.
+
+## Implementation Details
+
+The initial version of the RAG ingester has been implemented as `seed/coherence-lab/knowledge/rag_ingester.py`. It is a Python script that parses Markdown files, splits them into chunk objects based on headings, generates stable `source_id`s, and handles basic diffing between current and previous versions (identifying added, modified, and unchanged sections). This script can be called directly or run by higher-level systems within Terminus. A corresponding test file `sherlog-velocity/test/rag-ingester.test.js` has been created and verified to run the ingester via subprocess, testing logic for parsing new files and correctly identifying differences between file revisions.

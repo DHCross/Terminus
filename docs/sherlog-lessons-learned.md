@@ -14,11 +14,7 @@ These are the most common reasons Sherlog appears installed but is not truly ope
 - Symptom: constant `missing_implementation` false positives.
 - Fix: set `paths.source_roots` to real code roots (for example `vessel/src`), avoid `.` when possible.
 
-## 4) Forced repomix mode without matching artifacts
-- Symptom: recurring `integration` / `missing_bundle` pressure even when feature code exists.
-- Fix: only use repomix-compatible mode when manifest/config is present and maintained.
-
-## 5) Archive directories inflate drift
+## 4) Archive directories inflate drift
 - Symptom: `context_drift` triggered by legacy/archived files unrelated to current work.
 - Fix: add archive paths to `settings.gap_scan_ignore_dirs` in Sherlog config.
 

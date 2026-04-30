@@ -1,0 +1,103 @@
+{
+  "version": "0.1.0",
+  "generated_at": "2026-04-30T10:39:45.817Z",
+  "feature": "Version-Aware RAG",
+  "mode": "advisory",
+  "nodes": [
+    {
+      "id": "task.feature_implementation",
+      "kind": "task",
+      "title": "Implement Version-Aware RAG",
+      "status": "ready",
+      "priority": 0.8,
+      "confidence": "medium",
+      "evidence": [],
+      "owners": [
+        "agent.backend"
+      ],
+      "tags": [
+        "feature"
+      ]
+    },
+    {
+      "id": "gap.test_coverage",
+      "kind": "gap",
+      "title": "Resolve test coverage",
+      "status": "open",
+      "priority": 0.1875,
+      "confidence": "high",
+      "evidence": [
+        {
+          "source": "gap_detector",
+          "gap": "test_coverage",
+          "weight": 18.75,
+          "trend": "new"
+        }
+      ],
+      "tags": [
+        "gap",
+        "test_coverage"
+      ]
+    },
+    {
+      "id": "task.tests",
+      "kind": "task",
+      "title": "Write tests",
+      "status": "blocked",
+      "priority": 0.7,
+      "confidence": "medium",
+      "evidence": [
+        {
+          "source": "gap_detector",
+          "gap": "test_coverage",
+          "weight": 18.75
+        }
+      ],
+      "owners": [
+        "agent.test"
+      ],
+      "tags": [
+        "tests"
+      ]
+    },
+    {
+      "id": "gap.arch_complexity_hotspot",
+      "kind": "gap",
+      "title": "Resolve arch complexity hotspot",
+      "status": "open",
+      "priority": 0.05,
+      "confidence": "high",
+      "evidence": [
+        {
+          "source": "gap_detector",
+          "gap": "arch_complexity_hotspot",
+          "weight": 5,
+          "trend": "new"
+        }
+      ],
+      "tags": [
+        "gap",
+        "arch_complexity_hotspot"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "task.tests",
+      "to": "task.feature_implementation",
+      "type": "depends_on",
+      "hard": true
+    },
+    {
+      "from": "task.feature_implementation",
+      "to": "gap.arch_complexity_hotspot",
+      "type": "blocked_by",
+      "hard": false
+    }
+  ],
+  "policies": {
+    "dispatch_when_all_hard_deps_closed": true,
+    "max_parallel_ready_tasks": 3,
+    "retry_limit": 2
+  }
+}

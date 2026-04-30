@@ -88,6 +88,8 @@ This is the useful connection to Terminus: not "continuous learning" in the weig
 
 [SHERLOG](https://github.com/dancross/SHERLOG_starter) is a repo-aware preflight CLI for AI-assisted development. It detects gaps, tracks velocity, and validates code hygiene before you hand work off to an AI.
 
+Sherlog's CLI currently enforces architectural intent through plan validation; diagnostic scoring (fragility, liveness, rot escalation) is under development.
+
 ```bash
 make verify              # Validate install and bundle freshness
 make doctor ARGS="--feature 'Seed Pack'"   # Feature health check

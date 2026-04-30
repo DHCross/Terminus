@@ -1,58 +1,33 @@
 {
   "latest": {
-    "id": "run_1773860854231",
-    "timestamp": "2026-03-18T19:07:34.231Z",
+    "id": "run_1777543269443",
+    "timestamp": "2026-04-30T10:01:09.443Z",
     "repo_root": "/Users/dancross/Dev/GitHub/Terminus",
     "branch": "main",
-    "head": "00b0afd5abb6b0bdddf8e43ac354596056d81129",
+    "head": "42c921a297401b28fd47e1a0232e1f58de0ce17a",
     "window_days": 7,
-    "total_commits": 6,
-    "total_duration_seconds": 88083,
-    "commits_per_hour_active": 0.2452232553387146,
-    "commits_per_day_window": 0.8571428571428571,
-    "start": "2026-03-17T08:05:11.000Z",
-    "end": "2026-03-18T08:33:14.000Z",
+    "total_commits": 1,
+    "total_duration_seconds": 1,
+    "commits_per_hour_active": 3600,
+    "commits_per_day_window": 0.14285714285714285,
+    "start": "2026-04-30T09:52:29.000Z",
+    "end": "2026-04-30T09:52:29.000Z",
     "samples": [
       {
-        "sha": "00b0afd5abb6b0bdddf8e43ac354596056d81129",
-        "date": "2026-03-18 03:33:14 -0500",
-        "subject": "fix: add API key for Eleven Labs TTS service in credentials.json"
-      },
-      {
-        "sha": "29363ec07babafb8bb3e5d39e1b7b29a5f39cf6f",
-        "date": "2026-03-18 02:38:27 -0500",
-        "subject": "refactor: clean up Terminus workspace configuration by removing unused folder paths"
-      },
-      {
-        "sha": "202c5def9b3580d6d4871d366eb07ace46faa501",
-        "date": "2026-03-18 02:30:15 -0500",
-        "subject": "terminus foundation"
-      },
-      {
-        "sha": "aee4a2509757e9cdfb5130b579cb668e06ecfbc2",
-        "date": "2026-03-17 03:19:15 -0500",
-        "subject": "fix: resolve Task CLI and uv from Homebrew and ~/.local/bin paths"
-      },
-      {
-        "sha": "3f208eaf3ace1249d7d7145c6a9f2be562c01fd9",
-        "date": "2026-03-17 03:10:45 -0500",
-        "subject": "simplify: strip coherence_engine persona, keep terminus only"
-      },
-      {
-        "sha": "099e587e8202a02ca4491eeaccfb7d55000aa8b5",
-        "date": "2026-03-17 03:05:11 -0500",
-        "subject": "refactor: convert Terminus to native macOS Sapphire launcher with SHERLOG"
+        "sha": "42c921a297401b28fd47e1a0232e1f58de0ce17a",
+        "date": "2026-04-30 04:52:29 -0500",
+        "subject": "chore: add health check, backup-state, gitignore secrets, prune stale branches"
       }
     ]
   },
   "rolling": {
     "sample": 10,
-    "commits": 33,
-    "seconds": 432307,
+    "commits": 20,
+    "seconds": 221478,
     "days": 70,
-    "commits_per_hour_active": 0.2748047105413514,
-    "commits_per_day_window": 0.4714285714285714
+    "commits_per_hour_active": 0.32508872213041473,
+    "commits_per_day_window": 0.2857142857142857
   },
   "confidence": "high",
-  "runs": 24
+  "runs": 23
 }
