@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "source_id": "56af6cf9c1a8",
+  "title": "terminus-lineage.md",
+  "domain": "general",
+  "latest_version_id": "fa72fd86a74e893e",
+  "latest_artifact_path": "versions/56af6cf9c1a8/fa72fd86a74e893e.json",
+  "last_ingested_at": "2026-05-02T14:59:12+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "fa72fd86a74e893e",
+      "artifact_path": "versions/56af6cf9c1a8/fa72fd86a74e893e.json",
+      "content_hash": "73633e22fd3495924ce669017a05d642a44955cb1707f0e265e2c12bb9163672",
+      "ingested_at": "2026-05-02T14:59:12+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Terminus Lineage Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own pr..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Terminus Lineage Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own pr...",
+    "morning_summary": {
+      "summary_id": "64ffb43c8a0c05be",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Terminus Lineage",
+          "change_type": "added",
+          "summary": "Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own prompts, project fram..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 6,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 6,
+      "open_question_count": 0
+    }
+  }
+}

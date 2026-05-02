@@ -91,7 +91,7 @@ for task in task_source.get("tasks", []):
 dump_json(task_target_path, {"tasks": existing_tasks})
 
 
-# Enable reasoning-trace plugin in webui plugins list
+# Enable Coherence Lab plugins in webui plugins list
 plugins_path = data_dir / "webui" / "plugins.json"
 plugins_data = load_json(plugins_path)
 if not isinstance(plugins_data, dict):
@@ -99,20 +99,21 @@ if not isinstance(plugins_data, dict):
 enabled = plugins_data.get("enabled", [])
 if not isinstance(enabled, list):
     enabled = []
-if "reasoning-trace" not in enabled:
-    enabled.append("reasoning-trace")
+for plugin_name in ["reasoning-trace", "sherlog-instrument"]:
+    if plugin_name not in enabled:
+        enabled.append(plugin_name)
 plugins_data["enabled"] = enabled
 dump_json(plugins_path, plugins_data)
 PY
 
-# Copy reasoning-trace plugin files
-PLUGIN_SRC="$SEED_DIR/plugins/reasoning-trace"
-PLUGIN_DST="$DATA_DIR/plugins/reasoning-trace"
-mkdir -p "$PLUGIN_DST/hooks" "$PLUGIN_DST/tools"
-cp "$PLUGIN_SRC/plugin.json" "$PLUGIN_DST/plugin.json"
-cp "$PLUGIN_SRC/hooks/post_llm.py" "$PLUGIN_DST/hooks/post_llm.py"
-cp "$PLUGIN_SRC/hooks/post_execute.py" "$PLUGIN_DST/hooks/post_execute.py"
-cp "$PLUGIN_SRC/tools/trace_tools.py" "$PLUGIN_DST/tools/trace_tools.py"
+# Copy Coherence Lab plugin files
+for PLUGIN_SRC in "$SEED_DIR"/plugins/*; do
+  [ -d "$PLUGIN_SRC" ] || continue
+  PLUGIN_NAME="$(basename "$PLUGIN_SRC")"
+  PLUGIN_DST="$DATA_DIR/plugins/$PLUGIN_NAME"
+  mkdir -p "$PLUGIN_DST"
+  cp -R "$PLUGIN_SRC"/. "$PLUGIN_DST"/
+done
 
 bash "$ROOT_DIR/scripts/refresh-continuity-rag.sh" "$DATA_DIR" "$SEED_DIR/knowledge" >/dev/null
 
@@ -130,6 +131,7 @@ Seeded items:
   - continuity task: Terminus Daily Brief (9 AM)
   - continuity task: Terminus Daily Journal (10 PM)
     - plugin: reasoning-trace (post_llm + post_execute hooks + commit_claim/read_continuity_snapshot/read_trace/write_journal tools)
+    - plugin: sherlog-instrument (sherlog_preflight/verify/doctor/gaps/prompt/session tools)
     - continuity snapshot store: $DATA_DIR/continuity/rag/
   - traces directory: $DATA_DIR/continuity/traces/
   - journal directory: $DATA_DIR/continuity/journal/

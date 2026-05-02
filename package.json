@@ -9,6 +9,7 @@
   "scripts": {
     "sherlog:verify": "node sherlog-velocity/src/cli/verify.js --strict",
     "sherlog:doctor": "node sherlog-velocity/src/cli/doctor.js",
+    "sherlog:doctor:fast": "node sherlog-velocity/src/cli/doctor.js --skip-tests",
     "sherlog:gaps": "node sherlog-velocity/src/cli/gaps.js",
     "sherlog:consumers": "node sherlog-velocity/src/cli/consumers.js",
     "sherlog:bounds": "node sherlog-velocity/src/cli/bounds.js",

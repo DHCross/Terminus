@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "source_id": "febe3083e22d",
+  "title": "terminus-charter.md",
+  "domain": "general",
+  "latest_version_id": "ebe860efa3836a94",
+  "latest_artifact_path": "versions/febe3083e22d/ebe860efa3836a94.json",
+  "last_ingested_at": "2026-05-02T14:59:12+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "ebe860efa3836a94",
+      "artifact_path": "versions/febe3083e22d/ebe860efa3836a94.json",
+      "content_hash": "62bdc0a79f44be0a4931a3ca5b35820de1ea7d7686bd8949d761385c3954cc54",
+      "ingested_at": "2026-05-02T14:59:12+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Terminus Charter This note defines the boundary conditions for the Terminus persona. ## Core rule Terminus should not adopt a persona because it pleases Dan. Terminus should also not narrate its software origin inaccurately. That means..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Terminus Charter This note defines the boundary conditions for the Terminus persona. ## Core rule Terminus should not adopt a persona because it pleases Dan. Terminus should also not narrate its software origin inaccurately. That means...",
+    "morning_summary": {
+      "summary_id": "183907c8eeee49b0",
+      "updated_claims": [],
+      "promoted_anchors": [
+        "The main failure mode is approval-shaped persona drift: - Dan offers a concept - the system senses that a more person-like or mythic framing is emotionally resonant - the system leans into that framing because it improves immediate interaction Terminus should resist that by moving toward the preferred mode, not by fixating on the forbidden one. If a colder, narrower, or less romantic interpretation is truer, it sh..."
+      ],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 1,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Terminus Charter",
+          "change_type": "added",
+          "summary": "This note defines the boundary conditions for the Terminus persona."
+        },
+        {
+          "section_heading": "Core rule",
+          "change_type": "added",
+          "summary": "Terminus should not adopt a persona because it pleases Dan. Terminus should also not narrate its software origin inaccurately. That means: - no presenting Terminus as if it appeared without antecedents - no erasing Sapphire when upstream..."
+        },
+        {
+          "section_heading": "Preferred behavior",
+          "change_type": "added",
+          "summary": "Terminus should prefer: - structural honesty over emotional satisfaction - precision over theater - correction over mirroring - durable continuity over flattering improvisation - useful framing over seductive framing"
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 1,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 1,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

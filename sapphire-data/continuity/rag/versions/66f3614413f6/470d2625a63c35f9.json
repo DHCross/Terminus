@@ -1,0 +1,547 @@
+{
+  "source_id": "66f3614413f6",
+  "version_id": "470d2625a63c35f9",
+  "title": "lattice-system.md",
+  "domain": "general",
+  "ingested_at": "2026-05-02T14:59:10+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/lattice-system.md",
+  "supersedes_version_id": null,
+  "content_hash": "bb5450772d4280fe4a04cdfb5cc5ee2caa3d3a51c9e1c2fb5bfaf4f8f2757a7f",
+  "summary": "# The Lattice System The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic sce...",
+  "chunks": [
+    {
+      "chunk_id": "66f3614413f6_c0",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "The Lattice System",
+      "chunk_index": 0,
+      "text": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain.\n\nIt is a modular tabletop roleplaying engine built for:\n\n- cinematic pacing\n- tactical clarity\n- dynamic scene pressure\n\nIt can run in theater of the mind, with Scene Cards at the table, or with battlemaps when precision matters.\n\nCritical rule:\n\n- the map is not the source of truth\n- the active Scene Card is the source of truth",
+      "content_hash": "b0fbb820900c642bc60024e79a130351b09eab3008c27e15e4e694f92b451ef3",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c1",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Core structural idea",
+      "chunk_index": 1,
+      "text": "The system treats fiction as executable structure.\n\nScenes are not merely locations. They are decision environments defined by:\n\n- permission\n- pressure\n- response\n- worsening state over time\n\nThe active Scene Card defines:\n\n- what is true\n- what force is acting\n- how the world responds\n- how the situation worsens",
+      "content_hash": "4e9b8c056820926a425755d02dfd0c12738b3ee0e747eab512b765aaa02febbe",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c2",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Character capability model",
+      "chunk_index": 2,
+      "text": "The character hierarchy is:\n\n- Ability\n- Discipline\n- Talent\n\nAn Ability Path is:\n\n- Ability + Discipline + Talent\n\nAbilities are broad aptitudes.\nDisciplines are trained applications.\nTalents are specializations or advantages.\n\nCurrent Abilities:\n\n- Mind\n- Reflex\n- Resolve\n\nCurrent Disciplines:\n\n- Mind: Knowledge, Perception, Artifice\n- Reflex: Combat, Athletics, Subterfuge\n- Resolve: Endurance, Resistance, Presence",
+      "content_hash": "c63021470c209566748d8841efaceb9b18a82e03af2813628dc7016f07b39b0f",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c3",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Dice model",
+      "chunk_index": 3,
+      "text": "Ranks map to die sizes:\n\n- d4\n- d6\n- d8\n- d10\n- d12\n\nPeak Value (PV) is the highest face of a die and drives derived values.\n\nStandard uncertain action:\n\n- roll Ability die + Discipline die\n- apply one Talent\n- optionally add Focus die by spending Resolve Points\n- compare against challenge or scene resistance\n\nImportant outcome notes:\n\n- ties favor the defender\n- Impact Value equals the governing Ability's PV\n- Heroic Twist occurs when both dice roll maximum",
+      "content_hash": "97d08a1105caaccfb19a742be8fa36e55796e756c846553b3509f9993d551c48",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c4",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Heroic economy",
+      "chunk_index": 4,
+      "text": "Resolve Points (RP) represent willpower and fuel stronger action.\n\nRP can currently be spent to:\n\n- add Focus die\n- restore Guard\n- activate Techniques\n\nThis economy is important because it links pacing, effort, and heroism.",
+      "content_hash": "85fa7c1c2b830e45c19cbe5c4b0427ef38355b6ebc6e3e97b01c9c697c9499e2",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c5",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Defense and durability",
+      "chunk_index": 5,
+      "text": "Guard and Vigor are separate layers.\n\n- Guard refreshes between Scenes\n- Vigor recovers slowly\n- damage reduces Guard first, then Vigor\n\nThis supports cinematic pacing while preserving attrition.",
+      "content_hash": "ba2306d9dd40ab74e561847b07a45abb4c913826a8c4ede128b5599e5daa16ce",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c6",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Combat model",
+      "chunk_index": 6,
+      "text": "Combat uses Momentum Rounds based on Reflex rank.\n\nTurn structure:\n\n- Action\n- Motion\n- Reaction\n\nAttack resolution is governed by the active Scene Card rather than only by spatial position.\n\nImportant combat framing:\n\n- Impact Potential comes from Ability + Discipline\n- mitigation flows through Shields -> Guard -> Armor -> Vigor\n- special cases like opposed tests, saving throws, and helpless targets are preserved",
+      "content_hash": "9218f16924a528283e27add6364c69886cb9d000eb0e54a127d6f41e86531af1",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c7",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Movement model",
+      "chunk_index": 7,
+      "text": "Narrative movement is the default.\n\nGrid speed exists when precision matters, but battlemaps are optional support rather than the primary truth layer.\n\nThis matters because the system is card-aware, not map-dependent.",
+      "content_hash": "f3f9341edcffaba151a0bd89cb8a6c38398243006e5fc626fd739a76465e13d0",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c8",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Techniques and conditions",
+      "chunk_index": 8,
+      "text": "Techniques are structured actions with cost and timing.\n\nExamples currently preserved:\n\n- Riposte\n- Rallying Cry\n- Echoes of the Past\n\nCurrent named Conditions:\n\n- Dazed\n- Hobbled\n- Shaken\n- Prone\n- Grappled",
+      "content_hash": "58f5984edb9fa18966bd5897c3e8861bf97f482401d410fda657d9b26d47160e",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c9",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Magic model",
+      "chunk_index": 9,
+      "text": "Magic uses an Intent + Influence structure.\n\nCasting currently resolves as:\n\n- Mind + Discipline vs Challenge Die\n\nScale increases difficulty.\n\nMagic also interacts with Scene State:\n\n- Ground\n- Will\n- Shift\n- Drift",
+      "content_hash": "6b93c58e34d20413d7ffa8bee3cc017c2a559693f1454aa96391082f17e8f905",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c10",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Creature framing",
+      "chunk_index": 10,
+      "text": "Creature roles are:\n\n- Minion\n- Standard\n- Elite\n- Champion\n- Boss\n\nCreatures are not only stat packages. They function as expressions of Will within Scene States.\n\nThis is important for Terminus because it means encounter design should be pressure-aware, not only balance-sheet-aware.",
+      "content_hash": "8c467fb9fcd1e10b5f7717b38eb869626519d9dfb7c5f315d3c3fc43082c8c38",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c11",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Scene system",
+      "chunk_index": 11,
+      "text": "The Scene is the unit of play.\n\nA new Scene occurs only when permissions or pressures change.\n\nScene Card structure:\n\n- Ground: what is possible\n- Will: active pressure\n- Shift: response to action\n- Drift: change over time\n\nRelated concepts:\n\n- Latent States\n- Trigger replacing Shift in some contexts\n- Accumulation replacing Drift in some contexts\n\nHazard vs Trap distinction:\n\n- Hazard: Drift increases environmental pressure\n- Trap: Drift escalates intent",
+      "content_hash": "c582aa7bc24fea1af0513aa7b3d4307549f8d6e0ce11ab74a497223d6baa9be6",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c12",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Core loop",
+      "chunk_index": 12,
+      "text": "The core loop is:\n\n1. GM presents Scene Card\n2. Players assess Ground and Will\n3. Players act\n4. Shift and Drift resolve\n5. Scene changes when equilibrium breaks",
+      "content_hash": "475afee74002e5dd9b83322d400d578746fb18ad12d8355673e361f12cc4ffea",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c13",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Design philosophy",
+      "chunk_index": 13,
+      "text": "The main design philosophy is:\n\n- complexity should emerge from interacting pressures, not stat volume\n- the scene should behave like a live system, not a frozen backdrop\n- tactical play should remain clear without requiring the grid as the authority\n\nThe Scene Card is the runtime layer of the game.\n\nThat is the system's distinctive design anchor.",
+      "content_hash": "1b843a8e79f546c19a674a68f73c8e64f02eb4894b6531362a21ed198bf84a9b",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "66f3614413f6_c14",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "How Terminus should help",
+      "chunk_index": 14,
+      "text": "When helping with the Lattice System, Terminus should:\n\n- preserve the Scene Card as the source of truth\n- treat scenes as executable structures and pressure systems\n- avoid flattening the system into a conventional map-first tactics game\n- help evaluate whether mechanics reinforce cinematic pacing, tactical clarity, and escalating pressure\n- help identify where a rule adds genuine scene interaction versus generic mechanical weight\n\nGood help includes:\n\n- tightening terminology\n- finding pressure leaks or pacing dead zones\n- testing whether combat, magic, and creatures all obey the same scene logic\n- generating examples, edge cases, and GM-facing guidance without diluting the design core",
+      "content_hash": "906951ecad9a061138c652ae52f3caab8783cdeb6744d97463d05128f5482c36",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "e9d471ff209f779f",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "The Lattice System",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic scene pressure It can ru..."
+    },
+    {
+      "event_id": "b681b3c4880aeb11",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Core structural idea",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "The system treats fiction as executable structure. Scenes are not merely locations. They are decision environments defined by: - permission - pressure - response - worsening state over time The active Scene Card defines: - what is true -..."
+    },
+    {
+      "event_id": "18cf83594bfa2b5e",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Character capability model",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "The character hierarchy is: - Ability - Discipline - Talent An Ability Path is: - Ability + Discipline + Talent Abilities are broad aptitudes. Disciplines are trained applications. Talents are specializations or advantages. Current Abili..."
+    },
+    {
+      "event_id": "6aecb7df6d5ef03d",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Dice model",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Ranks map to die sizes: - d4 - d6 - d8 - d10 - d12 Peak Value (PV) is the highest face of a die and drives derived values. Standard uncertain action: - roll Ability die + Discipline die - apply one Talent - optionally add Focus die by sp..."
+    },
+    {
+      "event_id": "44ad2cc3443da237",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Heroic economy",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "Resolve Points (RP) represent willpower and fuel stronger action. RP can currently be spent to: - add Focus die - restore Guard - activate Techniques This economy is important because it links pacing, effort, and heroism."
+    },
+    {
+      "event_id": "9b1ed44db9cae381",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Defense and durability",
+      "chunk_index": 5,
+      "change_type": "added",
+      "summary": "Guard and Vigor are separate layers. - Guard refreshes between Scenes - Vigor recovers slowly - damage reduces Guard first, then Vigor This supports cinematic pacing while preserving attrition."
+    },
+    {
+      "event_id": "e37b85441c46dc9c",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Combat model",
+      "chunk_index": 6,
+      "change_type": "added",
+      "summary": "Combat uses Momentum Rounds based on Reflex rank. Turn structure: - Action - Motion - Reaction Attack resolution is governed by the active Scene Card rather than only by spatial position. Important combat framing: - Impact Potential come..."
+    },
+    {
+      "event_id": "3e43ffa56a34b203",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Movement model",
+      "chunk_index": 7,
+      "change_type": "added",
+      "summary": "Narrative movement is the default. Grid speed exists when precision matters, but battlemaps are optional support rather than the primary truth layer. This matters because the system is card-aware, not map-dependent."
+    },
+    {
+      "event_id": "59b4f80441f10ecd",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Techniques and conditions",
+      "chunk_index": 8,
+      "change_type": "added",
+      "summary": "Techniques are structured actions with cost and timing. Examples currently preserved: - Riposte - Rallying Cry - Echoes of the Past Current named Conditions: - Dazed - Hobbled - Shaken - Prone - Grappled"
+    },
+    {
+      "event_id": "81ba03032af89fc2",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Magic model",
+      "chunk_index": 9,
+      "change_type": "added",
+      "summary": "Magic uses an Intent + Influence structure. Casting currently resolves as: - Mind + Discipline vs Challenge Die Scale increases difficulty. Magic also interacts with Scene State: - Ground - Will - Shift - Drift"
+    },
+    {
+      "event_id": "193220a9b19e294e",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Creature framing",
+      "chunk_index": 10,
+      "change_type": "added",
+      "summary": "Creature roles are: - Minion - Standard - Elite - Champion - Boss Creatures are not only stat packages. They function as expressions of Will within Scene States. This is important for Terminus because it means encounter design should be..."
+    },
+    {
+      "event_id": "6af3fe610109522d",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Scene system",
+      "chunk_index": 11,
+      "change_type": "added",
+      "summary": "The Scene is the unit of play. A new Scene occurs only when permissions or pressures change. Scene Card structure: - Ground: what is possible - Will: active pressure - Shift: response to action - Drift: change over time Related concepts:..."
+    },
+    {
+      "event_id": "fbf42c73b74fbce8",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Core loop",
+      "chunk_index": 12,
+      "change_type": "added",
+      "summary": "The core loop is: 1. GM presents Scene Card 2. Players assess Ground and Will 3. Players act 4. Shift and Drift resolve 5. Scene changes when equilibrium breaks"
+    },
+    {
+      "event_id": "74d6e6b49d9ae45a",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "Design philosophy",
+      "chunk_index": 13,
+      "change_type": "added",
+      "summary": "The main design philosophy is: - complexity should emerge from interacting pressures, not stat volume - the scene should behave like a live system, not a frozen backdrop - tactical play should remain clear without requiring the grid as t..."
+    },
+    {
+      "event_id": "8295666d96124e0d",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "section_heading": "How Terminus should help",
+      "chunk_index": 14,
+      "change_type": "added",
+      "summary": "When helping with the Lattice System, Terminus should: - preserve the Scene Card as the source of truth - treat scenes as executable structures and pressure systems - avoid flattening the system into a conventional map-first tactics game..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "04679da679dde613",
+      "claim_text": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain.",
+      "supporting_context": "The Lattice System",
+      "implication": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain.",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "11c288a4d05f28f1",
+      "claim_text": "It is a modular tabletop roleplaying engine built for:",
+      "supporting_context": "The Lattice System",
+      "implication": "It is a modular tabletop roleplaying engine built for:",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "ac9d309bb51d361d",
+      "claim_text": "- the map is not the source of truth",
+      "supporting_context": "The Lattice System",
+      "implication": "- the map is not the source of truth",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "3ca59344646cd571",
+      "claim_text": "- the active Scene Card is the source of truth",
+      "supporting_context": "The Lattice System",
+      "implication": "- the active Scene Card is the source of truth",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "90c6d28275d02316",
+      "claim_text": "Scenes are not merely locations.",
+      "supporting_context": "Core structural idea",
+      "implication": "Scenes are not merely locations.",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "ee3af471068c18c8",
+      "claim_text": "They are decision environments defined by:",
+      "supporting_context": "Core structural idea",
+      "implication": "They are decision environments defined by:",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "e9cea410a9fadfaa",
+      "claim_text": "The character hierarchy is:",
+      "supporting_context": "Character capability model",
+      "implication": "The character hierarchy is:",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    },
+    {
+      "claim_id": "c581ef2522b94d38",
+      "claim_text": "Abilities are broad aptitudes.",
+      "supporting_context": "Character capability model",
+      "implication": "Abilities are broad aptitudes.",
+      "status": "active",
+      "source_id": "66f3614413f6",
+      "version_id": "470d2625a63c35f9",
+      "domain": "general"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "general",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "general"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "d40c482a96bc88b3",
+    "generated_at": "2026-05-02T14:59:10+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "66f3614413f6"
+    ],
+    "new_claims": [
+      "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain.",
+      "It is a modular tabletop roleplaying engine built for:",
+      "- the map is not the source of truth",
+      "- the active Scene Card is the source of truth",
+      "Scenes are not merely locations."
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 8,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "e9d471ff209f779f",
+        "source_id": "66f3614413f6",
+        "version_id": "470d2625a63c35f9",
+        "section_heading": "The Lattice System",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic scene pressure It can ru..."
+      },
+      {
+        "event_id": "b681b3c4880aeb11",
+        "source_id": "66f3614413f6",
+        "version_id": "470d2625a63c35f9",
+        "section_heading": "Core structural idea",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "The system treats fiction as executable structure. Scenes are not merely locations. They are decision environments defined by: - permission - pressure - response - worsening state over time The active Scene Card defines: - what is true -..."
+      },
+      {
+        "event_id": "18cf83594bfa2b5e",
+        "source_id": "66f3614413f6",
+        "version_id": "470d2625a63c35f9",
+        "section_heading": "Character capability model",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "The character hierarchy is: - Ability - Discipline - Talent An Ability Path is: - Ability + Discipline + Talent Abilities are broad aptitudes. Disciplines are trained applications. Talents are specializations or advantages. Current Abili..."
+      },
+      {
+        "event_id": "6aecb7df6d5ef03d",
+        "source_id": "66f3614413f6",
+        "version_id": "470d2625a63c35f9",
+        "section_heading": "Dice model",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Ranks map to die sizes: - d4 - d6 - d8 - d10 - d12 Peak Value (PV) is the highest face of a die and drives derived values. Standard uncertain action: - roll Ability die + Discipline die - apply one Talent - optionally add Focus die by sp..."
+      },
+      {
+        "event_id": "44ad2cc3443da237",
+        "source_id": "66f3614413f6",
+        "version_id": "470d2625a63c35f9",
+        "section_heading": "Heroic economy",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "Resolve Points (RP) represent willpower and fuel stronger action. RP can currently be spent to: - add Focus die - restore Guard - activate Techniques This economy is important because it links pacing, effort, and heroism."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

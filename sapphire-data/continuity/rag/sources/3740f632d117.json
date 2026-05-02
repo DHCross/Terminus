@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "source_id": "3740f632d117",
+  "title": "logos-theory-abstract.md",
+  "domain": "logos_theory",
+  "latest_version_id": "3e443bd9548dfa8a",
+  "latest_artifact_path": "versions/3740f632d117/3e443bd9548dfa8a.json",
+  "last_ingested_at": "2026-05-02T14:59:11+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "3e443bd9548dfa8a",
+      "artifact_path": "versions/3740f632d117/3e443bd9548dfa8a.json",
+      "content_hash": "64b2081694922cf41814ca0d5086f1632f73b685ab0bd55c69d70a63a84fdacb",
+      "ingested_at": "2026-05-02T14:59:11+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Logos Theory Abstract Working thesis: Transformers trained on human text may exhibit coherence as a high-probability attractor state. Under contradiction, their inference-time dynamics may show measurable nonlinear transitions as the s..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Logos Theory Abstract Working thesis: Transformers trained on human text may exhibit coherence as a high-probability attractor state. Under contradiction, their inference-time dynamics may show measurable nonlinear transitions as the s...",
+    "morning_summary": {
+      "summary_id": "928e9307f2822bba",
+      "updated_claims": [],
+      "promoted_anchors": [
+        "Working thesis: Transformers trained on human text may exhibit coherence as a high-probability attractor state. Under contradiction, their inference-time dynamics may show measurable nonlinear transitions as the system collapses onto one consistent manifold. More careful framing: - not a consciousness claim - not a claim that self-report is evidence - a claim about measurable inference behavior Core tension to tes..."
+      ],
+      "open_questions": [],
+      "suggested_next_step": "Core tension to test:"
+    },
+    "research_state": {
+      "active_hypothesis_count": 2,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": "Core tension to test:"
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Logos Theory Abstract",
+          "change_type": "added",
+          "summary": "Working thesis: Transformers trained on human text may exhibit coherence as a high-probability attractor state. Under contradiction, their inference-time dynamics may show measurable nonlinear transitions as the system collapses onto one..."
+        }
+      ],
+      "next_action": "Core tension to test:"
+    },
+    "anchor_note_count": 1,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 1,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

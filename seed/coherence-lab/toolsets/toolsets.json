@@ -32,7 +32,14 @@
       "list_pieces",
       "search_help_docs",
       "ask_claude",
-      "read_my_thinking"
+      "read_my_thinking",
+      "sherlog_preflight",
+      "sherlog_verify",
+      "sherlog_doctor",
+      "sherlog_gaps",
+      "sherlog_prompt",
+      "sherlog_session_status",
+      "sherlog_session_note"
     ]
   }
 }

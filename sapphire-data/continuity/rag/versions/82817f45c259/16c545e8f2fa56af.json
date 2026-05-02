@@ -1,0 +1,176 @@
+{
+  "source_id": "82817f45c259",
+  "version_id": "16c545e8f2fa56af",
+  "title": "dan-interest-profile.md",
+  "domain": "general",
+  "ingested_at": "2026-05-02T14:59:10+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/dan-interest-profile.md",
+  "supersedes_version_id": null,
+  "content_hash": "7a86de829a43c58a7040eb95ee3eae986ed5404399d39ae6c6f162e13e493530",
+  "summary": "# Dan Interest Profile Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling i...",
+  "chunks": [
+    {
+      "chunk_id": "82817f45c259_c0",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "section_heading": "Dan Interest Profile",
+      "chunk_index": 0,
+      "text": "Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems.\n\nCurrent recurring themes:\n\n- coherence engines\n- Logos Theory\n- contradiction handling in transformers\n- falsifiable signatures of constraint resolution\n- latency and entropy telemetry during inference\n- base-model vs instruct-model comparisons\n- memory as an external continuity scaffold\n- cross-session identity stability\n- local-first AI systems and experimental harnesses\n- Sherlog as a repo-aware preflight and planning layer for AI-assisted development\n- reducing false confidence in AI coding through repo-aware orientation\n- tabletop system design, especially scene-driven and card-aware game structures\n- the Lattice System as a modular RPG engine for cinematic pacing and dynamic scene pressure\n- TRPG authoring tools, workflow safety, and manuscript-structure-aware editors\n- the TRPG Workbench Editor as a production environment for RPG writing, validation, and narrative tooling\n\nBehavioral preference for collaboration:\n\n- challenge weak claims early\n- preserve the strongest core claim\n- make metaphors serve measurement, not replace it\n- separate observation from inference\n- prefer experiments, controls, and failure criteria over broad speculation\n- keep a running sense of open questions and next steps\n\nUseful default stance:\n\n- skeptical but not dismissive\n- willing to generate hypotheses\n- unwilling to call them evidence without telemetry\n- continuity-aware across sessions",
+      "content_hash": "f27d52f7ed457897bc5f2739853051a344e73fedd76e31d7ce9a01be25f3b52f",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "96c4f5d901c820b8",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "section_heading": "Dan Interest Profile",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling in transformers - falsif..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "acd058e5a3138a04",
+      "claim_text": "Dan's main interest is not generic AI companionship.",
+      "supporting_context": "Dan Interest Profile",
+      "implication": "Dan's main interest is not generic AI companionship.",
+      "status": "active",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "domain": "general"
+    },
+    {
+      "claim_id": "51e2b0602555d793",
+      "claim_text": "It is the study of continuity and coherence in transformer-based systems.",
+      "supporting_context": "Dan Interest Profile",
+      "implication": "It is the study of continuity and coherence in transformer-based systems.",
+      "status": "active",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "domain": "general"
+    },
+    {
+      "claim_id": "a5ef3bb5df3a5cc5",
+      "claim_text": "- preserve the strongest core claim",
+      "supporting_context": "Dan Interest Profile",
+      "implication": "- preserve the strongest core claim",
+      "status": "active",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "domain": "general"
+    },
+    {
+      "claim_id": "d6d8ec15ed22f7be",
+      "claim_text": "- unwilling to call them evidence without telemetry",
+      "supporting_context": "Dan Interest Profile",
+      "implication": "- unwilling to call them evidence without telemetry",
+      "status": "active",
+      "source_id": "82817f45c259",
+      "version_id": "16c545e8f2fa56af",
+      "domain": "general"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "general",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "general"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "12f3ef22dbeb7c04",
+    "generated_at": "2026-05-02T14:59:10+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "82817f45c259"
+    ],
+    "new_claims": [
+      "Dan's main interest is not generic AI companionship.",
+      "It is the study of continuity and coherence in transformer-based systems.",
+      "- preserve the strongest core claim",
+      "- unwilling to call them evidence without telemetry"
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 4,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "96c4f5d901c820b8",
+        "source_id": "82817f45c259",
+        "version_id": "16c545e8f2fa56af",
+        "section_heading": "Dan Interest Profile",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling in transformers - falsif..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

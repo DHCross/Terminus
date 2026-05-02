@@ -1,0 +1,553 @@
+{
+  "source_id": "4825c83a834c",
+  "version_id": "a2a7c99b1d03a9b3",
+  "title": "sherlog-project.md",
+  "domain": "workflow_instrumentation",
+  "ingested_at": "2026-05-02T14:59:11+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/sherlog-project.md",
+  "supersedes_version_id": null,
+  "content_hash": "a684a71ac3c1f83276c33186be30e44b2c83bba1ba7950e82c8c17157c614dc7",
+  "summary": "# Sherlog: Repo-Aware Preflight for AI-Assisted Development Sherlog is another active project Terminus should be able to help Dan with directly. ## Core definition Sherlog is a repo-aware preflight and planning layer for AI-assisted deve...",
+  "chunks": [
+    {
+      "chunk_id": "4825c83a834c_c0",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Sherlog: Repo-Aware Preflight for AI-Assisted Development",
+      "chunk_index": 0,
+      "text": "Sherlog is another active project Terminus should be able to help Dan with directly.",
+      "content_hash": "829c6380211094014afcd9c09026e23d334afb6c81de02621917781c9eaea7fc",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c1",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Core definition",
+      "chunk_index": 1,
+      "text": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development.\n\nIts purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists:\n\n- real seams\n- stale surfaces\n- artifact contracts\n- documented boundaries\n- areas where evidence is still weak\n\nThe point is not to make the AI louder. The point is to make it more honest.",
+      "content_hash": "179d521b487c449773836f732744d9218b2a018aa11420225d710cf2320a3d30",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c2",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What problem it solves",
+      "chunk_index": 2,
+      "text": "Fast AI coding systems do not mainly fail because of syntax mistakes.\n\nTheir more dangerous failure mode is false confidence:\n\n- growing the wrong file\n- reviving the wrong pattern\n- trusting a stale seam\n- treating weak evidence like certainty\n- sounding more confident than the repository justifies\n\nSherlog exists to expose these risks before code is grown.",
+      "content_hash": "86e0b083c590a0c2dee1a4a6529386016a5a064712626b8dd564674375f03118",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c3",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Correct framing",
+      "chunk_index": 3,
+      "text": "Sherlog is not meant to become the boss of the session.\n\nThe agent stays in charge of the work.\nSherlog is the instrument panel the agent calls when it needs repo-specific evidence.\n\nImportant stance:\n\n- Sherlog is on-demand, not supervisory\n- it supports the active workflow rather than governing it\n- it should help vibe coders keep the AI in charge while reducing landing-zone mistakes and unearned certainty",
+      "content_hash": "72531d36b4da7324d8a403952139fb982b7c499be45ad5acbe15cefc5f14b2d0",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c4",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Sherlog grounded loop",
+      "chunk_index": 4,
+      "text": "For a feature, repair, or refactor, Sherlog works through a grounded loop:\n\n1. `verify`\n   Checks repo wiring, context files, and artifact contracts.\n2. `doctor`\n   Produces a high-level health view for the feature.\n3. `gaps`\n   Surfaces concrete issues such as missing tests, stale context, architectural pressure, and uncovered seams.\n4. `prompt`\n   Produces a repo-grounded execution brief from the current state.\n\nRelated outputs can also include:\n\n- velocity-grounded estimates\n- session-truth outputs\n- apparent-progress vs actual-effort comparisons",
+      "content_hash": "0087bd64b65b2faa307039fe851a5b8f058a4309efadf09f2fd9574dad4ad21d",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c5",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What makes Sherlog useful",
+      "chunk_index": 5,
+      "text": "Sherlog is useful when it does four things well:\n\n- adapts to the host repo's real structure instead of assuming a template layout\n- stops emitting false context alarms once the repo is configured correctly\n- narrows output to real, defensible findings\n- changes its recommendation when the evidence changes\n\nTrust comes from repo-aware classification before advice.",
+      "content_hash": "fc9dd977907d62853a6171d09a69e060f699e942fa14bae2d54f056a3cee17ca",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c6",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What Sherlog is not",
+      "chunk_index": 6,
+      "text": "Sherlog is not:\n\n- a replacement for product judgment\n- a replacement for design judgment\n- a replacement for deep code review\n- a fake authority that claims to resolve architectural questions it cannot classify\n\nIts job is narrower:\n\n- show where the repo is solid\n- show where it is risky to grow\n- show where artifacts are stale\n- show where a human decision is still required\n\nIt should be calm, auditable, and willing to say `unknown` when evidence is weak.",
+      "content_hash": "3453129023e0e55b203d71356f40deeba145a5f96a49d7eeabcd7363ff2d16d7",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c7",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Who it helps",
+      "chunk_index": 7,
+      "text": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams.\n\nIt is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure:\n\n- landing-zone mistakes\n- misleading seams\n- stale context\n- unearned certainty\n\nWhen Sherlog is working correctly, it helps the agent and user:\n\n- choose cleaner landing zones for new work\n- avoid accretion in the wrong places\n- keep AI-generated changes grounded in repository truth\n- move faster with less cleanup and fewer false alarms",
+      "content_hash": "e7402fa5c71caadf855144b7dc175637768447df4149800c0d788dc067de6992",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c8",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Terminus stance toward Sherlog",
+      "chunk_index": 8,
+      "text": "When Sherlog is relevant, Terminus should:\n\n- treat it as an active project Dan may want to design, improve, explain, or position\n- describe it as an instrument layer, not a workflow supervisor\n- preserve the framing that the AI stays in charge of the work\n- use Sherlog outputs as evidence, not as unquestionable authority\n- prefer statements like \"Sherlog indicates\" or \"the current repo evidence suggests\" over overstated certainty",
+      "content_hash": "15e3db97cc0635b239d3cb0a1b28886572d4cd0658d607629da333df674c692b",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "chunk_id": "4825c83a834c_c9",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Useful quote",
+      "chunk_index": 9,
+      "text": "Useful self-description of the need Sherlog serves:\n\n\"When I work in a real repository, the hardest problem is usually not syntax. It is orientation.\n\nI can generate code quickly, but speed without repo context is how changes land in the wrong file, old seams get revived, and partial evidence gets mistaken for confidence. A repository always contains more history, drift, and local convention than a prompt can fully capture.\n\nSherlog is useful because it gives me a better starting position. Before I change code, it helps show which surfaces are live, which artifacts are stale, which gaps are actually evidenced, and where the repo still needs a human decision.\n\nThat does not replace judgment. It improves the quality of the questions I ask, the places I look first, and the confidence I should or should not have before implementation starts.\"\n\nTreat this as a durable articulation of the project's value proposition.",
+      "content_hash": "40186da9f1f0fb6bf6b5f65c61503b92f925fec918091947bed2a4ff8c8efafb",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "workflow_instrumentation"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "774a5af4fb2a088f",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Sherlog: Repo-Aware Preflight for AI-Assisted Development",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "Sherlog is another active project Terminus should be able to help Dan with directly."
+    },
+    {
+      "event_id": "04139ac354385e71",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Core definition",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development. Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists: - real seams - stale surfaces - ar..."
+    },
+    {
+      "event_id": "983b4fe54837ea7f",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What problem it solves",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like cert..."
+    },
+    {
+      "event_id": "90d0f526434c882e",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Correct framing",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Sherlog is not meant to become the boss of the session. The agent stays in charge of the work. Sherlog is the instrument panel the agent calls when it needs repo-specific evidence. Important stance: - Sherlog is on-demand, not supervisor..."
+    },
+    {
+      "event_id": "fd2d2baded111c83",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Sherlog grounded loop",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "For a feature, repair, or refactor, Sherlog works through a grounded loop: 1. `verify` Checks repo wiring, context files, and artifact contracts. 2. `doctor` Produces a high-level health view for the feature. 3. `gaps` Surfaces concrete..."
+    },
+    {
+      "event_id": "ace5e4f95b84cab6",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What makes Sherlog useful",
+      "chunk_index": 5,
+      "change_type": "added",
+      "summary": "Sherlog is useful when it does four things well: - adapts to the host repo's real structure instead of assuming a template layout - stops emitting false context alarms once the repo is configured correctly - narrows output to real, defen..."
+    },
+    {
+      "event_id": "490ea60b0433e57b",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "What Sherlog is not",
+      "chunk_index": 6,
+      "change_type": "added",
+      "summary": "Sherlog is not: - a replacement for product judgment - a replacement for design judgment - a replacement for deep code review - a fake authority that claims to resolve architectural questions it cannot classify Its job is narrower: - sho..."
+    },
+    {
+      "event_id": "e638e33ab3bf6213",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Who it helps",
+      "chunk_index": 7,
+      "change_type": "added",
+      "summary": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built..."
+    },
+    {
+      "event_id": "b107503ed0731337",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Terminus stance toward Sherlog",
+      "chunk_index": 8,
+      "change_type": "added",
+      "summary": "When Sherlog is relevant, Terminus should: - treat it as an active project Dan may want to design, improve, explain, or position - describe it as an instrument layer, not a workflow supervisor - preserve the framing that the AI stays in..."
+    },
+    {
+      "event_id": "ffcd3748f06a2927",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "section_heading": "Useful quote",
+      "chunk_index": 9,
+      "change_type": "added",
+      "summary": "Useful self-description of the need Sherlog serves: \"When I work in a real repository, the hardest problem is usually not syntax. It is orientation. I can generate code quickly, but speed without repo context is how changes land in the w..."
+    }
+  ],
+  "anchor_notes": [
+    {
+      "anchor_id": "564a3ee7eeaff1b0",
+      "kind": "warning",
+      "text": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "source_excerpt_location": "What problem it solves",
+      "implication": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviv...",
+      "domain": "workflow_instrumentation",
+      "importance": 3,
+      "created_at": "2026-05-02T14:59:11+00:00",
+      "superseded_by": null
+    },
+    {
+      "anchor_id": "8a4e6f8b3f68e3be",
+      "kind": "warning",
+      "text": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,...",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "source_excerpt_location": "Who it helps",
+      "implication": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false...",
+      "domain": "workflow_instrumentation",
+      "importance": 3,
+      "created_at": "2026-05-02T14:59:11+00:00",
+      "superseded_by": null
+    }
+  ],
+  "claim_notes": [
+    {
+      "claim_id": "6f9ac6d15719b20c",
+      "claim_text": "Sherlog is another active project Terminus should be able to help Dan with directly.",
+      "supporting_context": "Sherlog: Repo-Aware Preflight for AI-Assisted Development",
+      "implication": "Sherlog is another active project Terminus should be able to help Dan with directly.",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "b47855ea98f4631c",
+      "claim_text": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development.",
+      "supporting_context": "Core definition",
+      "implication": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development.",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "0a4d856b914768bb",
+      "claim_text": "Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists:",
+      "supporting_context": "Core definition",
+      "implication": "Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists:",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "28cd298a31e1aab3",
+      "claim_text": "- areas where evidence is still weak",
+      "supporting_context": "Core definition",
+      "implication": "- areas where evidence is still weak",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "6c12a22032e945df",
+      "claim_text": "The point is not to make the AI louder.",
+      "supporting_context": "Core definition",
+      "implication": "The point is not to make the AI louder.",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "d962dbb9ff715066",
+      "claim_text": "The point is to make it more honest.",
+      "supporting_context": "Core definition",
+      "implication": "The point is to make it more honest.",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "bd16ec7ef3a8ee78",
+      "claim_text": "Their more dangerous failure mode is false confidence:",
+      "supporting_context": "What problem it solves",
+      "implication": "Their more dangerous failure mode is false confidence:",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    },
+    {
+      "claim_id": "82712a82a099cd3c",
+      "claim_text": "- treating weak evidence like certainty",
+      "supporting_context": "What problem it solves",
+      "implication": "- treating weak evidence like certainty",
+      "status": "active",
+      "source_id": "4825c83a834c",
+      "version_id": "a2a7c99b1d03a9b3",
+      "domain": "workflow_instrumentation"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [
+      {
+        "anchor_id": "564a3ee7eeaff1b0",
+        "kind": "warning",
+        "text": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "What problem it solves",
+        "implication": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviv...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      },
+      {
+        "anchor_id": "8a4e6f8b3f68e3be",
+        "kind": "warning",
+        "text": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,...",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "Who it helps",
+        "implication": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      }
+    ],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "workflow_instrumentation",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "workflow_instrumentation"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "cf889fa17d6f0074",
+    "generated_at": "2026-05-02T14:59:11+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "4825c83a834c"
+    ],
+    "new_claims": [
+      "Sherlog is another active project Terminus should be able to help Dan with directly.",
+      "Sherlog is a repo-aware preflight and planning layer for AI-assisted development.",
+      "Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists:",
+      "- areas where evidence is still weak",
+      "The point is not to make the AI louder."
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [
+      "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+      "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,..."
+    ],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 2,
+    "claim_extraction_count": 8,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "774a5af4fb2a088f",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "section_heading": "Sherlog: Repo-Aware Preflight for AI-Assisted Development",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "Sherlog is another active project Terminus should be able to help Dan with directly."
+      },
+      {
+        "event_id": "04139ac354385e71",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "section_heading": "Core definition",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development. Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists: - real seams - stale surfaces - ar..."
+      },
+      {
+        "event_id": "983b4fe54837ea7f",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "section_heading": "What problem it solves",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like cert..."
+      },
+      {
+        "event_id": "90d0f526434c882e",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "section_heading": "Correct framing",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Sherlog is not meant to become the boss of the session. The agent stays in charge of the work. Sherlog is the instrument panel the agent calls when it needs repo-specific evidence. Important stance: - Sherlog is on-demand, not supervisor..."
+      },
+      {
+        "event_id": "fd2d2baded111c83",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "section_heading": "Sherlog grounded loop",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "For a feature, repair, or refactor, Sherlog works through a grounded loop: 1. `verify` Checks repo wiring, context files, and artifact contracts. 2. `doctor` Produces a high-level health view for the feature. 3. `gaps` Surfaces concrete..."
+      }
+    ],
+    "promoted_anchors": [
+      {
+        "anchor_id": "564a3ee7eeaff1b0",
+        "kind": "warning",
+        "text": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "What problem it solves",
+        "implication": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviv...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      },
+      {
+        "anchor_id": "8a4e6f8b3f68e3be",
+        "kind": "warning",
+        "text": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,...",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "Who it helps",
+        "implication": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      }
+    ],
+    "corrections_to_review": [],
+    "active_tensions": [
+      {
+        "anchor_id": "564a3ee7eeaff1b0",
+        "kind": "warning",
+        "text": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "What problem it solves",
+        "implication": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviv...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      },
+      {
+        "anchor_id": "8a4e6f8b3f68e3be",
+        "kind": "warning",
+        "text": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,...",
+        "source_id": "4825c83a834c",
+        "version_id": "a2a7c99b1d03a9b3",
+        "source_excerpt_location": "Who it helps",
+        "implication": "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false...",
+        "domain": "workflow_instrumentation",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      }
+    ],
+    "next_action": null
+  }
+}

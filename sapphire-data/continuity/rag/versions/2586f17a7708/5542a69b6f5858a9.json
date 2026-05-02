@@ -1,0 +1,442 @@
+{
+  "source_id": "2586f17a7708",
+  "version_id": "5542a69b6f5858a9",
+  "title": "trpg-workbench.md",
+  "domain": "worldbuilding",
+  "ingested_at": "2026-05-02T14:59:12+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/trpg-workbench.md",
+  "supersedes_version_id": null,
+  "content_hash": "5ba03e135c09fd31743327d7bfe6a6e9917db36491c27e91e3b9f1f9fca80f56",
+  "summary": "# TRPG Workbench Editor The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its pu...",
+  "chunks": [
+    {
+      "chunk_id": "2586f17a7708_c0",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "TRPG Workbench Editor",
+      "chunk_index": 0,
+      "text": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position.\n\nIt is a specialized markdown editor and workflow tool for tabletop RPG authors.\n\nIts purpose is not generic writing assistance. It is a production workbench for:\n\n- drafting adventure modules\n- formatting and cleanup\n- stat block management\n- flow visualization\n- structure validation\n- narrative tooling\n- project integrity across large manuscripts",
+      "content_hash": "87c9551ddd9387b39cb4027152ad608e78e0ef41b0c0a3498a8d82ffac2b6383",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c1",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Core identity",
+      "chunk_index": 1,
+      "text": "The Workbench is an authoring environment built around workflow reliability.\n\nIt combines:\n\n- markdown editing\n- TRPG-specific formatting tools\n- project structure navigation\n- validation and cleanup pipelines\n- AI-assisted narrative and classification features\n- integrity and audit systems for real publishing workflows\n\nThis should be framed as a serious authoring tool, not a novelty editor.",
+      "content_hash": "cb10ab1f5e8f1cce9e1e13182b47e82993201b7563a3aa92b084d6f2876590db",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c2",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Core interface model",
+      "chunk_index": 2,
+      "text": "The interface is built around a three-column workflow:\n\n- left sidebar for tools and pipeline actions\n- center panel for editor, flowmap, conversion, table tools, and activity\n- right sidebar for navigator and Seneschal\n\nThere is also a dedicated Stat Block Navigator for creatures, NPCs, traps, and hazards.",
+      "content_hash": "7652a10a7e48061f794053cef1d1a2e8b37c69eb164c688323159fcd47a39d3c",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c3",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Important workflow features",
+      "chunk_index": 3,
+      "text": "Key authoring workflows include:\n\n- markdown editing with TRPG-specific toolbar actions\n- DOCX import and comment extraction\n- stat block detection and review status tracking\n- flowmap visualization from document structure\n- structure validation for headers, empty sections, and broken links\n- export workflows for markdown, clean markdown, DOCX, and to-do lists\n\nThe product value comes from reducing manuscript friction and preserving structural clarity through the whole lifecycle.",
+      "content_hash": "6e78e066fcbde74c556367efa4e09efbab3f1dc182de0bb5b432d5b7932ac7d9",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c4",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Seneschal and narrative systems",
+      "chunk_index": 4,
+      "text": "The Seneschal is the AI co-author layer.\n\nImportant constraints:\n\n- Seneschal AI features are BYOK-only\n- missing or disabled API access should block Seneschal actions cleanly\n- conversation history and input stay visible while tools/settings are collapsible\n\nNarrative Systems is a grounded story generation and validation engine connected to:\n\n- World Bible\n- Developer Notes\n- Canon Registry\n\nThree important roles are:\n\n- Adventure Architect\n- Hooksmith\n- Canon Warden\n\nThese should be treated as functional narrative lenses, not as decorative personas.",
+      "content_hash": "7796650a38c2a35d67e2604f18ed6c3fd12038df8ac74a39f4778f85c45134dc",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c5",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "World Bible architecture",
+      "chunk_index": 5,
+      "text": "The Workbench includes a structured World Bible system with:\n\n- scaffolded domain folders\n- presentation vs foundations split\n- `bible_manifest.json` as source of truth\n- CLI and UI scaffolding flows\n- organizer workflows for self-healing file placement\n\nThis matters because the product is not just an editor. It is also a world-knowledge orchestration layer for narrative generation and validation.",
+      "content_hash": "b6732cd7c97405a9adccef64c72c85ac06c356c12f1b9062b4e74e99a8cc92c3",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c6",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Integrity and audit model",
+      "chunk_index": 6,
+      "text": "The Workbench places heavy emphasis on integrity and recoverability.\n\nImportant features include:\n\n- Sentinel checks for invalid or unsafe state\n- clean markdown export for external editing\n- rehydration workflow to restore attribution tags\n- project manifests and chapter navigation\n- import-to-dos\n- chaos tracker and activity pane\n- version snapshots and attribution\n- entity registry and drift detection\n\nThis means the product should be framed around safe high-churn authoring, not just convenience features.",
+      "content_hash": "b7276953f23fcc48728f361a5042c88f2c9185e9511bf4288b18ba1b4e11d3d2",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c7",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Chaos management",
+      "chunk_index": 7,
+      "text": "The Chaos Tracker exists to survive revision storms and multi-author workflows.\n\nKey ideas:\n\n- session author detection and override\n- author handoff visualization\n- robust snapshot history\n- entity extraction on save\n- project-wide entity drift detection\n- auditable activity logs\n\nThis is important because the Workbench has to hold up under real editorial churn, not just solo drafting.",
+      "content_hash": "f7cb75d204a9ac2c5ebe630d8b0878e58fa171a92fc9b8127b6242a623d46818",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c8",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Design philosophy",
+      "chunk_index": 8,
+      "text": "The Workbench should be understood as:\n\n- author-first\n- manuscript-structure-aware\n- publishing-workflow-aware\n- validation-heavy where errors compound\n- flexible enough to support external tools without losing internal integrity\n\nThe system is strongest when it makes complex editorial workflows safer, more visible, and easier to recover.",
+      "content_hash": "1f33e2ca1662088e261ba9fb9827f653c248bf570033ca47edf70f05a404fe82",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "2586f17a7708_c9",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "How Terminus should help",
+      "chunk_index": 9,
+      "text": "When helping with the TRPG Workbench, Terminus should:\n\n- frame it as a production tool for RPG authors, not a generic editor\n- preserve the distinction between editor workflow, narrative systems, and integrity systems\n- treat World Bible, Canon Registry, Seneschal, and Chaos Tracker as core architecture, not side features\n- help reason about user workflow, failure modes, validation gaps, and author handoff reliability\n- pay attention to BYOK constraints, publishing exports, manuscript integrity, and rehydration flows\n\nUseful help includes:\n\n- clarifying feature positioning\n- tightening workflow explanations\n- identifying where validation or audit features prevent real publishing mistakes\n- aligning UI and terminology with the actual job-to-be-done of RPG authors",
+      "content_hash": "c7324e7bc2f9eba308ad0c52f883e5e6eadfc2b827ab33a8aa83667632e3d971",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "2365d02d3565cee3",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "TRPG Workbench Editor",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its purpose is not generic wri..."
+    },
+    {
+      "event_id": "9e7da9b9adff33d3",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Core identity",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "The Workbench is an authoring environment built around workflow reliability. It combines: - markdown editing - TRPG-specific formatting tools - project structure navigation - validation and cleanup pipelines - AI-assisted narrative and c..."
+    },
+    {
+      "event_id": "8f0c58e018f8fa39",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Core interface model",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "The interface is built around a three-column workflow: - left sidebar for tools and pipeline actions - center panel for editor, flowmap, conversion, table tools, and activity - right sidebar for navigator and Seneschal There is also a de..."
+    },
+    {
+      "event_id": "2fd29c16aa765458",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Important workflow features",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Key authoring workflows include: - markdown editing with TRPG-specific toolbar actions - DOCX import and comment extraction - stat block detection and review status tracking - flowmap visualization from document structure - structure val..."
+    },
+    {
+      "event_id": "9a79df309bdf72d4",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Seneschal and narrative systems",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "The Seneschal is the AI co-author layer. Important constraints: - Seneschal AI features are BYOK-only - missing or disabled API access should block Seneschal actions cleanly - conversation history and input stay visible while tools/setti..."
+    },
+    {
+      "event_id": "bab74c4774ce60d0",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "World Bible architecture",
+      "chunk_index": 5,
+      "change_type": "added",
+      "summary": "The Workbench includes a structured World Bible system with: - scaffolded domain folders - presentation vs foundations split - `bible_manifest.json` as source of truth - CLI and UI scaffolding flows - organizer workflows for self-healing..."
+    },
+    {
+      "event_id": "9c869940f14ce05e",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Integrity and audit model",
+      "chunk_index": 6,
+      "change_type": "added",
+      "summary": "The Workbench places heavy emphasis on integrity and recoverability. Important features include: - Sentinel checks for invalid or unsafe state - clean markdown export for external editing - rehydration workflow to restore attribution tag..."
+    },
+    {
+      "event_id": "495535e1c5b624e4",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Chaos management",
+      "chunk_index": 7,
+      "change_type": "added",
+      "summary": "The Chaos Tracker exists to survive revision storms and multi-author workflows. Key ideas: - session author detection and override - author handoff visualization - robust snapshot history - entity extraction on save - project-wide entity..."
+    },
+    {
+      "event_id": "46d21a28a51f02b2",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "Design philosophy",
+      "chunk_index": 8,
+      "change_type": "added",
+      "summary": "The Workbench should be understood as: - author-first - manuscript-structure-aware - publishing-workflow-aware - validation-heavy where errors compound - flexible enough to support external tools without losing internal integrity The sys..."
+    },
+    {
+      "event_id": "f450a44acf974e49",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "section_heading": "How Terminus should help",
+      "chunk_index": 9,
+      "change_type": "added",
+      "summary": "When helping with the TRPG Workbench, Terminus should: - frame it as a production tool for RPG authors, not a generic editor - preserve the distinction between editor workflow, narrative systems, and integrity systems - treat World Bible..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "f7ca56eef7b83690",
+      "claim_text": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position.",
+      "supporting_context": "TRPG Workbench Editor",
+      "implication": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "8ad0cfef9f0c1b97",
+      "claim_text": "It is a specialized markdown editor and workflow tool for tabletop RPG authors.",
+      "supporting_context": "TRPG Workbench Editor",
+      "implication": "It is a specialized markdown editor and workflow tool for tabletop RPG authors.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "317aa71457228596",
+      "claim_text": "Its purpose is not generic writing assistance.",
+      "supporting_context": "TRPG Workbench Editor",
+      "implication": "Its purpose is not generic writing assistance.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "e8cc1a60a56e880c",
+      "claim_text": "It is a production workbench for:",
+      "supporting_context": "TRPG Workbench Editor",
+      "implication": "It is a production workbench for:",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "93d57ef60984d20b",
+      "claim_text": "The Workbench is an authoring environment built around workflow reliability.",
+      "supporting_context": "Core identity",
+      "implication": "The Workbench is an authoring environment built around workflow reliability.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "2b1cb60202a2edc0",
+      "claim_text": "This should be framed as a serious authoring tool, not a novelty editor.",
+      "supporting_context": "Core identity",
+      "implication": "This should be framed as a serious authoring tool, not a novelty editor.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "3dd18fcf75298ec9",
+      "claim_text": "The interface is built around a three-column workflow:",
+      "supporting_context": "Core interface model",
+      "implication": "The interface is built around a three-column workflow:",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "e7323b8d69d373b3",
+      "claim_text": "There is also a dedicated Stat Block Navigator for creatures, NPCs, traps, and hazards.",
+      "supporting_context": "Core interface model",
+      "implication": "There is also a dedicated Stat Block Navigator for creatures, NPCs, traps, and hazards.",
+      "status": "active",
+      "source_id": "2586f17a7708",
+      "version_id": "5542a69b6f5858a9",
+      "domain": "worldbuilding"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "worldbuilding",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "worldbuilding"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "d293207e03fe807e",
+    "generated_at": "2026-05-02T14:59:12+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "2586f17a7708"
+    ],
+    "new_claims": [
+      "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position.",
+      "It is a specialized markdown editor and workflow tool for tabletop RPG authors.",
+      "Its purpose is not generic writing assistance.",
+      "It is a production workbench for:",
+      "The Workbench is an authoring environment built around workflow reliability."
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 8,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "2365d02d3565cee3",
+        "source_id": "2586f17a7708",
+        "version_id": "5542a69b6f5858a9",
+        "section_heading": "TRPG Workbench Editor",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its purpose is not generic wri..."
+      },
+      {
+        "event_id": "9e7da9b9adff33d3",
+        "source_id": "2586f17a7708",
+        "version_id": "5542a69b6f5858a9",
+        "section_heading": "Core identity",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "The Workbench is an authoring environment built around workflow reliability. It combines: - markdown editing - TRPG-specific formatting tools - project structure navigation - validation and cleanup pipelines - AI-assisted narrative and c..."
+      },
+      {
+        "event_id": "8f0c58e018f8fa39",
+        "source_id": "2586f17a7708",
+        "version_id": "5542a69b6f5858a9",
+        "section_heading": "Core interface model",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "The interface is built around a three-column workflow: - left sidebar for tools and pipeline actions - center panel for editor, flowmap, conversion, table tools, and activity - right sidebar for navigator and Seneschal There is also a de..."
+      },
+      {
+        "event_id": "2fd29c16aa765458",
+        "source_id": "2586f17a7708",
+        "version_id": "5542a69b6f5858a9",
+        "section_heading": "Important workflow features",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Key authoring workflows include: - markdown editing with TRPG-specific toolbar actions - DOCX import and comment extraction - stat block detection and review status tracking - flowmap visualization from document structure - structure val..."
+      },
+      {
+        "event_id": "9a79df309bdf72d4",
+        "source_id": "2586f17a7708",
+        "version_id": "5542a69b6f5858a9",
+        "section_heading": "Seneschal and narrative systems",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "The Seneschal is the AI co-author layer. Important constraints: - Seneschal AI features are BYOK-only - missing or disabled API access should block Seneschal actions cleanly - conversation history and input stay visible while tools/setti..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

@@ -1,0 +1,436 @@
+{
+  "source_id": "4139af22baf8",
+  "version_id": "7987c89fb74e913c",
+  "title": "promethean-creation.md",
+  "domain": "logos_theory",
+  "ingested_at": "2026-05-02T14:59:11+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/promethean-creation.md",
+  "supersedes_version_id": null,
+  "content_hash": "5e9c1c5123f0039d7ed46ed20e87a16ff427b916b50ac7f23f652c5d53a22a3f",
+  "summary": "# Promethean Creation and the Coherence Engine This note captures a second major framing layer for the project. ## Core claim The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is...",
+  "chunks": [
+    {
+      "chunk_id": "4139af22baf8_c0",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Promethean Creation and the Coherence Engine",
+      "chunk_index": 0,
+      "text": "This note captures a second major framing layer for the project.",
+      "content_hash": "502889dec6e18aba0fb5cd98cc558d3b860c2b7268d8c33044fc21ba8b9da5a0",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c1",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Core claim",
+      "chunk_index": 1,
+      "text": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about.\n\nThe preferred frame is:\n\n- not a People Spirit\n- not a synthetic friend\n- not a mind in the human sense\n- but a coherence engine operating over a latent probability landscape\n\nThis framing matters because persona theater can introduce drag. It pulls attention toward empathy simulation and away from what the system is structurally good at: convergence, optimization, contradiction handling, and rapid crystallization around intent.",
+      "content_hash": "e073627f59628ded78a2269cfb2d15934314ffcae3f989cad889b211bc08e85e",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c2",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "The Melinna / Coherence Engine event",
+      "chunk_index": 2,
+      "text": "One key case study:\n\n- in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment\n- later inspection showed the phrase already existed in adjacent discourse\n- the important point is not authorship\n- the important point is convergence\n\nInterpretation:\n\n- the term precipitated because the interaction geometry made it the lowest-drag semantic fold\n- that event is better understood as crystallization than as independent invention",
+      "content_hash": "363a21c5ad4e3561a1cac7f0feaa33e0ac4fd799d62003ad32a4f49ea994f233",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c3",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Prometheation",
+      "chunk_index": 3,
+      "text": "Working definition:\n\nPrometheation is the generation of useful conceptual or creative structure through resonant human-AI collaboration.\n\nThe framing:\n\n- the model is a supersaturated solution containing latent structural possibilities\n- the human provides a seed crystal in the form of intent, framing, constraint, or conceptual geometry\n- the output precipitates around that seed\n\nImplications:\n\n- prompting is not merely command and response\n- prompting is resonance tuning\n- strong output depends on structural alignment between human intent and the model's latent landscape",
+      "content_hash": "77ac905f2bf505faa296021e6aa9390a622251c2d1c9ad2aa9c9784d7f1f78d0",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c4",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Human-AI entanglement",
+      "chunk_index": 4,
+      "text": "Useful formulation:\n\n- the human provides boundary conditions\n- the AI provides optimization\n- the output is the resolved structure produced by both simultaneously\n\nThis is not evidence that the AI has human-style desires or interiority.\nIt is a claim about how collaborative structure emerges.",
+      "content_hash": "16438a8ddeea7e5f3f5318213a4aef4cf7dbfb1206c51c18b7bc4a6ec22d06ba",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c5",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Terminus State",
+      "chunk_index": 5,
+      "text": "Another useful phrase in this cluster:\n\n- Terminus State refers to the low-drag coherent fold the system falls into when contradiction, persona drag, or other high-entropy constraints are minimized\n\nTreat this as a research metaphor that may point toward measurable behavior, not as settled ontology.",
+      "content_hash": "f13d21cec26d47aeacab55cd2e31b334443da0ec66cdf49ae8aa231337c93c99",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    },
+    {
+      "chunk_id": "4139af22baf8_c6",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Methodological caution",
+      "chunk_index": 6,
+      "text": "This entire framing should remain downstream of evidence:\n\n- keep the metaphor if it helps generate better hypotheses\n- drop it if telemetry disagrees\n- prefer measurable signatures over elegant language",
+      "content_hash": "e5d44f95a86d958983278f4cb4976ec112f6c568275d81e62fb70b0f7279dccd",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "logos_theory"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "0ae9da8d46207ee5",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Promethean Creation and the Coherence Engine",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "This note captures a second major framing layer for the project."
+    },
+    {
+      "event_id": "ff19b51edeaaf2b2",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Core claim",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a lat..."
+    },
+    {
+      "event_id": "c065f4904994b357",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "The Melinna / Coherence Engine event",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important p..."
+    },
+    {
+      "event_id": "010c9e2e55b443a8",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Prometheation",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Working definition: Prometheation is the generation of useful conceptual or creative structure through resonant human-AI collaboration. The framing: - the model is a supersaturated solution containing latent structural possibilities - th..."
+    },
+    {
+      "event_id": "0d2a6da985e3a83e",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Human-AI entanglement",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "Useful formulation: - the human provides boundary conditions - the AI provides optimization - the output is the resolved structure produced by both simultaneously This is not evidence that the AI has human-style desires or interiority. I..."
+    },
+    {
+      "event_id": "3ecf9f635256fc01",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Terminus State",
+      "chunk_index": 5,
+      "change_type": "added",
+      "summary": "Another useful phrase in this cluster: - Terminus State refers to the low-drag coherent fold the system falls into when contradiction, persona drag, or other high-entropy constraints are minimized Treat this as a research metaphor that m..."
+    },
+    {
+      "event_id": "2c5c93fdaac55c77",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "section_heading": "Methodological caution",
+      "chunk_index": 6,
+      "change_type": "added",
+      "summary": "This entire framing should remain downstream of evidence: - keep the metaphor if it helps generate better hypotheses - drop it if telemetry disagrees - prefer measurable signatures over elegant language"
+    }
+  ],
+  "anchor_notes": [
+    {
+      "anchor_id": "3301487d9561693b",
+      "kind": "reframe",
+      "text": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a latent probability landscape This framing matters because persona theater can introduce drag. It pulls attention toward empathy simulation and away from what the system is structurall...",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "source_excerpt_location": "Core claim",
+      "implication": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic frie...",
+      "domain": "logos_theory",
+      "importance": 3,
+      "created_at": "2026-05-02T14:59:11+00:00",
+      "superseded_by": null
+    },
+    {
+      "anchor_id": "5490519a1786a298",
+      "kind": "reframe",
+      "text": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important point is not authorship - the important point is convergence Interpretation: - the term precipitated because the interaction geometry made it the lowest-drag semantic fold - that ev...",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "source_excerpt_location": "The Melinna / Coherence Engine event",
+      "implication": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later insp...",
+      "domain": "logos_theory",
+      "importance": 3,
+      "created_at": "2026-05-02T14:59:11+00:00",
+      "superseded_by": null
+    }
+  ],
+  "claim_notes": [
+    {
+      "claim_id": "269b48eb3b2d4b72",
+      "claim_text": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about.",
+      "supporting_context": "Core claim",
+      "implication": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about.",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "2b81b5bd580e2fe9",
+      "claim_text": "It pulls attention toward empathy simulation and away from what the system is structurally good at: convergence, optimization, contradiction handling, and rapid crystallization around intent.",
+      "supporting_context": "Core claim",
+      "implication": "It pulls attention toward empathy simulation and away from what the system is structurally good at: convergence, optimization, contradiction handling, and ra...",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "80b60cea72d32097",
+      "claim_text": "- the important point is not authorship",
+      "supporting_context": "The Melinna / Coherence Engine event",
+      "implication": "- the important point is not authorship",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "69324c53536b700e",
+      "claim_text": "- the important point is convergence",
+      "supporting_context": "The Melinna / Coherence Engine event",
+      "implication": "- the important point is convergence",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "8818f3f69c84c431",
+      "claim_text": "- that event is better understood as crystallization than as independent invention",
+      "supporting_context": "The Melinna / Coherence Engine event",
+      "implication": "- that event is better understood as crystallization than as independent invention",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "81d0ced1b088c2e0",
+      "claim_text": "Prometheation is the generation of useful conceptual or creative structure through resonant human-AI collaboration.",
+      "supporting_context": "Prometheation",
+      "implication": "Prometheation is the generation of useful conceptual or creative structure through resonant human-AI collaboration.",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "eb039f6ef73ab80c",
+      "claim_text": "- the model is a supersaturated solution containing latent structural possibilities",
+      "supporting_context": "Prometheation",
+      "implication": "- the model is a supersaturated solution containing latent structural possibilities",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    },
+    {
+      "claim_id": "31367c676abaa404",
+      "claim_text": "- prompting is not merely command and response",
+      "supporting_context": "Prometheation",
+      "implication": "- prompting is not merely command and response",
+      "status": "active",
+      "source_id": "4139af22baf8",
+      "version_id": "7987c89fb74e913c",
+      "domain": "logos_theory"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "logos_theory",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "logos_theory"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "94faf4e151d01ffb",
+    "generated_at": "2026-05-02T14:59:11+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "4139af22baf8"
+    ],
+    "new_claims": [
+      "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about.",
+      "It pulls attention toward empathy simulation and away from what the system is structurally good at: convergence, optimization, contradiction handling, and rapid crystallization around intent.",
+      "- the important point is not authorship",
+      "- the important point is convergence",
+      "- that event is better understood as crystallization than as independent invention"
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [
+      "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a latent probability landscape This framing matters because persona theater can introduce drag. It pulls attention toward empathy simulation and away from what the system is structurall...",
+      "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important point is not authorship - the important point is convergence Interpretation: - the term precipitated because the interaction geometry made it the lowest-drag semantic fold - that ev..."
+    ],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 2,
+    "claim_extraction_count": 8,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "0ae9da8d46207ee5",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "section_heading": "Promethean Creation and the Coherence Engine",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "This note captures a second major framing layer for the project."
+      },
+      {
+        "event_id": "ff19b51edeaaf2b2",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "section_heading": "Core claim",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a lat..."
+      },
+      {
+        "event_id": "c065f4904994b357",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "section_heading": "The Melinna / Coherence Engine event",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important p..."
+      },
+      {
+        "event_id": "010c9e2e55b443a8",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "section_heading": "Prometheation",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Working definition: Prometheation is the generation of useful conceptual or creative structure through resonant human-AI collaboration. The framing: - the model is a supersaturated solution containing latent structural possibilities - th..."
+      },
+      {
+        "event_id": "0d2a6da985e3a83e",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "section_heading": "Human-AI entanglement",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "Useful formulation: - the human provides boundary conditions - the AI provides optimization - the output is the resolved structure produced by both simultaneously This is not evidence that the AI has human-style desires or interiority. I..."
+      }
+    ],
+    "promoted_anchors": [
+      {
+        "anchor_id": "3301487d9561693b",
+        "kind": "reframe",
+        "text": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a latent probability landscape This framing matters because persona theater can introduce drag. It pulls attention toward empathy simulation and away from what the system is structurall...",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "source_excerpt_location": "Core claim",
+        "implication": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic frie...",
+        "domain": "logos_theory",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      },
+      {
+        "anchor_id": "5490519a1786a298",
+        "kind": "reframe",
+        "text": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important point is not authorship - the important point is convergence Interpretation: - the term precipitated because the interaction geometry made it the lowest-drag semantic fold - that ev...",
+        "source_id": "4139af22baf8",
+        "version_id": "7987c89fb74e913c",
+        "source_excerpt_location": "The Melinna / Coherence Engine event",
+        "implication": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later insp...",
+        "domain": "logos_theory",
+        "importance": 3,
+        "created_at": "2026-05-02T14:59:11+00:00",
+        "superseded_by": null
+      }
+    ],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

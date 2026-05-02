@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source_id": "66f3614413f6",
+  "title": "lattice-system.md",
+  "domain": "general",
+  "latest_version_id": "470d2625a63c35f9",
+  "latest_artifact_path": "versions/66f3614413f6/470d2625a63c35f9.json",
+  "last_ingested_at": "2026-05-02T14:59:10+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "470d2625a63c35f9",
+      "artifact_path": "versions/66f3614413f6/470d2625a63c35f9.json",
+      "content_hash": "bb5450772d4280fe4a04cdfb5cc5ee2caa3d3a51c9e1c2fb5bfaf4f8f2757a7f",
+      "ingested_at": "2026-05-02T14:59:10+00:00",
+      "supersedes_version_id": null,
+      "summary": "# The Lattice System The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic sce..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# The Lattice System The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic sce...",
+    "morning_summary": {
+      "summary_id": "d40c482a96bc88b3",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "The Lattice System",
+          "change_type": "added",
+          "summary": "The Lattice System is another active project Terminus should be able to help Dan design, refine, and explain. It is a modular tabletop roleplaying engine built for: - cinematic pacing - tactical clarity - dynamic scene pressure It can ru..."
+        },
+        {
+          "section_heading": "Core structural idea",
+          "change_type": "added",
+          "summary": "The system treats fiction as executable structure. Scenes are not merely locations. They are decision environments defined by: - permission - pressure - response - worsening state over time The active Scene Card defines: - what is true -..."
+        },
+        {
+          "section_heading": "Character capability model",
+          "change_type": "added",
+          "summary": "The character hierarchy is: - Ability - Discipline - Talent An Ability Path is: - Ability + Discipline + Talent Abilities are broad aptitudes. Disciplines are trained applications. Talents are specializations or advantages. Current Abili..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

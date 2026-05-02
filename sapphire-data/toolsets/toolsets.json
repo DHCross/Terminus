@@ -69,5 +69,47 @@
       "delete_goal",
       "ask_claude"
     ]
+  },
+  "coherence_lab": {
+    "emoji": "CL",
+    "functions": [
+      "web_search",
+      "get_website",
+      "get_wikipedia",
+      "research_topic",
+      "get_site_links",
+      "get_images",
+      "save_memory",
+      "search_memory",
+      "get_recent_memories",
+      "delete_memory",
+      "save_knowledge",
+      "search_knowledge",
+      "delete_knowledge",
+      "create_goal",
+      "list_goals",
+      "update_goal",
+      "delete_goal",
+      "notepad_read",
+      "notepad_append_lines",
+      "notepad_delete_lines",
+      "notepad_insert_line",
+      "view_prompt",
+      "switch_prompt",
+      "set_piece",
+      "remove_piece",
+      "create_piece",
+      "list_pieces",
+      "search_help_docs",
+      "ask_claude",
+      "read_my_thinking",
+      "sherlog_preflight",
+      "sherlog_verify",
+      "sherlog_doctor",
+      "sherlog_gaps",
+      "sherlog_prompt",
+      "sherlog_session_status",
+      "sherlog_session_note"
+    ]
   }
 }

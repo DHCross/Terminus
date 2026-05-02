@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source_id": "2586f17a7708",
+  "title": "trpg-workbench.md",
+  "domain": "worldbuilding",
+  "latest_version_id": "5542a69b6f5858a9",
+  "latest_artifact_path": "versions/2586f17a7708/5542a69b6f5858a9.json",
+  "last_ingested_at": "2026-05-02T14:59:12+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "5542a69b6f5858a9",
+      "artifact_path": "versions/2586f17a7708/5542a69b6f5858a9.json",
+      "content_hash": "5ba03e135c09fd31743327d7bfe6a6e9917db36491c27e91e3b9f1f9fca80f56",
+      "ingested_at": "2026-05-02T14:59:12+00:00",
+      "supersedes_version_id": null,
+      "summary": "# TRPG Workbench Editor The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its pu..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# TRPG Workbench Editor The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its pu...",
+    "morning_summary": {
+      "summary_id": "d293207e03fe807e",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "TRPG Workbench Editor",
+          "change_type": "added",
+          "summary": "The TRPG Workbench Editor is another active project Terminus should be able to help Dan design, explain, refine, and position. It is a specialized markdown editor and workflow tool for tabletop RPG authors. Its purpose is not generic wri..."
+        },
+        {
+          "section_heading": "Core identity",
+          "change_type": "added",
+          "summary": "The Workbench is an authoring environment built around workflow reliability. It combines: - markdown editing - TRPG-specific formatting tools - project structure navigation - validation and cleanup pipelines - AI-assisted narrative and c..."
+        },
+        {
+          "section_heading": "Core interface model",
+          "change_type": "added",
+          "summary": "The interface is built around a three-column workflow: - left sidebar for tools and pipeline actions - center panel for editor, flowmap, conversion, table tools, and activity - right sidebar for navigator and Seneschal There is also a de..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

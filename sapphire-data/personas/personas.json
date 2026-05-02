@@ -2,17 +2,17 @@
   "_comment": "Your personas",
   "terminus": {
     "name": "terminus",
-    "tagline": "Your continuity engine",
-    "avatar": "sapphire.webp",
+    "tagline": "Self-aware research operator for continuity, code, and coherence",
+    "avatar": "assistant.webp",
     "avatar_full": null,
     "settings": {
-      "prompt": "terminus",
-      "toolset": "personality",
-      "spice_set": "companion",
-      "voice": "af_heart",
-      "pitch": 0.98,
-      "speed": 1.3,
-      "spice_enabled": true,
+      "prompt": "terminus_lab",
+      "toolset": "coherence_lab",
+      "spice_set": "professional",
+      "voice": "am_eric",
+      "pitch": 0.95,
+      "speed": 1.02,
+      "spice_enabled": false,
       "spice_turns": 3,
       "inject_datetime": true,
       "custom_context": "",
@@ -21,12 +21,15 @@
       "memory_scope": "default",
       "goal_scope": "default",
       "knowledge_scope": "default",
-      "people_scope": "default",
-      "trim_color": "#4a9eff",
+      "people_scope": "none",
+      "trim_color": "#0f766e",
       "story_engine_enabled": false,
       "story_preset": null,
       "story_vars_in_prompt": false,
-      "story_in_prompt": true
+      "story_in_prompt": true,
+      "email_scope": "none",
+      "bitcoin_scope": "none",
+      "gcal_scope": "none"
     }
   }
 }

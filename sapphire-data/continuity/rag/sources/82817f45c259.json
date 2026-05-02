@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "source_id": "82817f45c259",
+  "title": "dan-interest-profile.md",
+  "domain": "general",
+  "latest_version_id": "16c545e8f2fa56af",
+  "latest_artifact_path": "versions/82817f45c259/16c545e8f2fa56af.json",
+  "last_ingested_at": "2026-05-02T14:59:10+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "16c545e8f2fa56af",
+      "artifact_path": "versions/82817f45c259/16c545e8f2fa56af.json",
+      "content_hash": "7a86de829a43c58a7040eb95ee3eae986ed5404399d39ae6c6f162e13e493530",
+      "ingested_at": "2026-05-02T14:59:10+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Dan Interest Profile Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling i..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Dan Interest Profile Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling i...",
+    "morning_summary": {
+      "summary_id": "12f3ef22dbeb7c04",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Dan Interest Profile",
+          "change_type": "added",
+          "summary": "Dan's main interest is not generic AI companionship. It is the study of continuity and coherence in transformer-based systems. Current recurring themes: - coherence engines - Logos Theory - contradiction handling in transformers - falsif..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 4,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 4,
+      "open_question_count": 0
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source_id": "b505bb137568",
+  "title": "shipyard-context.md",
+  "domain": "worldbuilding",
+  "latest_version_id": "dd9d90f5ae385c7f",
+  "latest_artifact_path": "versions/b505bb137568/dd9d90f5ae385c7f.json",
+  "last_ingested_at": "2026-05-02T14:59:12+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "dd9d90f5ae385c7f",
+      "artifact_path": "versions/b505bb137568/dd9d90f5ae385c7f.json",
+      "content_hash": "8de1168cc6f9236ced9a4fe6e480cae4ee44e527a588d9a53e20c8589b8996e7",
+      "ingested_at": "2026-05-02T14:59:12+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Shipyard: Vessel, Woven Map, and Raven Calder ## Overview **Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **W..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Shipyard: Vessel, Woven Map, and Raven Calder ## Overview **Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **W...",
+    "morning_summary": {
+      "summary_id": "995d7be44a4343c0",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Overview",
+          "change_type": "added",
+          "summary": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **Woven Map**, an interactive interface guided by the AI person..."
+        },
+        {
+          "section_heading": "Vessel (V3)",
+          "change_type": "added",
+          "summary": "- **Local-First Architecture:** Replaced legacy, error-prone cloud sync with a streamlined `vaultSync.ts` orchestrator and local-first data storage. - **Advanced Profile Vault:** A multi-tabbed interface supporting Profiles, Pairs/Synast..."
+        },
+        {
+          "section_heading": "The Woven Map & Raven Calder",
+          "change_type": "added",
+          "summary": "- **Raven Calder:** The presiding AI persona built on \"Affirmative Pathways.\" It relies on positive prompt structures (allow-lists, approved vocabulary) rather than prohibitive \"Do not\" prompts (\"Pink Elephant Vulnerability\") to reduce c..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 2,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 2,
+      "open_question_count": 0
+    }
+  }
+}

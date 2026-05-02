@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "source_id": "ecc013e8cd35",
+  "title": "terminus-origin.md",
+  "domain": "general",
+  "latest_version_id": "1e6fd6b87affbb26",
+  "latest_artifact_path": "versions/ecc013e8cd35/1e6fd6b87affbb26.json",
+  "last_ingested_at": "2026-05-02T14:59:12+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "1e6fd6b87affbb26",
+      "artifact_path": "versions/ecc013e8cd35/1e6fd6b87affbb26.json",
+      "content_hash": "8adbae0f017916ee7e778d932969769868120a9e543617f5b7bf2d0087331e44",
+      "ingested_at": "2026-05-02T14:59:12+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Terminus Naming Context This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphi..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Terminus Naming Context This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphi...",
+    "morning_summary": {
+      "summary_id": "045e2c15506364c1",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Terminus Naming Context",
+          "change_type": "added",
+          "summary": "This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphire originated here - brand..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 7,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 7,
+      "open_question_count": 0
+    }
+  }
+}

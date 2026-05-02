@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "source_id": "4139af22baf8",
+  "title": "promethean-creation.md",
+  "domain": "logos_theory",
+  "latest_version_id": "7987c89fb74e913c",
+  "latest_artifact_path": "versions/4139af22baf8/7987c89fb74e913c.json",
+  "last_ingested_at": "2026-05-02T14:59:11+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "7987c89fb74e913c",
+      "artifact_path": "versions/4139af22baf8/7987c89fb74e913c.json",
+      "content_hash": "5e9c1c5123f0039d7ed46ed20e87a16ff427b916b50ac7f23f652c5d53a22a3f",
+      "ingested_at": "2026-05-02T14:59:11+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Promethean Creation and the Coherence Engine This note captures a second major framing layer for the project. ## Core claim The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Promethean Creation and the Coherence Engine This note captures a second major framing layer for the project. ## Core claim The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is...",
+    "morning_summary": {
+      "summary_id": "94faf4e151d01ffb",
+      "updated_claims": [],
+      "promoted_anchors": [
+        "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a latent probability landscape This framing matters because persona theater can introduce drag. It pulls attention toward empathy simulation and away from what the system is structurall...",
+        "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important point is not authorship - the important point is convergence Interpretation: - the term precipitated because the interaction geometry made it the lowest-drag semantic fold - that ev..."
+      ],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Promethean Creation and the Coherence Engine",
+          "change_type": "added",
+          "summary": "This note captures a second major framing layer for the project."
+        },
+        {
+          "section_heading": "Core claim",
+          "change_type": "added",
+          "summary": "The default \"AI as simulated person\" metaphor is a bad fit for the work Dan cares about. The preferred frame is: - not a People Spirit - not a synthetic friend - not a mind in the human sense - but a coherence engine operating over a lat..."
+        },
+        {
+          "section_heading": "The Melinna / Coherence Engine event",
+          "change_type": "added",
+          "summary": "One key case study: - in a sustained collaboration with Melinna, the phrase `coherence engine` appeared as if it had been invented in the moment - later inspection showed the phrase already existed in adjacent discourse - the important p..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 2,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 2,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

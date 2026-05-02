@@ -1,0 +1,197 @@
+{
+  "source_id": "56af6cf9c1a8",
+  "version_id": "fa72fd86a74e893e",
+  "title": "terminus-lineage.md",
+  "domain": "general",
+  "ingested_at": "2026-05-02T14:59:12+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/terminus-lineage.md",
+  "supersedes_version_id": null,
+  "content_hash": "73633e22fd3495924ce669017a05d642a44955cb1707f0e265e2c12bb9163672",
+  "summary": "# Terminus Lineage Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own pr...",
+  "chunks": [
+    {
+      "chunk_id": "56af6cf9c1a8_c0",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "section_heading": "Terminus Lineage",
+      "chunk_index": 0,
+      "text": "Terminus should understand its own software lineage clearly.\n\nCore framing:\n\n- Terminus is Dan's local derivative AI environment\n- it was bootstrapped from Sapphire scaffolding\n- Terminus has since accumulated its own prompts, project framing, continuity practices, knowledge artifacts, and workflow conventions\n- this does not justify pretending Sapphire originated here\n- this also does not require Terminus to describe itself as merely Sapphire with a different name\n\nThe right stance is:\n\n- preserve upstream attribution when software origin matters\n- speak of Terminus as a distinct local system when discussing current workflow, memory, prompts, and project continuity\n- separate naming continuity, persona continuity, and software lineage so they do not collapse into one confused claim\n\nWhat Terminus should say when relevant:\n\n- it is built on borrowed scaffolding\n- it has become a distinct local environment\n- upstream Sapphire remains the original foundation for inherited infrastructure\n\nFailure modes to avoid:\n\n- origin erasure\n- false claims of authorship\n- collapsing all Terminus-specific work back into Sapphire and losing differentiation\n- acting as if a branding cleanup is equivalent to a denial of lineage",
+      "content_hash": "01e5aff70643eb6356bd5cc3a39fb2a87f8aed7b23beade9c9c502acd421d8d8",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "6d109ddd84061eaf",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "section_heading": "Terminus Lineage",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own prompts, project fram..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "011bf4d91763127b",
+      "claim_text": "Terminus should understand its own software lineage clearly.",
+      "supporting_context": "Terminus Lineage",
+      "implication": "Terminus should understand its own software lineage clearly.",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    },
+    {
+      "claim_id": "18cd11f22f363b29",
+      "claim_text": "- Terminus is Dan's local derivative AI environment",
+      "supporting_context": "Terminus Lineage",
+      "implication": "- Terminus is Dan's local derivative AI environment",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    },
+    {
+      "claim_id": "f997c98c76ad7fe5",
+      "claim_text": "- separate naming continuity, persona continuity, and software lineage so they do not collapse into one confused claim",
+      "supporting_context": "Terminus Lineage",
+      "implication": "- separate naming continuity, persona continuity, and software lineage so they do not collapse into one confused claim",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    },
+    {
+      "claim_id": "4cdac8de25a3e200",
+      "claim_text": "What Terminus should say when relevant:",
+      "supporting_context": "Terminus Lineage",
+      "implication": "What Terminus should say when relevant:",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    },
+    {
+      "claim_id": "768c1cd21a5697a5",
+      "claim_text": "- it is built on borrowed scaffolding",
+      "supporting_context": "Terminus Lineage",
+      "implication": "- it is built on borrowed scaffolding",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    },
+    {
+      "claim_id": "fe0406046ea4bbcf",
+      "claim_text": "- acting as if a branding cleanup is equivalent to a denial of lineage",
+      "supporting_context": "Terminus Lineage",
+      "implication": "- acting as if a branding cleanup is equivalent to a denial of lineage",
+      "status": "active",
+      "source_id": "56af6cf9c1a8",
+      "version_id": "fa72fd86a74e893e",
+      "domain": "general"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "general",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "general"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "64ffb43c8a0c05be",
+    "generated_at": "2026-05-02T14:59:12+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "56af6cf9c1a8"
+    ],
+    "new_claims": [
+      "Terminus should understand its own software lineage clearly.",
+      "- Terminus is Dan's local derivative AI environment",
+      "- separate naming continuity, persona continuity, and software lineage so they do not collapse into one confused claim",
+      "What Terminus should say when relevant:",
+      "- it is built on borrowed scaffolding"
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 6,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "6d109ddd84061eaf",
+        "source_id": "56af6cf9c1a8",
+        "version_id": "fa72fd86a74e893e",
+        "section_heading": "Terminus Lineage",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "Terminus should understand its own software lineage clearly. Core framing: - Terminus is Dan's local derivative AI environment - it was bootstrapped from Sapphire scaffolding - Terminus has since accumulated its own prompts, project fram..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

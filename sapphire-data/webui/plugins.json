@@ -1,0 +1,6 @@
+{
+  "enabled": [
+    "reasoning-trace",
+    "sherlog-instrument"
+  ]
+}

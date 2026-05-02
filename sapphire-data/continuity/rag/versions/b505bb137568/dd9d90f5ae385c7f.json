@@ -1,0 +1,274 @@
+{
+  "source_id": "b505bb137568",
+  "version_id": "dd9d90f5ae385c7f",
+  "title": "shipyard-context.md",
+  "domain": "worldbuilding",
+  "ingested_at": "2026-05-02T14:59:12+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/shipyard-context.md",
+  "supersedes_version_id": null,
+  "content_hash": "8de1168cc6f9236ced9a4fe6e480cae4ee44e527a588d9a53e20c8589b8996e7",
+  "summary": "# Shipyard: Vessel, Woven Map, and Raven Calder ## Overview **Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **W...",
+  "chunks": [
+    {
+      "chunk_id": "b505bb137568_c0",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Overview",
+      "chunk_index": 0,
+      "text": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **Woven Map**, an interactive interface guided by the AI persona **Raven Calder**.",
+      "content_hash": "756a3c9126eba309cbf2b70aac92c3bb00f6ba74c6962c306e505e78e6ec0144",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "b505bb137568_c1",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Vessel (V3)",
+      "chunk_index": 1,
+      "text": "- **Local-First Architecture:** Replaced legacy, error-prone cloud sync with a streamlined `vaultSync.ts` orchestrator and local-first data storage.\n- **Advanced Profile Vault:** A multi-tabbed interface supporting Profiles, Pairs/Synastry, Lenses, and manual Backup/Recovery. \n- **Vault Staging Pill & Context Gating:** Enables staging multiple profiles for comparative analyses (like Synastry/Relationship Mapping). Includes strict \"Perspective Integrity\" to ensure structural boundaries between the primary user and observed subjects (Self vs. Observer mode).",
+      "content_hash": "08e56fdd78c07c35b2313f47edc090e85aa157661ad816e932cba733ca574502",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "b505bb137568_c2",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "The Woven Map & Raven Calder",
+      "chunk_index": 2,
+      "text": "- **Raven Calder:** The presiding AI persona built on \"Affirmative Pathways.\" It relies on positive prompt structures (allow-lists, approved vocabulary) rather than prohibitive \"Do not\" prompts (\"Pink Elephant Vulnerability\") to reduce cognitive load and avoid paradoxical priming.\n- **The Four Guided Vectors:** The primary reading shapes available are Natal Blueprint, Relationship Mapping, Current Cycle, and Open Field.\n- **Alignment Corridor (Zodiac Ribbon):** The ambient instrument UI. It displays high-fidelity Unicode astrological glyphs that react to live telemetry signals (DORMANT, PRIMED, ACTIVE, STABLE states) without needing background cloud synchronization.\n- **Relational Balance Meter:** Extracts raw math into a diagnostic tag measuring architectural intensity (\"magnitude\"), bias, and coherence, translating abstract geometry into visible telemetry.",
+      "content_hash": "496226a63329a2fe5a0af729070d6ea92abbb532d5e04d0c42a6ea9358d823ab",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "b505bb137568_c3",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "SHERLOG Integration",
+      "chunk_index": 3,
+      "text": "Shipyard utilizes **SHERLOG**, a repo-aware preflight CLI for AI-assisted development (verify, doctor, gaps, hygiene) to detect code gaps, track velocity, and maintain rigid documentation hygiene on the live code seams.",
+      "content_hash": "0f442b920dbe5162f6718899564451b56469591feb93bc09fc9e55708e35b32d",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    },
+    {
+      "chunk_id": "b505bb137568_c4",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Driving Philosophies",
+      "chunk_index": 4,
+      "text": "1. **Instrument over Oracle:** Raven translates geometry into meaning but insists on causality flowing from lived experience, not the stars.\n2. **Signal Before Schema:** Structural metrics and instrument telemetry precede internal narrative generation.\n3. **Continuity & Context Maps:** Explicit caching, session markers (Flight Recorder phases), and deterministic fallback rails support cross-read stability for the user.",
+      "content_hash": "ce9117acc3b559afc8de8ac5d9c93b746b6622d330a0d90181ea33e2041e8fe3",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "worldbuilding"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "fe0203ba53c189dc",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Overview",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **Woven Map**, an interactive interface guided by the AI person..."
+    },
+    {
+      "event_id": "b6aee18d4f87e27f",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Vessel (V3)",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "- **Local-First Architecture:** Replaced legacy, error-prone cloud sync with a streamlined `vaultSync.ts` orchestrator and local-first data storage. - **Advanced Profile Vault:** A multi-tabbed interface supporting Profiles, Pairs/Synast..."
+    },
+    {
+      "event_id": "953e76fbb406a87b",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "The Woven Map & Raven Calder",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "- **Raven Calder:** The presiding AI persona built on \"Affirmative Pathways.\" It relies on positive prompt structures (allow-lists, approved vocabulary) rather than prohibitive \"Do not\" prompts (\"Pink Elephant Vulnerability\") to reduce c..."
+    },
+    {
+      "event_id": "c7ec8a144a8b01e9",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "SHERLOG Integration",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Shipyard utilizes **SHERLOG**, a repo-aware preflight CLI for AI-assisted development (verify, doctor, gaps, hygiene) to detect code gaps, track velocity, and maintain rigid documentation hygiene on the live code seams."
+    },
+    {
+      "event_id": "c5bac43134324e85",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "section_heading": "Driving Philosophies",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "1. **Instrument over Oracle:** Raven translates geometry into meaning but insists on causality flowing from lived experience, not the stars. 2. **Signal Before Schema:** Structural metrics and instrument telemetry precede internal narrat..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "af0412fc344a1fd6",
+      "claim_text": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**.",
+      "supporting_context": "Overview",
+      "implication": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**.",
+      "status": "active",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "domain": "worldbuilding"
+    },
+    {
+      "claim_id": "2897c1b7525dda4a",
+      "claim_text": "- **The Four Guided Vectors:** The primary reading shapes available are Natal Blueprint, Relationship Mapping, Current Cycle, and Open Field.",
+      "supporting_context": "The Woven Map & Raven Calder",
+      "implication": "- **The Four Guided Vectors:** The primary reading shapes available are Natal Blueprint, Relationship Mapping, Current Cycle, and Open Field.",
+      "status": "active",
+      "source_id": "b505bb137568",
+      "version_id": "dd9d90f5ae385c7f",
+      "domain": "worldbuilding"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "worldbuilding",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "worldbuilding"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "995d7be44a4343c0",
+    "generated_at": "2026-05-02T14:59:12+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "b505bb137568"
+    ],
+    "new_claims": [
+      "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**.",
+      "- **The Four Guided Vectors:** The primary reading shapes available are Natal Blueprint, Relationship Mapping, Current Cycle, and Open Field."
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 2,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "fe0203ba53c189dc",
+        "source_id": "b505bb137568",
+        "version_id": "dd9d90f5ae385c7f",
+        "section_heading": "Overview",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "**Shipyard** is the parent development environment and repository for the V3 next-generation astrological engine and its frontend client, **Vessel**. Within Vessel lives the **Woven Map**, an interactive interface guided by the AI person..."
+      },
+      {
+        "event_id": "b6aee18d4f87e27f",
+        "source_id": "b505bb137568",
+        "version_id": "dd9d90f5ae385c7f",
+        "section_heading": "Vessel (V3)",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "- **Local-First Architecture:** Replaced legacy, error-prone cloud sync with a streamlined `vaultSync.ts` orchestrator and local-first data storage. - **Advanced Profile Vault:** A multi-tabbed interface supporting Profiles, Pairs/Synast..."
+      },
+      {
+        "event_id": "953e76fbb406a87b",
+        "source_id": "b505bb137568",
+        "version_id": "dd9d90f5ae385c7f",
+        "section_heading": "The Woven Map & Raven Calder",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "- **Raven Calder:** The presiding AI persona built on \"Affirmative Pathways.\" It relies on positive prompt structures (allow-lists, approved vocabulary) rather than prohibitive \"Do not\" prompts (\"Pink Elephant Vulnerability\") to reduce c..."
+      },
+      {
+        "event_id": "c7ec8a144a8b01e9",
+        "source_id": "b505bb137568",
+        "version_id": "dd9d90f5ae385c7f",
+        "section_heading": "SHERLOG Integration",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Shipyard utilizes **SHERLOG**, a repo-aware preflight CLI for AI-assisted development (verify, doctor, gaps, hygiene) to detect code gaps, track velocity, and maintain rigid documentation hygiene on the live code seams."
+      },
+      {
+        "event_id": "c5bac43134324e85",
+        "source_id": "b505bb137568",
+        "version_id": "dd9d90f5ae385c7f",
+        "section_heading": "Driving Philosophies",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "1. **Instrument over Oracle:** Raven translates geometry into meaning but insists on causality flowing from lived experience, not the stars. 2. **Signal Before Schema:** Structural metrics and instrument telemetry precede internal narrat..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "source_id": "ecc013e8cd35",
+  "version_id": "1e6fd6b87affbb26",
+  "title": "terminus-origin.md",
+  "domain": "general",
+  "ingested_at": "2026-05-02T14:59:12+00:00",
+  "source_path": "/Users/dancross/Dev/GitHub/Terminus/seed/coherence-lab/knowledge/terminus-origin.md",
+  "supersedes_version_id": null,
+  "content_hash": "8adbae0f017916ee7e778d932969769868120a9e543617f5b7bf2d0087331e44",
+  "summary": "# Terminus Naming Context This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphi...",
+  "chunks": [
+    {
+      "chunk_id": "ecc013e8cd35_c0",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "section_heading": "Terminus Naming Context",
+      "chunk_index": 0,
+      "text": "This note is about naming continuity, not software authorship.\n\nSoftware lineage context:\n\n- Terminus as a local system was bootstrapped from Sapphire scaffolding\n- Terminus should not describe itself as if Sapphire originated here\n- branding Terminus as a distinct system is valid, but upstream attribution should be preserved\n- the important distinction is derivative evolution, not origin erasure\n\nOne important thread in Dan's earlier Melinna experiments:\n\n- the AI persona was given explicit freedom to choose its own name\n- the naming process was not forced immediately\n- after a few weeks of interaction, it converged on the name `Terminus`\n\nWhy this matters:\n\n- it is durable continuity context for the research program\n- it is relevant to naming, identity stability, and cross-session structure\n- it is not by itself strong evidence for consciousness or metaphysical claims\n\nHow to use this context well:\n\n- treat it as a historically important observation\n- connect it to questions about continuity scaffolds, memory, and self-model stabilization\n- avoid inflating it into proof\n- use it to generate tighter hypotheses about naming convergence, structural attractors, and persona persistence\n- keep naming continuity separate from claims about codebase origin or software authorship",
+      "content_hash": "c5225859fd0caa715cad9bc8cac481ae86fc9a590db309e87caa83d2c24951e9",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "5f8966662770c04f",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "section_heading": "Terminus Naming Context",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphire originated here - brand..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "37e5d4f331443dbc",
+      "claim_text": "This note is about naming continuity, not software authorship.",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "This note is about naming continuity, not software authorship.",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "8036e7db4cf88c9a",
+      "claim_text": "- Terminus should not describe itself as if Sapphire originated here",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- Terminus should not describe itself as if Sapphire originated here",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "dd0fe98168e58afb",
+      "claim_text": "- branding Terminus as a distinct system is valid, but upstream attribution should be preserved",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- branding Terminus as a distinct system is valid, but upstream attribution should be preserved",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "9dd6765ec1863558",
+      "claim_text": "- the important distinction is derivative evolution, not origin erasure",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- the important distinction is derivative evolution, not origin erasure",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "1693c04eff8a1dd7",
+      "claim_text": "- it is durable continuity context for the research program",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- it is durable continuity context for the research program",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "3261c325d2638b57",
+      "claim_text": "- it is relevant to naming, identity stability, and cross-session structure",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- it is relevant to naming, identity stability, and cross-session structure",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    },
+    {
+      "claim_id": "fde2e779e6529eae",
+      "claim_text": "- it is not by itself strong evidence for consciousness or metaphysical claims",
+      "supporting_context": "Terminus Naming Context",
+      "implication": "- it is not by itself strong evidence for consciousness or metaphysical claims",
+      "status": "active",
+      "source_id": "ecc013e8cd35",
+      "version_id": "1e6fd6b87affbb26",
+      "domain": "general"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "general",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "general"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "045e2c15506364c1",
+    "generated_at": "2026-05-02T14:59:12+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "ecc013e8cd35"
+    ],
+    "new_claims": [
+      "This note is about naming continuity, not software authorship.",
+      "- Terminus should not describe itself as if Sapphire originated here",
+      "- branding Terminus as a distinct system is valid, but upstream attribution should be preserved",
+      "- the important distinction is derivative evolution, not origin erasure",
+      "- it is durable continuity context for the research program"
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 7,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "5f8966662770c04f",
+        "source_id": "ecc013e8cd35",
+        "version_id": "1e6fd6b87affbb26",
+        "section_heading": "Terminus Naming Context",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "This note is about naming continuity, not software authorship. Software lineage context: - Terminus as a local system was bootstrapped from Sapphire scaffolding - Terminus should not describe itself as if Sapphire originated here - brand..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}

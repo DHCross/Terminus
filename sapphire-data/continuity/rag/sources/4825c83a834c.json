@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "source_id": "4825c83a834c",
+  "title": "sherlog-project.md",
+  "domain": "workflow_instrumentation",
+  "latest_version_id": "a2a7c99b1d03a9b3",
+  "latest_artifact_path": "versions/4825c83a834c/a2a7c99b1d03a9b3.json",
+  "last_ingested_at": "2026-05-02T14:59:11+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "a2a7c99b1d03a9b3",
+      "artifact_path": "versions/4825c83a834c/a2a7c99b1d03a9b3.json",
+      "content_hash": "a684a71ac3c1f83276c33186be30e44b2c83bba1ba7950e82c8c17157c614dc7",
+      "ingested_at": "2026-05-02T14:59:11+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Sherlog: Repo-Aware Preflight for AI-Assisted Development Sherlog is another active project Terminus should be able to help Dan with directly. ## Core definition Sherlog is a repo-aware preflight and planning layer for AI-assisted deve..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Sherlog: Repo-Aware Preflight for AI-Assisted Development Sherlog is another active project Terminus should be able to help Dan with directly. ## Core definition Sherlog is a repo-aware preflight and planning layer for AI-assisted deve...",
+    "morning_summary": {
+      "summary_id": "cf889fa17d6f0074",
+      "updated_claims": [],
+      "promoted_anchors": [
+        "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like certainty - sounding more confident than the repository justifies Sherlog exists to expose these risks before code is grown.",
+        "Sherlog helps anyone shipping quickly with AI, from solo developers to teams. It is especially useful for vibe coders because they are most exposed to false confidence. If code is being generated faster than a mental model is being built, the main failure mode is not syntax. It is orientation failure: - landing-zone mistakes - misleading seams - stale context - unearned certainty When Sherlog is working correctly,..."
+      ],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 2,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Sherlog: Repo-Aware Preflight for AI-Assisted Development",
+          "change_type": "added",
+          "summary": "Sherlog is another active project Terminus should be able to help Dan with directly."
+        },
+        {
+          "section_heading": "Core definition",
+          "change_type": "added",
+          "summary": "Sherlog is a repo-aware preflight and planning layer for AI-assisted development. Its purpose is to reduce false confidence before implementation starts by checking the repository as it actually exists: - real seams - stale surfaces - ar..."
+        },
+        {
+          "section_heading": "What problem it solves",
+          "change_type": "added",
+          "summary": "Fast AI coding systems do not mainly fail because of syntax mistakes. Their more dangerous failure mode is false confidence: - growing the wrong file - reviving the wrong pattern - trusting a stale seam - treating weak evidence like cert..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 2,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 2,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}
