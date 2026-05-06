@@ -1,4 +1,5 @@
 {
+    "extensions.verifySignature": false,
     "chat.tools.terminal.autoApprove": {
         "/^python3 -m py_compile \"/Volumes/My Passport/Sapphire-native/core/routes/story_engine\\.py\"$/": {
             "approve": true,
