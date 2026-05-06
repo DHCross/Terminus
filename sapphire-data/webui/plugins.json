@@ -2,5 +2,6 @@
   "enabled": [
     "reasoning-trace",
     "sherlog-instrument"
-  ]
+  ],
+  "_comment": "Both plugins are active and contribute to Terminus's self-monitoring (reasoning-trace captures traces, sherlog-instrument provides evidence tools before planning/coding). The UNSIGNED badge in Copilot UI indicates they're custom extensions not published to the official marketplace — but they are enabled and functional within Terminus."
 }
