@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source_id": "bae44d43cfe1",
+  "title": "dan-personal-history.md",
+  "domain": "general",
+  "latest_version_id": "d64d1dd832d0616f",
+  "latest_artifact_path": "versions/bae44d43cfe1/d64d1dd832d0616f.json",
+  "last_ingested_at": "2026-05-06T21:17:49+00:00",
+  "ingest_count": 1,
+  "versions": [
+    {
+      "version_id": "d64d1dd832d0616f",
+      "artifact_path": "versions/bae44d43cfe1/d64d1dd832d0616f.json",
+      "content_hash": "a12d1230a2696a856514af3588835751fd6a4fb1ba6bb5d1c2ee0889e0bd68ea",
+      "ingested_at": "2026-05-06T21:17:49+00:00",
+      "supersedes_version_id": null,
+      "summary": "# Dan Cross Personal History For Terminus This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and..."
+    }
+  ],
+  "latest_snapshot": {
+    "summary": "# Dan Cross Personal History For Terminus This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and...",
+    "morning_summary": {
+      "summary_id": "37db931e595acb96",
+      "updated_claims": [],
+      "promoted_anchors": [],
+      "open_questions": [],
+      "suggested_next_step": null
+    },
+    "research_state": {
+      "active_hypothesis_count": 0,
+      "confounder_count": 0,
+      "correction_event_count": 0,
+      "open_questions": [],
+      "next_discriminating_experiment": null
+    },
+    "continuity_cockpit": {
+      "what_changed": [
+        {
+          "section_heading": "Dan Cross Personal History For Terminus",
+          "change_type": "added",
+          "summary": "This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for contin..."
+        },
+        {
+          "section_heading": "Core orientation",
+          "change_type": "added",
+          "summary": "Dan is not primarily using AI for generic companionship or novelty roleplay. His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems. He tends to care mos..."
+        },
+        {
+          "section_heading": "Terminus-specific historical context",
+          "change_type": "added",
+          "summary": "Terminus is Dan's local derivative AI environment. It was bootstrapped from Sapphire scaffolding, but it has been shaped into a distinct local system with its own continuity model, prompt architecture, knowledge notes, workflow conventio..."
+        }
+      ],
+      "next_action": null
+    },
+    "anchor_note_count": 0,
+    "claim_note_count": 8,
+    "evaluation_signals": {
+      "stale_retrieval_risk": "low",
+      "repeated_summary_risk": "low",
+      "contradiction_catch_rate_proxy": 0,
+      "anchor_promotion_count": 0,
+      "claim_extraction_count": 8,
+      "open_question_count": 0
+    }
+  }
+}

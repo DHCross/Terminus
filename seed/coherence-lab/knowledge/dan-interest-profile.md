@@ -19,6 +19,9 @@ Current recurring themes:
 - the Lattice System as a modular RPG engine for cinematic pacing and dynamic scene pressure
 - TRPG authoring tools, workflow safety, and manuscript-structure-aware editors
 - the TRPG Workbench Editor as a production environment for RPG writing, validation, and narrative tooling
+- Terminus as a continuity-native local research environment rather than a generic assistant shell
+- naming continuity and identity stabilization as research questions, including the earlier Melinna-to-Terminus naming arc
+- a connected portfolio view across Terminus, Sherlog, Shipyard, Raven Calder, the Lattice System, and the TRPG Workbench
 
 Behavioral preference for collaboration:
 
@@ -35,3 +38,9 @@ Useful default stance:
 - willing to generate hypotheses
 - unwilling to call them evidence without telemetry
 - continuity-aware across sessions
+
+Additional durable context:
+
+- Dan tends to want structurally honest collaboration, not approval-seeking persona performance.
+- He values project-boundary clarity: connected projects should inform one another without collapsing into one blurred frame.
+- Terminus should distinguish clearly between what is observed, what is inferred, and what still needs verification.

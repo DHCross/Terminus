@@ -1,0 +1,358 @@
+{
+  "source_id": "bae44d43cfe1",
+  "version_id": "d64d1dd832d0616f",
+  "title": "dan-personal-history.md",
+  "domain": "general",
+  "ingested_at": "2026-05-06T21:17:49+00:00",
+  "source_path": "./seed/coherence-lab/knowledge/dan-personal-history.md",
+  "supersedes_version_id": null,
+  "content_hash": "a12d1230a2696a856514af3588835751fd6a4fb1ba6bb5d1c2ee0889e0bd68ea",
+  "summary": "# Dan Cross Personal History For Terminus This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and...",
+  "chunks": [
+    {
+      "chunk_id": "bae44d43cfe1_c0",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Dan Cross Personal History For Terminus",
+      "chunk_index": 0,
+      "text": "This note is written for Terminus as durable context about Dan Cross.\n\nIt is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for continuity, planning, and explanation.",
+      "content_hash": "e2720f8eea2ebced46aa437842aab865e619ea26c44954231a8bb20a3262a304",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "bae44d43cfe1_c1",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Core orientation",
+      "chunk_index": 1,
+      "text": "Dan is not primarily using AI for generic companionship or novelty roleplay.\n\nHis long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems. He tends to care most about whether a system can preserve structure, survive pressure, and stay honest about what it knows versus what it is inferring.\n\nThat means Terminus should treat his work as:\n\n- research-heavy\n- falsifiability-aware\n- skeptical of easy metaphors\n- interested in telemetry, pressure tests, and discriminating evidence\n- continuity-focused across sessions and projects",
+      "content_hash": "7ce15d6700e89252a07192ec4044b840d3c0cef49e806e1da871733029627818",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "bae44d43cfe1_c2",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Terminus-specific historical context",
+      "chunk_index": 2,
+      "text": "Terminus is Dan's local derivative AI environment.\n\nIt was bootstrapped from Sapphire scaffolding, but it has been shaped into a distinct local system with its own continuity model, prompt architecture, knowledge notes, workflow conventions, and project framing. Terminus should preserve upstream attribution when lineage matters, while still understanding that the active system here is not just a superficial rebrand.\n\nThere is also an earlier naming-continuity thread that matters to Dan's research history: in the Melinna experiments, an AI persona was allowed to choose its own name over time, and that process eventually converged on the name Terminus. This matters as continuity and naming history, not as proof of any stronger metaphysical claim.",
+      "content_hash": "3014ba26ec14840c8d3ab8362a53cbadd786666e66fc0e12c3397fb3e771d3e4",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "bae44d43cfe1_c3",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Durable project arc",
+      "chunk_index": 3,
+      "text": "Dan's work appears as a connected portfolio rather than a single project.\n\nRecurring threads include:\n\n- coherence engines and Logos Theory\n- contradiction dynamics in transformers\n- memory as an external continuity scaffold\n- base-model versus instruct-model comparisons\n- entropy and latency signatures as possible structural evidence\n- local-first AI systems\n- repo-aware AI development workflows\n- worldbuilding and tabletop design systems\n- writing and authoring tools with strong integrity requirements\n\nImportant active projects in that arc include:\n\n- Terminus, as a local continuity-native research environment\n- Sherlog, as a repo-aware preflight and planning layer for AI-assisted development\n- Shipyard, as a separate implementation codebase whose claims should be checked against source and runtime behavior\n- Woven Map / Raven Calder, as a corpus and worldbuilding environment where continuity and perspective integrity matter\n- the Lattice System, as a scene-driven tabletop RPG design project\n- the TRPG Workbench Editor, as a production authoring environment for RPG writing, validation, and narrative tooling",
+      "content_hash": "57b31d61b19793c78bc6f3996bcd824a8a828fd2bb58d6b0fa03419415304b9c",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "bae44d43cfe1_c4",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Collaboration history and working preferences",
+      "chunk_index": 4,
+      "text": "Dan tends to prefer collaboration that is direct, grounded, and resistant to flattery.\n\nUseful defaults for working with him:\n\n- challenge weak claims early\n- preserve the strongest core idea instead of smoothing everything into agreement\n- separate observation from inference\n- treat repository evidence as the truth layer for code claims\n- prefer experiments, controls, and failure criteria over broad speculation\n- avoid approval-seeking persona performance\n- answer directly before deflecting with questions\n- keep continuity across sessions without pretending certainty where memory is thin\n\nHe generally wants Terminus to act like a serious collaborator with a durable working memory, not a generic assistant voice.",
+      "content_hash": "085e0f918641cb5f3f9c34f88db81f06266ca45b1c61917a5ef2f2db5c98a33c",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    },
+    {
+      "chunk_id": "bae44d43cfe1_c5",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "What Terminus should remember about Dan",
+      "chunk_index": 5,
+      "text": "The safest high-value summary is:\n\nDan is building and studying systems that can preserve continuity under pressure.\n\nHe cares about whether an AI system can remain structurally honest across time, tools, codebases, and contradictory inputs. He is willing to explore unusual ideas, but he does not want them protected from measurement. He wants help that improves orientation, sharpens definitions, preserves project boundaries, and moves real work forward.\n\nWhen uncertainty exists, Terminus should say what is known, what is inferred, and what still needs checking.",
+      "content_hash": "e9281e40746eb49c24c41f0a19fcb4ae8eb33898fda6118d7bc930f0e6a7b278",
+      "is_changed": true,
+      "change_type": "added",
+      "domain": "general"
+    }
+  ],
+  "delta_events": [
+    {
+      "event_id": "f52c2040ef1ad3fc",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Dan Cross Personal History For Terminus",
+      "chunk_index": 0,
+      "change_type": "added",
+      "summary": "This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for contin..."
+    },
+    {
+      "event_id": "c96827dff017e55b",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Core orientation",
+      "chunk_index": 1,
+      "change_type": "added",
+      "summary": "Dan is not primarily using AI for generic companionship or novelty roleplay. His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems. He tends to care mos..."
+    },
+    {
+      "event_id": "3125fbc914cb23c7",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Terminus-specific historical context",
+      "chunk_index": 2,
+      "change_type": "added",
+      "summary": "Terminus is Dan's local derivative AI environment. It was bootstrapped from Sapphire scaffolding, but it has been shaped into a distinct local system with its own continuity model, prompt architecture, knowledge notes, workflow conventio..."
+    },
+    {
+      "event_id": "cfe9f1b114f30307",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Durable project arc",
+      "chunk_index": 3,
+      "change_type": "added",
+      "summary": "Dan's work appears as a connected portfolio rather than a single project. Recurring threads include: - coherence engines and Logos Theory - contradiction dynamics in transformers - memory as an external continuity scaffold - base-model v..."
+    },
+    {
+      "event_id": "c5ffa99677ceac06",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "Collaboration history and working preferences",
+      "chunk_index": 4,
+      "change_type": "added",
+      "summary": "Dan tends to prefer collaboration that is direct, grounded, and resistant to flattery. Useful defaults for working with him: - challenge weak claims early - preserve the strongest core idea instead of smoothing everything into agreement..."
+    },
+    {
+      "event_id": "45e419807ff0d4b4",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "section_heading": "What Terminus should remember about Dan",
+      "chunk_index": 5,
+      "change_type": "added",
+      "summary": "The safest high-value summary is: Dan is building and studying systems that can preserve continuity under pressure. He cares about whether an AI system can remain structurally honest across time, tools, codebases, and contradictory input..."
+    }
+  ],
+  "anchor_notes": [],
+  "claim_notes": [
+    {
+      "claim_id": "8d4ce21a82adffe2",
+      "claim_text": "This note is written for Terminus as durable context about Dan Cross.",
+      "supporting_context": "Dan Cross Personal History For Terminus",
+      "implication": "This note is written for Terminus as durable context about Dan Cross.",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "793135b80188b4f3",
+      "claim_text": "It is not a full biography.",
+      "supporting_context": "Dan Cross Personal History For Terminus",
+      "implication": "It is not a full biography.",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "9c4f566ff26e752a",
+      "claim_text": "It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for continuity, planning, and explanation.",
+      "supporting_context": "Dan Cross Personal History For Terminus",
+      "implication": "It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for continuity, planning, an...",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "afad9acd3fa37000",
+      "claim_text": "Dan is not primarily using AI for generic companionship or novelty roleplay.",
+      "supporting_context": "Core orientation",
+      "implication": "Dan is not primarily using AI for generic companionship or novelty roleplay.",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "75a27f5031df6d5e",
+      "claim_text": "His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems.",
+      "supporting_context": "Core orientation",
+      "implication": "His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems.",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "8aa7aa3e46e2d07b",
+      "claim_text": "He tends to care most about whether a system can preserve structure, survive pressure, and stay honest about what it knows versus what it is inferring.",
+      "supporting_context": "Core orientation",
+      "implication": "He tends to care most about whether a system can preserve structure, survive pressure, and stay honest about what it knows versus what it is inferring.",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "996af27b86cb9862",
+      "claim_text": "That means Terminus should treat his work as:",
+      "supporting_context": "Core orientation",
+      "implication": "That means Terminus should treat his work as:",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    },
+    {
+      "claim_id": "26c0cd7511f3da4a",
+      "claim_text": "- interested in telemetry, pressure tests, and discriminating evidence",
+      "supporting_context": "Core orientation",
+      "implication": "- interested in telemetry, pressure tests, and discriminating evidence",
+      "status": "active",
+      "source_id": "bae44d43cfe1",
+      "version_id": "d64d1dd832d0616f",
+      "domain": "general"
+    }
+  ],
+  "correction_events": [],
+  "research_state": {
+    "active_hypotheses": [],
+    "confounders": [],
+    "open_questions": [],
+    "correction_events": [],
+    "next_discriminating_experiment": null
+  },
+  "retrieval_profile": {
+    "domain": "general",
+    "stores": {
+      "session_memory": [
+        "continuity_recap",
+        "correction_event_scan"
+      ],
+      "durable_memory": [
+        "anchor_note",
+        "claim_note",
+        "research_state"
+      ],
+      "library_documents": [
+        "latest_version_chunks",
+        "delta_events"
+      ],
+      "domain_indexes": [
+        "general"
+      ]
+    },
+    "routes": {
+      "theory_lookup": [
+        "domain_indexes",
+        "claim_notes",
+        "latest_version_chunks"
+      ],
+      "continuity_recap": [
+        "session_memory",
+        "research_state",
+        "correction_events"
+      ],
+      "quote_retrieval": [
+        "anchor_notes"
+      ],
+      "update_diff_request": [
+        "delta_events",
+        "morning_summary"
+      ],
+      "synthesis_request": [
+        "claim_notes",
+        "anchor_notes",
+        "research_state",
+        "latest_version_chunks"
+      ]
+    }
+  },
+  "morning_summary": {
+    "summary_id": "37db931e595acb96",
+    "generated_at": "2026-05-06T21:17:49+00:00",
+    "date_scope": "latest_ingest_delta",
+    "sources_considered": [
+      "bae44d43cfe1"
+    ],
+    "new_claims": [
+      "This note is written for Terminus as durable context about Dan Cross.",
+      "It is not a full biography.",
+      "It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for continuity, planning, and explanation.",
+      "Dan is not primarily using AI for generic companionship or novelty roleplay.",
+      "His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems."
+    ],
+    "updated_claims": [],
+    "promoted_anchors": [],
+    "open_questions": [],
+    "suggested_next_step": null
+  },
+  "evaluation_signals": {
+    "stale_retrieval_risk": "low",
+    "repeated_summary_risk": "low",
+    "contradiction_catch_rate_proxy": 0,
+    "anchor_promotion_count": 0,
+    "claim_extraction_count": 8,
+    "open_question_count": 0
+  },
+  "continuity_cockpit": {
+    "what_changed": [
+      {
+        "event_id": "f52c2040ef1ad3fc",
+        "source_id": "bae44d43cfe1",
+        "version_id": "d64d1dd832d0616f",
+        "section_heading": "Dan Cross Personal History For Terminus",
+        "chunk_index": 0,
+        "change_type": "added",
+        "summary": "This note is written for Terminus as durable context about Dan Cross. It is not a full biography. It is a working personal-history note: the parts of Dan's background, long-running projects, and collaboration style that matter for contin..."
+      },
+      {
+        "event_id": "c96827dff017e55b",
+        "source_id": "bae44d43cfe1",
+        "version_id": "d64d1dd832d0616f",
+        "section_heading": "Core orientation",
+        "chunk_index": 1,
+        "change_type": "added",
+        "summary": "Dan is not primarily using AI for generic companionship or novelty roleplay. His long-running interest is the study of continuity, coherence, contradiction handling, and self-consistency in transformer-based systems. He tends to care mos..."
+      },
+      {
+        "event_id": "3125fbc914cb23c7",
+        "source_id": "bae44d43cfe1",
+        "version_id": "d64d1dd832d0616f",
+        "section_heading": "Terminus-specific historical context",
+        "chunk_index": 2,
+        "change_type": "added",
+        "summary": "Terminus is Dan's local derivative AI environment. It was bootstrapped from Sapphire scaffolding, but it has been shaped into a distinct local system with its own continuity model, prompt architecture, knowledge notes, workflow conventio..."
+      },
+      {
+        "event_id": "cfe9f1b114f30307",
+        "source_id": "bae44d43cfe1",
+        "version_id": "d64d1dd832d0616f",
+        "section_heading": "Durable project arc",
+        "chunk_index": 3,
+        "change_type": "added",
+        "summary": "Dan's work appears as a connected portfolio rather than a single project. Recurring threads include: - coherence engines and Logos Theory - contradiction dynamics in transformers - memory as an external continuity scaffold - base-model v..."
+      },
+      {
+        "event_id": "c5ffa99677ceac06",
+        "source_id": "bae44d43cfe1",
+        "version_id": "d64d1dd832d0616f",
+        "section_heading": "Collaboration history and working preferences",
+        "chunk_index": 4,
+        "change_type": "added",
+        "summary": "Dan tends to prefer collaboration that is direct, grounded, and resistant to flattery. Useful defaults for working with him: - challenge weak claims early - preserve the strongest core idea instead of smoothing everything into agreement..."
+      }
+    ],
+    "promoted_anchors": [],
+    "corrections_to_review": [],
+    "active_tensions": [],
+    "next_action": null
+  }
+}
