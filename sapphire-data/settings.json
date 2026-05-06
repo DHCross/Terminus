@@ -6,20 +6,8 @@
   },
   "llm": {
     "LLM_PROVIDERS": {
-      "lmstudio": {
-        "model": "GLM-4.7-Flash-Uncen-Hrt-NEO-CODE-MAX-imat-D_AU-IQ2_M"
-      },
       "claude": {
         "model": "claude-3-7-sonnet-20250219"
-      }
-    },
-    "MODEL_GENERATION_PROFILES": {
-      "GLM-4.7-Flash-Uncen-Hrt-NEO-CODE-MAX-imat-D_AU-IQ2_M": {
-        "temperature": 0.6,
-        "top_p": 0.9,
-        "max_tokens": 640,
-        "presence_penalty": 0.0,
-        "frequency_penalty": 0.0
       }
     }
   },

@@ -1,32 +1,10 @@
 # Agent Guide
 
-<!-- SHERLOG START -->
-## Sherlog Preflight (Required)
+## Note on Sherlog (Removed May 2026)
 
-Before proposing plans, estimates, or implementation order for a feature, run:
+Sherlog Velocity was removed from this repo. It was a developer-side velocity tracker and gap detector — useful when actively building features. Terminus reached a stable state where active feature development slowed, making Sherlog's preflight rituals overhead with no payoff.
 
-```bash
-npm run sherlog:verify -- --json
-npm run sherlog:doctor -- --feature "Feature Name" --json
-npm run sherlog:gaps -- --feature "Feature Name" --json
-npm run sherlog:prompt -- "Feature Name"
-```
+Terminus routes through Claude (not a local model), so API billing is real. Sherlog did not affect that routing and added no runtime value to Terminus itself.
 
-## Sherlog Session Contract (Required)
-
-Run session tracking for every coding session:
-
-```bash
-npm run sherlog:session:start -- "Feature Name"
-npm run sherlog:session:note -- "what changed"
-npm run sherlog:session:prompt -- --lookback 5
-npm run sherlog:session:end
-```
-
-The agent should explicitly start the current coding session instead of inheriting an unrelated active session.
-
-If `settings.session_autostart_on_feature_commands` is true, `doctor`/`gaps`/`prompt`/`estimate` may auto-start a session when none is active, but that mode is optional and still command-time only.
-
-Use `/docs/sherlog-next-steps.md` and `/docs/why-sherlog.md` as the local operating guide.
-<!-- SHERLOG END -->
+If Sherlog is needed again during a future active build cycle, it can be re-added from its source repo.
 

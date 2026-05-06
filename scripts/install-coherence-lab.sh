@@ -57,6 +57,16 @@ def merge_missing(existing, additions):
     return merged
 
 
+def append_missing(existing, additions):
+    if not isinstance(existing, list):
+        existing = []
+    merged = list(existing)
+    for item in additions:
+        if item not in merged:
+            merged.append(item)
+    return merged
+
+
 for relative in [
     "personas/personas.json",
     "prompts/prompt_pieces.json",
@@ -64,7 +74,30 @@ for relative in [
 ]:
     source = seed_dir / relative
     target = data_dir / relative
-    merged = merge_missing(load_json(target), load_json(source))
+    existing = load_json(target)
+    additions = load_json(source)
+    merged = merge_missing(existing, additions)
+
+    if relative == "toolsets/toolsets.json":
+        for name, toolset in additions.items():
+            if not isinstance(toolset, dict):
+                continue
+            functions = toolset.get("functions", [])
+            if not isinstance(functions, list):
+                continue
+            merged.setdefault(name, {})
+            merged[name]["functions"] = append_missing(
+                merged.get(name, {}).get("functions", []),
+                functions,
+            )
+
+    if relative == "prompts/prompt_pieces.json":
+        source_extras = additions.get("components", {}).get("extras", {})
+        target_extras = merged.setdefault("components", {}).setdefault("extras", {})
+        for key in ["system_knowledge", "sherlog_instrumentation", "email_access"]:
+            if source_extras.get(key):
+                target_extras[key] = source_extras[key]
+
     dump_json(target, merged)
 
 
@@ -99,7 +132,7 @@ if not isinstance(plugins_data, dict):
 enabled = plugins_data.get("enabled", [])
 if not isinstance(enabled, list):
     enabled = []
-for plugin_name in ["reasoning-trace", "sherlog-instrument"]:
+for plugin_name in ["reasoning-trace", "sherlog-instrument", "codebase-reader", "email"]:
     if plugin_name not in enabled:
         enabled.append(plugin_name)
 plugins_data["enabled"] = enabled
@@ -131,7 +164,9 @@ Seeded items:
   - continuity task: Terminus Daily Brief (9 AM)
   - continuity task: Terminus Daily Journal (10 PM)
     - plugin: reasoning-trace (post_llm + post_execute hooks + commit_claim/read_continuity_snapshot/read_trace/write_journal tools)
-    - plugin: sherlog-instrument (sherlog_preflight/verify/doctor/gaps/prompt/session tools)
+    - plugin: sherlog-instrument (sherlog_run plus sherlog_preflight/verify/doctor/gaps/prompt/session tools)
+    - plugin: codebase-reader (repo tools plus notebook_read/notebook_validate/notebook_create/notebook_update_cell/notebook_append_cell)
+    - plugin: email (get_recipients/send_email for whitelisted contacts)
     - continuity snapshot store: $DATA_DIR/continuity/rag/
   - traces directory: $DATA_DIR/continuity/traces/
   - journal directory: $DATA_DIR/continuity/journal/

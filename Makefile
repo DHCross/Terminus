@@ -10,18 +10,18 @@ TASK ?= $(shell command -v task 2>/dev/null || echo /opt/homebrew/bin/task)
 STARTUP_WAIT_SECONDS ?= 60
 
 launch:
-	@if lsof -ti :8073 > /dev/null 2>&1; then \
+	@if lsof -tiTCP:8073 -sTCP:LISTEN > /dev/null 2>&1; then \
 		echo "Terminus backend already running on :8073"; \
 	else \
-		cd "$(SAPPHIRE_NATIVE_DIR)" && TERMINUS_REPO_ROOT="$(CURDIR)" STARTUP_PROMPT="$(STARTUP_PROMPT)" nohup .venv/bin/python3 main.py > /tmp/sapphire-native.log 2>&1 & \
+		"$(CURDIR)/scripts/start-terminus-backend.sh" "$(SAPPHIRE_NATIVE_DIR)" "$(CURDIR)" "$(STARTUP_PROMPT)"; \
 		echo "Starting Terminus backend..."; \
 		for i in $$(seq 1 $(STARTUP_WAIT_SECONDS)); do \
-			lsof -ti :8073 > /dev/null 2>&1 && break; \
+			lsof -tiTCP:8073 -sTCP:LISTEN > /dev/null 2>&1 && break; \
 			sleep 1; \
 		done; \
-		lsof -ti :8073 > /dev/null 2>&1 && echo "Terminus ready" || echo "Backend did not bind :8073 within $(STARTUP_WAIT_SECONDS)s — check /tmp/sapphire-native.log"; \
+		lsof -tiTCP:8073 -sTCP:LISTEN > /dev/null 2>&1 && echo "Terminus ready" || echo "Backend did not bind :8073 within $(STARTUP_WAIT_SECONDS)s — check /tmp/sapphire-native.log"; \
 	fi
-	@if lsof -ti :8073 > /dev/null 2>&1; then \
+	@if lsof -tiTCP:8073 -sTCP:LISTEN > /dev/null 2>&1; then \
 		open https://localhost:8073; \
 	else \
 		echo "Not opening browser because Terminus is not ready yet."; \
@@ -40,7 +40,7 @@ install-desktop-launcher:
 	@./scripts/install-desktop-launcher.sh
 
 stop:
-	@pid=$$(lsof -ti :8073 | head -n 1); \
+	@pid=$$(lsof -tiTCP:8073 -sTCP:LISTEN | head -n 1); \
 	if [ -n "$$pid" ]; then \
 		/bin/kill "$$pid" && echo "Stopped Terminus backend (PID $$pid)"; \
 	else \

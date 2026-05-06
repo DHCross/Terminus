@@ -4,7 +4,7 @@
   "description": "Allows Terminus to call Sherlog as a local evidence instrument before planning, coding, and completion claims.",
   "author": "terminus-lab",
   "priority": 80,
-  "default_enabled": true,
+  "default_enabled": false,
   "capabilities": {
     "tools": ["tools/sherlog_tools.py"]
   }

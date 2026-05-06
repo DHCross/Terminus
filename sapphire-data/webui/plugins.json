@@ -1,6 +1,7 @@
 {
   "enabled": [
     "reasoning-trace",
-    "sherlog-instrument"
+    "sherlog-instrument",
+    "email"
   ]
 }

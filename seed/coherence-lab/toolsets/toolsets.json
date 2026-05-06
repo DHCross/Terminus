@@ -32,14 +32,22 @@
       "list_pieces",
       "search_help_docs",
       "ask_claude",
-      "read_my_thinking",
-      "sherlog_preflight",
-      "sherlog_verify",
-      "sherlog_doctor",
-      "sherlog_gaps",
-      "sherlog_prompt",
-      "sherlog_session_status",
-      "sherlog_session_note"
+      "get_recipients",
+      "send_email",
+      "repo_tree",
+      "repo_search",
+      "ripgrep_search",
+      "repo_read_file",
+      "repo_write_file",
+      "repo_append_file",
+      "notebook_read",
+      "notebook_validate",
+      "notebook_create",
+      "notebook_update_cell",
+      "notebook_append_cell",
+      "repo_git_status",
+      "repo_git_diff",
+      "read_my_thinking"
     ]
   }
 }

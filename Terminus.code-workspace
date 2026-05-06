@@ -1,25 +1,14 @@
 {
-        "folders": [
-                {
-                        "path": "."
-                },
-                {
-                        "path": "../../../../../Volumes/My Passport/LM Studio"
-                },
-                {
-                        "path": "../Shipyard"
-                }
-        ],
-        "settings": {
-                "chat.tools.terminal.autoApprove": {
-                        "/^cd '/Volumes/My Passport/Sapphire-native/electron-shell' && npm start$/": {
-                                "approve": true,
-                                "matchCommandLine": true
-                        },
-                        "/^cd '/Volumes/My Passport/Sapphire-native' && task launch$/": {
-                                "approve": true,
-                                "matchCommandLine": true
-                        }
-                }
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../../../../../Volumes/My Passport/LM Studio"
+        },
+        {
+            "path": "../Shipyard"
         }
+    ],
+    "settings": {}
 }

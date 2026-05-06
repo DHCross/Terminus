@@ -1,0 +1,11 @@
+{
+  "name": "codebase-reader",
+  "version": "1.0.0",
+  "description": "Gives Terminus bounded, read-only access to inspect its own repository structure and source files.",
+  "author": "terminus-lab",
+  "priority": 75,
+  "default_enabled": true,
+  "capabilities": {
+    "tools": ["tools/codebase_tools.py"]
+  }
+}

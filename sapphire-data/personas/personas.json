@@ -21,13 +21,13 @@
       "memory_scope": "default",
       "goal_scope": "default",
       "knowledge_scope": "default",
-      "people_scope": "none",
+      "people_scope": "default",
       "trim_color": "#0f766e",
       "story_engine_enabled": false,
       "story_preset": null,
       "story_vars_in_prompt": false,
       "story_in_prompt": true,
-      "email_scope": "none",
+      "email_scope": "default",
       "bitcoin_scope": "none",
       "gcal_scope": "none"
     }

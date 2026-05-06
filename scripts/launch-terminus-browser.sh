@@ -43,7 +43,7 @@ print_lan_urls() {
   done <<< "$addrs"
 }
 
-if lsof -ti :8073 >/dev/null 2>&1; then
+if lsof -tiTCP:8073 -sTCP:LISTEN >/dev/null 2>&1; then
   echo "Terminus backend already running on :8073"
 else
   if [ ! -d "$SAPPHIRE_NATIVE_DIR" ]; then
@@ -58,21 +58,18 @@ else
     exit 1
   fi
 
-  (
-    cd "$SAPPHIRE_NATIVE_DIR"
-    nohup env TERMINUS_REPO_ROOT="$REPO_ROOT" STARTUP_PROMPT="$STARTUP_PROMPT" .venv/bin/python3 main.py >/tmp/sapphire-native.log 2>&1 &
-  )
+  "$REPO_ROOT/scripts/start-terminus-backend.sh" "$SAPPHIRE_NATIVE_DIR" "$REPO_ROOT" "$STARTUP_PROMPT"
 
   echo "Starting Terminus backend..."
   for _ in $(seq 1 "$STARTUP_WAIT_SECONDS"); do
-    if lsof -ti :8073 >/dev/null 2>&1; then
+    if lsof -tiTCP:8073 -sTCP:LISTEN >/dev/null 2>&1; then
       break
     fi
     sleep 1
   done
 fi
 
-if lsof -ti :8073 >/dev/null 2>&1; then
+if lsof -tiTCP:8073 -sTCP:LISTEN >/dev/null 2>&1; then
   echo "Opening $DEFAULT_URL"
   print_lan_urls
   open "$DEFAULT_URL"
