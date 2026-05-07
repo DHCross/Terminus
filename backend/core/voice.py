@@ -90,7 +90,7 @@ class VoiceEngine:
 
         if self.available and self.client:
             try:
-                audio_stream = self.client.text_to_speech.convert_as_stream(
+                audio_stream = self.client.text_to_speech.stream(
                     text=text,
                     voice_id=self.voice_id,
                     model_id=self.model,
