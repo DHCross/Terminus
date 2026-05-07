@@ -3,6 +3,7 @@ Terminus FastAPI Backend — v2.1.0
 M1-optimized, self-hosted Claude with voice, tools, scheduler, and reasoning-trace.
 """
 import logging
+import json
 import tempfile
 import uuid
 from datetime import datetime
@@ -41,6 +42,118 @@ voice_engine = get_voice_engine()
 scheduler = get_scheduler(generate_fn=claude_client.send_message, db=continuity_db)
 
 current_conversation_id: str = None
+current_toolset_name: str = "all"
+enabled_functions_override: list[str] | None = None
+
+TOOLSETS_PATH = Path(__file__).parent.parent / "sapphire-data" / "toolsets" / "toolsets.json"
+
+
+def _tool_name_from_schema(tool: object) -> str | None:
+    if isinstance(tool, dict):
+        return tool.get("name")
+    return getattr(tool, "name", None)
+
+
+def _core_tool_names() -> list[str]:
+    names: list[str] = []
+    for tool in claude_client.tools or []:
+        name = _tool_name_from_schema(tool)
+        if name:
+            names.append(name)
+    return sorted(set(names))
+
+
+def _load_user_toolsets() -> dict:
+    if not TOOLSETS_PATH.exists():
+        return {}
+    try:
+        raw = json.loads(TOOLSETS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+    result: dict = {}
+    for name, entry in raw.items():
+        if name.startswith("_"):
+            continue
+        if not isinstance(entry, dict):
+            continue
+        funcs = [f for f in entry.get("functions", []) if isinstance(f, str) and f.strip()]
+        result[name] = {
+            "emoji": str(entry.get("emoji", "")),
+            "functions": funcs,
+        }
+    return result
+
+
+def _save_user_toolsets(toolsets: dict) -> None:
+    TOOLSETS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"_comment": "Your toolsets"}
+    payload.update(toolsets)
+    TOOLSETS_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _all_function_names() -> list[str]:
+    names = set(_core_tool_names())
+    for ts in _load_user_toolsets().values():
+        for fn in ts.get("functions", []):
+            names.add(fn)
+    return sorted(names)
+
+
+def _toolsets_payload() -> list[dict]:
+    user_toolsets = _load_user_toolsets()
+    all_functions = _all_function_names()
+    toolsets: list[dict] = [
+        {
+            "name": "all",
+            "type": "builtin",
+            "emoji": "📦",
+            "function_count": len(all_functions),
+            "functions": all_functions,
+        },
+        {
+            "name": "none",
+            "type": "builtin",
+            "emoji": "⛔",
+            "function_count": 0,
+            "functions": [],
+        },
+    ]
+    for name, data in sorted(user_toolsets.items(), key=lambda item: item[0].lower()):
+        toolsets.append(
+            {
+                "name": name,
+                "type": "user",
+                "emoji": data.get("emoji", ""),
+                "function_count": len(data.get("functions", [])),
+                "functions": data.get("functions", []),
+            }
+        )
+    return toolsets
+
+
+def _functions_payload() -> dict:
+    core_names = set(_core_tool_names())
+    all_names = _all_function_names()
+    core_funcs = [{"name": name, "description": ""} for name in all_names if name in core_names]
+    imported_funcs = [{"name": name, "description": ""} for name in all_names if name not in core_names]
+
+    if enabled_functions_override is not None:
+        enabled = enabled_functions_override
+    elif current_toolset_name == "none":
+        enabled = []
+    elif current_toolset_name == "all":
+        enabled = all_names
+    else:
+        enabled = _load_user_toolsets().get(current_toolset_name, {}).get("functions", [])
+
+    modules: dict[str, dict] = {}
+    if core_funcs:
+        modules["core"] = {"emoji": "🧠", "functions": core_funcs}
+    if imported_funcs:
+        modules["imported"] = {"emoji": "🧰", "functions": imported_funcs}
+
+    return {"modules": modules, "enabled": enabled}
 
 
 # ── Models ────────────────────────────────────────────────────────────────────
@@ -346,11 +459,14 @@ async def get_changelog():
 async def get_init():
     """Bootstrap data for the Sapphire/Terminus web UI."""
     conversations = continuity_db.get_all_conversations()
+    toolsets = _toolsets_payload()
+    current = next((t for t in toolsets if t["name"] == current_toolset_name), toolsets[0])
     return {
         "toolsets": {
-            "list": [{"name": "All", "type": "builtin", "function_count": len(claude_client.tools or [])}],
-            "current": "All",
+            "list": toolsets,
+            "current": current,
         },
+        "functions": _functions_payload(),
         "prompts": {
             "list": [{"name": "terminus"}],
             "current": "terminus",
@@ -448,13 +564,99 @@ async def get_settings():
     return {
         "settings": {
             "prompt": "terminus",
-            "toolset": "All",
+            "toolset": current_toolset_name,
             "spice_set": "default",
             "persona": None,
             "llm_primary": "auto",
             "llm_model": settings.LLM_MODEL,
         }
     }
+
+
+@app.get("/api/toolsets")
+async def get_toolsets():
+    return {"toolsets": _toolsets_payload()}
+
+
+@app.get("/api/toolsets/current")
+async def get_toolsets_current():
+    toolsets = _toolsets_payload()
+    current = next((t for t in toolsets if t["name"] == current_toolset_name), toolsets[0])
+    return {
+        "name": current["name"],
+        "type": current["type"],
+        "function_count": current.get("function_count", 0),
+        "story_tools": 0,
+    }
+
+
+@app.post("/api/toolsets/{name}/activate")
+async def activate_toolset(name: str):
+    global current_toolset_name, enabled_functions_override
+    known = {t["name"] for t in _toolsets_payload()}
+    if name not in known:
+        raise HTTPException(status_code=404, detail="Toolset not found")
+    current_toolset_name = name
+    enabled_functions_override = None
+    return await get_toolsets_current()
+
+
+@app.post("/api/toolsets/custom")
+async def save_custom_toolset(body: dict):
+    name = str((body or {}).get("name", "")).strip()
+    functions = [f for f in (body or {}).get("functions", []) if isinstance(f, str) and f.strip()]
+    if not name:
+        raise HTTPException(status_code=400, detail="Toolset name is required")
+    if name in {"all", "none"}:
+        raise HTTPException(status_code=400, detail="Reserved toolset name")
+
+    toolsets = _load_user_toolsets()
+    existing_emoji = toolsets.get(name, {}).get("emoji", "")
+    toolsets[name] = {"emoji": existing_emoji, "functions": functions}
+    _save_user_toolsets(toolsets)
+    return {"ok": True, "name": name, "function_count": len(functions)}
+
+
+@app.delete("/api/toolsets/{name}")
+async def delete_user_toolset(name: str):
+    if name in {"all", "none"}:
+        raise HTTPException(status_code=400, detail="Cannot delete builtin toolset")
+    toolsets = _load_user_toolsets()
+    if name not in toolsets:
+        raise HTTPException(status_code=404, detail="Toolset not found")
+    del toolsets[name]
+    _save_user_toolsets(toolsets)
+
+    global current_toolset_name
+    if current_toolset_name == name:
+        current_toolset_name = "all"
+    return {"ok": True}
+
+
+@app.post("/api/toolsets/{name}/emoji")
+async def set_toolset_emoji(name: str, body: dict):
+    if name in {"all", "none"}:
+        raise HTTPException(status_code=400, detail="Cannot edit builtin toolset")
+    toolsets = _load_user_toolsets()
+    if name not in toolsets:
+        raise HTTPException(status_code=404, detail="Toolset not found")
+    toolsets[name]["emoji"] = str((body or {}).get("emoji", ""))
+    _save_user_toolsets(toolsets)
+    return {"ok": True}
+
+
+@app.get("/api/functions")
+async def get_functions():
+    return _functions_payload()
+
+
+@app.post("/api/functions/enable")
+async def enable_functions(body: dict):
+    global enabled_functions_override
+    enabled_functions_override = [
+        f for f in (body or {}).get("functions", []) if isinstance(f, str) and f.strip()
+    ]
+    return {"ok": True, "enabled": enabled_functions_override}
 
 
 @app.get("/api/privacy")
