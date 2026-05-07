@@ -4,17 +4,19 @@ M1-optimized, self-hosted Claude chat application
 """
 import os
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import logging
 import uuid
 from datetime import datetime
+import tempfile
 
 from config import settings
 from core.claude_client import ClaudeClient
 from core.continuity_db import ContinuityDB
+from core.stt import get_stt_engine
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +55,24 @@ class ConfigResponse(BaseModel):
     host: str
     port: int
     ready: bool
+
+
+class TranscriptionSegment(BaseModel):
+    """A segment of transcribed audio"""
+    start: float
+    end: float
+    text: str
+    confidence: float = 0.9
+
+
+class TranscriptionResponse(BaseModel):
+    """Speech-to-text transcription result"""
+    text: str
+    language: str
+    confidence: float
+    duration: float
+    segments: list
+    model: str
 
 
 # Routes
@@ -207,6 +227,70 @@ async def clear_history():
     claude_client.clear_history()
     current_conversation_id = None
     return {"status": "cleared"}
+
+
+@app.post("/api/transcribe", response_model=TranscriptionResponse)
+async def transcribe(audio_file: UploadFile = File(...)):
+    """
+    Transcribe audio file to text using MLX Whisper
+    
+    Supports: WAV, MP3, M4A, OGG
+    Uses M1's Neural Engine for 3-5x speedup
+    
+    Args:
+        audio_file: Audio file uploaded via multipart/form-data
+        
+    Returns:
+        TranscriptionResponse with text, language, confidence, segments
+    """
+    # Validate file type
+    allowed_types = {"audio/wav", "audio/mpeg", "audio/mp4", "audio/ogg", "application/octet-stream"}
+    if audio_file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio type: {audio_file.content_type}. Supported: WAV, MP3, M4A, OGG"
+        )
+    
+    # Save uploaded file temporarily
+    temp_file = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+            content = await audio_file.read()
+            tmp.write(content)
+            temp_file = tmp.name
+        
+        logger.info(f"Transcribing audio: {audio_file.filename} ({len(content)} bytes)")
+        
+        # Get STT engine and transcribe
+        stt_engine = get_stt_engine()
+        
+        if not stt_engine.available:
+            raise HTTPException(
+                status_code=503,
+                detail="MLX Whisper not installed. Install with: pip install mlx-whisper"
+            )
+        
+        result = stt_engine.transcribe(temp_file)
+        
+        logger.info(f"Transcription complete: '{result['text'][:50]}...'")
+        
+        return TranscriptionResponse(**result)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Transcription error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Transcription failed: {str(e)}"
+        )
+    finally:
+        # Clean up temporary file
+        if temp_file and Path(temp_file).exists():
+            try:
+                Path(temp_file).unlink()
+            except Exception as e:
+                logger.warning(f"Failed to clean temp file: {e}")
 
 
 # Mount static assets if they exist
