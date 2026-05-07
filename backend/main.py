@@ -340,6 +340,160 @@ async def get_changelog():
     return {"changelog": changelog_path.read_text(encoding="utf-8"), "format": "markdown"}
 
 
+# ── Sapphire UI compatibility stubs ───────────────────────────────────────────
+
+@app.get("/api/init")
+async def get_init():
+    """Bootstrap data for the Sapphire/Terminus web UI."""
+    conversations = continuity_db.get_all_conversations()
+    return {
+        "toolsets": {
+            "list": [{"name": "All", "type": "builtin", "function_count": len(claude_client.tools or [])}],
+            "current": "All",
+        },
+        "prompts": {
+            "list": [{"name": "terminus"}],
+            "current": "terminus",
+        },
+        "spice_sets": {
+            "list": [{"name": "default", "emoji": "", "category_count": 0}],
+            "current": "default",
+        },
+        "personas": {
+            "list": [],
+            "default": "Terminus",
+        },
+        "chat_count": len(conversations),
+        "version": "2.1.0",
+    }
+
+
+@app.get("/api/chats")
+async def list_chats():
+    """Chat list in the format the Sapphire UI expects."""
+    conversations = continuity_db.get_all_conversations()
+    chats = [
+        {
+            "name": c["id"],
+            "display_name": c.get("name") or c["id"],
+            "title": c.get("name") or c["id"],
+            "modified": c.get("updated_at", c.get("created_at", "")),
+            "created_at": c.get("created_at", ""),
+            "updated_at": c.get("updated_at", ""),
+            "message_count": 0,
+            "story_chat": False,
+            "private_chat": False,
+            "settings": {"topic_folder": ""},
+        }
+        for c in conversations
+    ]
+    return {
+        "chats": chats,
+        "active_chat": current_conversation_id,
+    }
+
+
+@app.get("/api/topics")
+async def get_topics(topic: str = "", limit: int = 100):
+    """Topic shelf data — folders and saved entries."""
+    return {
+        "active_topic": topic or "",
+        "folders": [],
+        "entries": [],
+    }
+
+
+@app.post("/api/chats")
+async def create_chat(body: dict = None):
+    """Create a new chat session (alias for new conversation)."""
+    new_id = str(uuid.uuid4())
+    name = (body or {}).get("name", f"Chat {new_id[:8]}")
+    claude_client.clear_history()
+    global current_conversation_id
+    current_conversation_id = continuity_db.add_conversation(name)
+    return {"name": current_conversation_id, "title": name}
+
+
+@app.get("/api/chats/{chat_name}/activate")
+@app.post("/api/chats/{chat_name}/activate")
+async def activate_chat(chat_name: str):
+    """Activate a chat by ID."""
+    global current_conversation_id
+    current_conversation_id = chat_name
+    messages = continuity_db.get_conversation_messages(chat_name)
+    claude_client.clear_history()
+    for msg in messages:
+        claude_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+    return {"status": "activated", "name": chat_name, "settings": {}}
+
+
+@app.get("/api/status")
+async def get_status():
+    """UI status endpoint — scope, identity, entropy for HUD display."""
+    return {
+        "status": "ok",
+        "context": {
+            "scope": "default",
+            "entropy": "default",
+            "identity": "Terminus",
+        },
+        "voice": voice_engine.backend,
+        "model": settings.LLM_MODEL,
+    }
+
+
+@app.get("/api/settings")
+async def get_settings():
+    """Minimal settings object for the UI."""
+    return {
+        "settings": {
+            "prompt": "terminus",
+            "toolset": "All",
+            "spice_set": "default",
+            "persona": None,
+            "llm_primary": "auto",
+            "llm_model": settings.LLM_MODEL,
+        }
+    }
+
+
+@app.get("/api/privacy")
+async def get_privacy():
+    return {"privacy_mode": False}
+
+
+@app.put("/api/privacy")
+async def set_privacy(body: dict):
+    return {"privacy_mode": body.get("enabled", False)}
+
+
+@app.get("/api/usage/balance")
+async def get_balance():
+    return {"balance": 0, "session_spent": 0, "currency": "USD"}
+
+
+@app.get("/api/webui/plugins")
+async def get_webui_plugins():
+    return {"plugins": [], "enabled": []}
+
+
+@app.get("/api/events")
+async def get_events():
+    """SSE keep-alive stream for the EventBus (no-op in Terminus)."""
+    async def event_stream():
+        yield "data: {\"type\":\"connected\"}\n\n"
+        # Keep connection open with periodic pings
+        import asyncio
+        for _ in range(30):
+            await asyncio.sleep(10)
+            yield ": ping\n\n"
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 # ── Static ────────────────────────────────────────────────────────────────────
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
