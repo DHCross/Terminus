@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.bounds-output.schema.json",
+  "title": "Sherlog Bounds Output",
+  "type": "object",
+  "required": [
+    "feature_target",
+    "confidence_score",
+    "topology",
+    "obligations",
+    "strategy"
+  ],
+  "properties": {
+    "feature_target": {
+      "type": "string"
+    },
+    "confidence_score": {
+      "type": "number"
+    },
+    "topology": {
+      "type": "object",
+      "required": [
+        "recommended_entrypoints",
+        "safe_touch",
+        "risky_touch",
+        "do_not_touch",
+        "reference_only"
+      ],
+      "properties": {
+        "recommended_entrypoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "priority", "reason"],
+            "properties": {
+              "file": { "type": "string" },
+              "priority": { "type": "number" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "safe_touch": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "confidence", "reason"],
+            "properties": {
+              "file": { "type": "string" },
+              "confidence": { "type": "number" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "risky_touch": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "blast_radius", "constraints"],
+            "properties": {
+              "file": { "type": "string" },
+              "blast_radius": { "type": "string" },
+              "constraints": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "do_not_touch": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "reason"],
+            "properties": {
+              "file": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "reference_only": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "context_value"],
+            "properties": {
+              "file": { "type": "string" },
+              "context_value": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "obligations": {
+      "type": "object",
+      "required": [
+        "contracts_relevant",
+        "verifications_required",
+        "evidence_required"
+      ],
+      "properties": {
+        "contracts_relevant": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["description", "strictness"],
+            "properties": {
+              "description": { "type": "string" },
+              "strictness": {
+                "type": "string",
+                "enum": ["absolute", "negotiable"]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "verifications_required": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "description", "mandatory"],
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "mandatory": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "evidence_required": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "strategy": {
+      "type": "object",
+      "required": ["repair_strategy"],
+      "properties": {
+        "repair_strategy": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

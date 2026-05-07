@@ -1,0 +1,4 @@
+{
+  "themes": ["dark", "light", "claude", "synthwave", "rainbow", "grass", "earth", "dirt", "mustard", "sunset", "noir", "terminal", "abyss"],
+  "default": "dark"
+}

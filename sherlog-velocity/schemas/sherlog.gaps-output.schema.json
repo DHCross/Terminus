@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.gaps-output.schema.json",
+  "title": "Sherlog Gaps Output",
+  "type": "object",
+  "required": ["gaps", "evidence"],
+  "properties": {
+    "gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["feature", "has_implementation", "has_tests", "has_docs"],
+      "properties": {
+        "feature": { "type": "string" },
+        "tokens": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "probe_scope": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            },
+            "enforced": { "type": "boolean" }
+          },
+          "additionalProperties": true
+        },
+        "source_roots": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "docs_root": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        },
+        "has_implementation": { "type": "boolean" },
+        "has_tests": { "type": "boolean" },
+        "has_docs": { "type": "boolean" },
+        "feature_file_count": { "type": "number" },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            },
+            "enforced": { "type": "boolean" },
+            "path_hints": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "ignored_out_of_scope": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "ignored_out_of_scope_counts": {
+              "type": "object",
+              "additionalProperties": { "type": "number" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "context_map": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "map_mode": { "type": "string" },
+            "map_path": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+            "map_exists": { "type": "boolean" },
+            "map_valid": { "type": "boolean" },
+            "areas_count": { "type": "number" },
+            "stale_areas": { "type": "array", "items": { "type": "object" } },
+            "drift_areas": { "type": "array", "items": { "type": "object" } },
+            "covered_feature_files": { "type": "array", "items": { "type": "string" } },
+            "uncovered_feature_files": { "type": "array", "items": { "type": "string" } },
+            "notes": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": true
+        },
+        "changelog": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "path": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            },
+            "exists": { "type": "boolean" },
+            "last_updated_commit": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            },
+            "last_updated_at": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            },
+            "changed_files_since_last_update": { "type": "array", "items": { "type": "string" } },
+            "implementation_changes": { "type": "array", "items": { "type": "string" } },
+            "test_changes": { "type": "array", "items": { "type": "string" } },
+            "profile_changes": { "type": "array", "items": { "type": "string" } },
+            "user_facing_changes": { "type": "array", "items": { "type": "string" } },
+            "contract_changes": { "type": "array", "items": { "type": "string" } },
+            "feature_related_changes": { "type": "array", "items": { "type": "string" } },
+            "last_update_commit_files": { "type": "array", "items": { "type": "string" } },
+            "last_update_supporting_files": { "type": "array", "items": { "type": "string" } },
+            "status": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "salience": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "object" }
+      ]
+    }
+  },
+  "additionalProperties": true
+}

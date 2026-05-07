@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "workspace": "Terminus",
+  "description": "M1-optimized self-hosted backend. Rebuild from Sapphire → FastAPI + MLX",
+  "source_roots": [
+    "scripts",
+    "sapphire-data",
+    "seed"
+  ],
+  "zones": [
+    {
+      "name": "Backend Architecture",
+      "paths": [
+        "scripts/**/*.sh",
+        "sapphire-data/**/*.json",
+        "sapphire-config/**/*"
+      ],
+      "belief": "Core backend launch, configuration, and settings. Foundation for Phase 1-4 refactor."
+    },
+    {
+      "name": "Continuity & Data",
+      "paths": [
+        "sapphire-data/continuity/**/*",
+        "user/**/*"
+      ],
+      "belief": "Persistent state: conversation traces, memory, journal entries. Critical for Phase 2 migration."
+    },
+    {
+      "name": "Seed Pack & Prompts",
+      "paths": [
+        "seed/coherence-lab/**/*"
+      ],
+      "belief": "Persona, prompt presets, toolsets. Portable between backends."
+    },
+    {
+      "name": "Documentation",
+      "paths": [
+        "docs/**/*",
+        "AGENTS.md",
+        "README.md"
+      ],
+      "belief": "User-facing and operational docs. Must track rebuild progress and migration guide."
+    }
+  ],
+  "features": [
+    {
+      "key": "M1-optimized-backend",
+      "name": "M1-optimized self-hosted backend",
+      "description": "Rebuild from Sapphire to FastAPI, move off external drive, optimize for M1 (mlx-whisper)",
+      "phases": [
+        {
+          "phase": 1,
+          "name": "Scaffold & Chat",
+          "description": "FastAPI app, web UI mount, Claude integration working"
+        },
+        {
+          "phase": 2,
+          "name": "Continuity Migration",
+          "description": "Port memory/traces from Sapphire JSON → SQLite, data migration"
+        },
+        {
+          "phase": 3,
+          "name": "STT Optimization",
+          "description": "Swap faster_whisper (CPU) → mlx-whisper (M1 Neural Engine)"
+        },
+        {
+          "phase": 4,
+          "name": "Scheduler & Plugins",
+          "description": "APScheduler for tasks/journal, reasoning-trace plugin, final testing"
+        }
+      ]
+    }
+  ],
+  "velocity": {
+    "tracking_enabled": true,
+    "log_file": ".logs/terminus-velocity.jsonl"
+  }
+}

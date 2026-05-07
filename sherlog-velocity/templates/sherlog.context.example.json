@@ -1,0 +1,22 @@
+{
+  "zones": [
+    {
+      "name": "Core Domain",
+      "paths": ["src/core/**/*", "src/lib/domain/**/*"],
+      "belief": "Stable domain rules and invariants.",
+      "last_updated": "2026-02-01"
+    },
+    {
+      "name": "API Layer",
+      "paths": ["src/app/api/**/*", "src/server/**/*"],
+      "belief": "Contracts and handlers for external integrations.",
+      "last_updated": "2026-02-01"
+    },
+    {
+      "name": "UI Layer",
+      "paths": ["src/components/**/*", "src/app/**/*"],
+      "belief": "Presentation and interaction logic.",
+      "last_updated": "2026-02-01"
+    }
+  ]
+}

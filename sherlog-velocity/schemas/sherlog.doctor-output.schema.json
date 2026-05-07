@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sherlog.dev/schemas/sherlog.doctor-output.schema.json",
+  "title": "Sherlog Doctor Output",
+  "type": "object",
+  "required": ["version", "timestamp", "feature", "velocity", "gaps", "context_health", "recommendation"],
+  "properties": {
+    "version": { "type": "number" },
+    "timestamp": { "type": "string" },
+    "feature": { "type": "string" },
+    "context": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string" },
+        "map_file": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "velocity": {
+      "type": "object",
+      "required": ["runs", "commits_per_day", "confidence"],
+      "properties": {
+        "runs": { "type": "number" },
+        "commits_per_day": { "type": "number" },
+        "confidence": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "gaps": {
+      "type": "object",
+      "required": ["total", "list"],
+      "properties": {
+        "total": { "type": "number" },
+        "list": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "context_health": {
+      "type": "object",
+      "required": ["enabled", "mode", "map_exists", "map_valid"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": { "type": "string" },
+        "map_exists": { "type": "boolean" },
+        "map_valid": { "type": "boolean" },
+        "stale_areas": { "type": "number" },
+        "drift_areas": { "type": "number" },
+        "uncovered_feature_files": { "type": "number" },
+        "map_path": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "estimate": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "object" }
+      ]
+    },
+    "salience": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "object" }
+      ]
+    },
+    "recommendation": {
+      "type": "object",
+      "required": ["action", "rationale", "commands", "priority"],
+      "properties": {
+        "action": { "type": "string" },
+        "rationale": { "type": "string" },
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

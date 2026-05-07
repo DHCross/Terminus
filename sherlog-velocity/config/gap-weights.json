@@ -1,0 +1,37 @@
+{
+  "_schema_version": 2,
+  "_doc": "Two-tier severity model. 'blocking' = irreversibility or hard missing dependencies (stops the ship). 'advisory' = health signals (visible, non-blocking). blocks_ship_when overrides blocks_ship conditionally.",
+  "severity_tiers": {
+    "blocking": "Irreversible damage or hard missing dependencies: data loss, security exposure, corrupted exports, broken build/release artifacts, schema/version incompatibility, critical artifact declared missing.",
+    "advisory": "Health signals and improvement opportunities. Visible but never gates routine motion."
+  },
+  "weights": {
+    "critical_artifact_missing": { "weight": 30, "tier": "blocking", "blocks_ship": true },
+    "security_exposure":         { "weight": 28, "tier": "blocking", "blocks_ship": true },
+    "data_integrity":            { "weight": 28, "tier": "blocking", "blocks_ship": true },
+    "schema_incompatibility":    { "weight": 25, "tier": "blocking", "blocks_ship": true },
+    "build_break":               { "weight": 25, "tier": "blocking", "blocks_ship": true },
+    "missing_implementation":    { "weight": 20, "tier": "advisory", "blocks_ship": false, "blocks_ship_when": "zone.ship_ready === true" },
+    "missing_handler":           { "weight": 18, "tier": "advisory", "blocks_ship": false },
+    "test_coverage":             { "weight": 15, "tier": "advisory", "blocks_ship": false },
+    "protocol_handler":          { "weight": 8,  "tier": "advisory", "blocks_ship": false },
+    "missing_bundle":            { "weight": 7,  "tier": "advisory", "blocks_ship": false },
+    "refactor":                  { "weight": 7,  "tier": "advisory", "blocks_ship": false },
+    "integration":               { "weight": 6,  "tier": "advisory", "blocks_ship": false },
+    "stale_context":             { "weight": 6,  "tier": "advisory", "blocks_ship": false },
+    "context_drift":             { "weight": 8,  "tier": "advisory", "blocks_ship": false },
+    "changelog_update_missing":  { "weight": 7,  "tier": "advisory", "blocks_ship": false },
+    "changelog_scope_mismatch":  { "weight": 5,  "tier": "advisory", "blocks_ship": false },
+    "changelog_stale_after_feature_change": { "weight": 6,  "tier": "advisory", "blocks_ship": false },
+    "velocity_collapse":         { "weight": 4,  "tier": "advisory", "blocks_ship": false },
+    "documentation":             { "weight": 5,  "tier": "advisory", "blocks_ship": false },
+    "type_orphan":               { "weight": 2,  "tier": "advisory", "blocks_ship": false },
+    "unknown":                   { "weight": 10, "tier": "advisory", "blocks_ship": false },
+    "hygiene_todo_cluster":      { "weight": 3,  "tier": "advisory", "blocks_ship": false },
+    "hygiene_console_log":       { "weight": 4,  "tier": "advisory", "blocks_ship": false },
+    "hygiene_any_abuse":         { "weight": 3,  "tier": "advisory", "blocks_ship": false },
+    "arch_monolith":             { "weight": 5,  "tier": "advisory", "blocks_ship": false },
+    "arch_complexity_hotspot":   { "weight": 4,  "tier": "advisory", "blocks_ship": false },
+    "arch_missing_docs":         { "weight": 2,  "tier": "advisory", "blocks_ship": false }
+  }
+}

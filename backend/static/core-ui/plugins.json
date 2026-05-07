@@ -1,0 +1,26 @@
+{
+  "enabled": [
+    "setup-wizard",
+    "backup",
+    "continuity"
+  ],
+  "plugins": {
+    "setup-wizard": {
+      "title": "Setup Wizard",
+      "showInSidebar": false,
+      "autoShow": true
+    },
+    "backup": {
+      "title": "Backup",
+      "menuText": "Backup & Restore",
+      "showInSidebar": false,
+      "lazy": true
+    },
+    "continuity": {
+      "title": "Continuity",
+      "menuText": "Continuity Tasks",
+      "showInSidebar": false,
+      "lazy": true
+    }
+  }
+}

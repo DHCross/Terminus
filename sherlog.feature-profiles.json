@@ -1,0 +1,28 @@
+{
+  "feature_profiles": {
+    "raven-fallback-export-reliability": {
+      "aliases": [
+        "Raven Fallback and Export Reliability"
+      ],
+      "implementation_path_hints": [
+        "src/raven/**",
+        "vessel/src/raven/**"
+      ],
+      "test_path_hints": [
+        "tests/**",
+        "test/**"
+      ],
+      "doc_path_hints": [
+        "docs/**"
+      ],
+      "export_hints": [
+        "exportRavenFallback",
+        "fallbackExport"
+      ],
+      "callsite_hints": [
+        "exportRavenFallback",
+        "fallbackExport"
+      ]
+    }
+  }
+}

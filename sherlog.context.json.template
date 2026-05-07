@@ -1,0 +1,20 @@
+{
+  "zones": [
+    {
+      "name": "Repository Core",
+      "paths": [
+        "**/*"
+      ],
+      "belief": "TODO: Describe what this zone governs.",
+      "last_updated": "2026-05-03"
+    },
+    {
+      "name": "Documentation",
+      "paths": [
+        "docs/**/*"
+      ],
+      "belief": "User-facing and internal documentation for this codebase.",
+      "last_updated": "2026-05-03"
+    }
+  ]
+}

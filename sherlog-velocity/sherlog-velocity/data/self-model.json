@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "generated_at": "2026-03-19T21:17:56.000Z",
+  "repo_root": "/Users/dancross/Dev/GitHub/SHERLOG_starter/sherlog-velocity",
+  "source_roots": [
+    "src"
+  ],
+  "summary": {
+    "total_modules": 26,
+    "total_edges": 0,
+    "fragile_file_count": 0,
+    "contract_anchor_count": 13,
+    "zone_coverage_pct": 0
+  },
+  "narrative": "This codebase contains:\n- 26 source files\n- 0 internal dependency edges\n- Contract anchor surfaces: context_contract, session_contract, gap_contract, estimate_contract",
+  "modules": [
+    {
+      "path": "src/core/code-gaps.js",
+      "role": "source",
+      "lines": 968,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 2,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/gap-detector.js",
+      "role": "source",
+      "lines": 2985,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 2,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/consumers.js",
+      "role": "source",
+      "lines": 501,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/estimate.js",
+      "role": "source",
+      "lines": 600,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/hygiene.js",
+      "role": "source",
+      "lines": 675,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/self-model.js",
+      "role": "source",
+      "lines": 535,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/session-tracker.js",
+      "role": "source",
+      "lines": 768,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/sonar.js",
+      "role": "source",
+      "lines": 595,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/verify.js",
+      "role": "source",
+      "lines": 445,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 1,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/analyzer.js",
+      "role": "source",
+      "lines": 60,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/boundary-mapper.js",
+      "role": "source",
+      "lines": 282,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/launch-risk.js",
+      "role": "source",
+      "lines": 94,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/reporter.js",
+      "role": "source",
+      "lines": 106,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/core/shared.js",
+      "role": "source",
+      "lines": 319,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/ack.js",
+      "role": "source",
+      "lines": 139,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/bounds.js",
+      "role": "source",
+      "lines": 66,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/bridge.js",
+      "role": "source",
+      "lines": 316,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/consumers.js",
+      "role": "source",
+      "lines": 106,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/doctor.js",
+      "role": "source",
+      "lines": 349,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/gaps.js",
+      "role": "source",
+      "lines": 393,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/hygiene.js",
+      "role": "source",
+      "lines": 172,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/index-sync.js",
+      "role": "source",
+      "lines": 158,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/init-context.js",
+      "role": "source",
+      "lines": 144,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/prompt.js",
+      "role": "source",
+      "lines": 20,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/retrospective.js",
+      "role": "source",
+      "lines": 255,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    },
+    {
+      "path": "src/cli/session.js",
+      "role": "source",
+      "lines": 251,
+      "export_count": 0,
+      "import_count": 0,
+      "churn": 0,
+      "fragility": {
+        "score": 0,
+        "label": "low"
+      }
+    }
+  ],
+  "edges": [],
+  "fragile_files": [],
+  "dependency_hubs": [],
+  "contract_anchors": [
+    {
+      "path": "src/core/boundary-mapper.js",
+      "anchors": [
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/core/estimate.js",
+      "anchors": [
+        "session_contract",
+        "gap_contract",
+        "estimate_contract",
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/core/gap-detector.js",
+      "anchors": [
+        "gap_contract",
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/core/self-model.js",
+      "anchors": [
+        "session_contract",
+        "gap_contract",
+        "estimate_contract",
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/core/session-tracker.js",
+      "anchors": [
+        "session_contract"
+      ]
+    },
+    {
+      "path": "src/cli/doctor.js",
+      "anchors": [
+        "gap_contract",
+        "estimate_contract"
+      ]
+    },
+    {
+      "path": "src/cli/gaps.js",
+      "anchors": [
+        "gap_contract"
+      ]
+    },
+    {
+      "path": "src/cli/index-sync.js",
+      "anchors": [
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/cli/init-context.js",
+      "anchors": [
+        "context_contract"
+      ]
+    },
+    {
+      "path": "src/cli/prompt.js",
+      "anchors": [
+        "estimate_contract"
+      ]
+    },
+    {
+      "path": "src/cli/retrospective.js",
+      "anchors": [
+        "estimate_contract"
+      ]
+    },
+    {
+      "path": "src/cli/session.js",
+      "anchors": [
+        "session_contract"
+      ]
+    },
+    {
+      "path": "src/cli/verify.js",
+      "anchors": [
+        "context_contract"
+      ]
+    }
+  ],
+  "zone_ownership": {
+    "total": 26,
+    "covered": 0,
+    "unmapped": 26,
+    "zones": []
+  },
+  "churn_window_days": 14,
+  "churn_hotspots": []
+}

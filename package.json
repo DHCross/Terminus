@@ -7,7 +7,15 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sherlog:preflight": "node sherlog-velocity/src/cli/preflight.js",
+    "sherlog:verify": "node sherlog-velocity/src/cli/verify.js",
+    "sherlog:doctor": "node sherlog-velocity/src/cli/doctor.js",
+    "sherlog:gaps": "node sherlog-velocity/src/cli/gaps.js",
+    "sherlog:session:start": "node sherlog-velocity/src/cli/session.js start",
+    "sherlog:session:note": "node sherlog-velocity/src/cli/session.js note",
+    "sherlog:session:end": "node sherlog-velocity/src/cli/session.js end",
+    "sherlog:manifest": "node sherlog-velocity/src/cli/manifest.js"
   },
   "keywords": [],
   "author": "",
