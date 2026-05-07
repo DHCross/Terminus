@@ -190,5 +190,10 @@ def get_voice_engine() -> VoiceEngine:
     """Get or create global VoiceEngine instance."""
     global _voice_engine
     if _voice_engine is None:
-        _voice_engine = VoiceEngine()
+        from config import settings
+        _voice_engine = VoiceEngine(
+            api_key=settings.ELEVENLABS_API_KEY,
+            voice_id=settings.VOICE_ID,
+            model=settings.VOICE_MODEL,
+        )
     return _voice_engine

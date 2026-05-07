@@ -40,11 +40,12 @@ WRITABLE_ROOTS = [
 BLOCKED_NAMES = {".env", ".env.local", "credentials.json", "secret_key", "cookies.txt"}
 BLOCKED_FRAGMENTS = {"api_key", "api-key", "secret", "sk-", "token"}
 
-# Allowlist for run_command
+# Allowlist for run_command — read-only and inspection commands only
+# python3 excluded: would allow arbitrary code execution via tool use
 SAFE_COMMANDS = {
     "ls", "pwd", "echo", "cat", "head", "tail", "wc",
     "date", "uname", "whoami", "df", "du", "find", "grep",
-    "sqlite3", "python3", "pip", "npm", "node", "git",
+    "sqlite3", "npm", "node", "git",
 }
 
 

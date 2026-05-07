@@ -12,7 +12,7 @@ read them as context in later conversations.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Callable
 
@@ -53,7 +53,7 @@ def daily_brief(generate_fn: Optional[Callable] = None):
         return
 
     # Read yesterday's trace if it exists
-    yesterday = (now.replace(hour=0, minute=0, second=0) - __import__("datetime").timedelta(days=1)).strftime("%Y-%m-%d")
+    yesterday = (now.replace(hour=0, minute=0, second=0) - timedelta(days=1)).strftime("%Y-%m-%d")
     trace_path = TRACES_DIR / f"{yesterday}.md"
     context = ""
     if trace_path.exists():
@@ -129,7 +129,7 @@ def trace_compact():
     at the top of the file for fast context loading.
     """
     _ensure_dirs()
-    yesterday = (datetime.now().replace(hour=0, minute=0, second=0) - __import__("datetime").timedelta(days=1)).strftime("%Y-%m-%d")
+    yesterday = (datetime.now().replace(hour=0, minute=0, second=0) - timedelta(days=1)).strftime("%Y-%m-%d")
     trace_path = TRACES_DIR / f"{yesterday}.jsonl"
 
     if not trace_path.exists():
@@ -168,12 +168,15 @@ def health_ping(db=None):
     """Log an uptime heartbeat to the activity_log table."""
     if db:
         try:
-            import uuid
-            db.conn.execute(
-                "INSERT INTO activity_log (id, event_type, content, timestamp) VALUES (?, ?, ?, ?)",
-                (str(uuid.uuid4()), "health_ping", "Terminus running", datetime.now().isoformat())
+            import sqlite3
+            conn = sqlite3.connect(db.db_path)
+            conn.execute(
+                "INSERT INTO activity_log (event_type, content, timestamp) VALUES (?, ?, ?)",
+                ("health_ping", "Terminus running", datetime.now().isoformat()),
             )
-            db.conn.commit()
+            conn.commit()
+            conn.close()
+            logger.debug("[scheduler] health_ping logged")
         except Exception as e:
             logger.warning(f"[scheduler] Health ping failed: {e}")
     else:

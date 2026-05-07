@@ -33,8 +33,10 @@ class Settings(BaseSettings):
     DATA_DIR: Path = Path.home() / ".terminus" / "data"
 
     class Config:
-        env_file = ".env"
+        # .env lives at the repo root, one level above backend/
+        env_file = str(Path(__file__).parent.parent / ".env")
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Repo .env has vars (tz, sapphire_native_dir) not in Settings
     
     def __init__(self, **data):
         super().__init__(**data)
