@@ -9,9 +9,12 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import logging
+import uuid
+from datetime import datetime
 
 from config import settings
 from core.claude_client import ClaudeClient
+from core.continuity_db import ContinuityDB
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,8 +27,13 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# Initialize Claude client (one per app instance for conversation continuity)
+# Initialize Claude client and continuity DB
 claude_client = ClaudeClient()
+continuity_db = ContinuityDB(settings.DATA_DIR / "continuity.db")
+continuity_db.init_schema()
+
+# Current conversation ID (in-memory session)
+current_conversation_id: str = None
 
 # Request/Response models
 class ChatRequest(BaseModel):
@@ -83,6 +91,7 @@ async def get_config():
 async def chat(request: ChatRequest):
     """
     Send a message to Claude and get a response
+    Saves messages to continuity database
     
     Args:
         request: ChatRequest with user message
@@ -90,6 +99,8 @@ async def chat(request: ChatRequest):
     Returns:
         ChatResponse with Claude's reply
     """
+    global current_conversation_id
+    
     if not settings.ANTHROPIC_API_KEY:
         raise HTTPException(
             status_code=500,
@@ -102,9 +113,36 @@ async def chat(request: ChatRequest):
             detail="Message cannot be empty"
         )
     
+    # Initialize conversation if needed
+    if current_conversation_id is None:
+        current_conversation_id = str(uuid.uuid4())
+        continuity_db.add_conversation(
+            current_conversation_id,
+            f"session_{datetime.utcnow().isoformat()[:10]}"
+        )
+        logger.info(f"Started new conversation: {current_conversation_id}")
+    
     try:
         logger.info(f"Chat request: {request.message[:50]}...")
+        
+        # Get response from Claude
         response_text = claude_client.send_message(request.message)
+        
+        # Save user message to database
+        continuity_db.add_message(
+            str(uuid.uuid4()),
+            current_conversation_id,
+            "user",
+            request.message
+        )
+        
+        # Save assistant response to database
+        continuity_db.add_message(
+            str(uuid.uuid4()),
+            current_conversation_id,
+            "assistant",
+            response_text
+        )
         
         return ChatResponse(
             response=response_text,
@@ -121,13 +159,53 @@ async def chat(request: ChatRequest):
 @app.get("/api/history")
 async def get_history():
     """Get current conversation history"""
-    return {"messages": claude_client.get_history()}
+    global current_conversation_id
+    
+    if current_conversation_id:
+        messages = continuity_db.get_conversation_messages(current_conversation_id)
+        return {"messages": messages, "conversation_id": current_conversation_id}
+    else:
+        return {"messages": [], "conversation_id": None}
+
+
+@app.get("/api/conversations")
+async def list_conversations():
+    """List all conversations"""
+    conversations = continuity_db.get_all_conversations()
+    return {"conversations": conversations}
+
+
+@app.post("/api/conversations/{conv_id}/load")
+async def load_conversation(conv_id: str):
+    """Load a specific conversation"""
+    global current_conversation_id
+    
+    current_conversation_id = conv_id
+    messages = continuity_db.get_conversation_messages(conv_id)
+    claude_client.clear_history()
+    
+    # Reload Claude history from database
+    for msg in messages:
+        claude_client.conversation_history.append({
+            "role": msg["role"],
+            "content": msg["content"]
+        })
+    
+    logger.info(f"Loaded conversation: {conv_id} ({len(messages)} messages)")
+    return {
+        "status": "loaded",
+        "conversation_id": conv_id,
+        "message_count": len(messages)
+    }
 
 
 @app.post("/api/history/clear")
 async def clear_history():
-    """Clear conversation history"""
+    """Start a new conversation"""
+    global current_conversation_id
+    
     claude_client.clear_history()
+    current_conversation_id = None
     return {"status": "cleared"}
 
 
@@ -145,6 +223,10 @@ async def startup_event():
     logger.info(f"Model: {settings.LLM_MODEL}")
     logger.info(f"API Key present: {bool(settings.ANTHROPIC_API_KEY)}")
     logger.info(f"Data directory: {settings.DATA_DIR}")
+    
+    # Check continuity database
+    conv_count = len(continuity_db.get_all_conversations())
+    logger.info(f"Continuity DB ready ({conv_count} existing conversations)")
 
 
 @app.get("/health")
