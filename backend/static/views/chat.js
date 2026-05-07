@@ -653,7 +653,7 @@ export default {
             }
         };
 
-        // Toggle buttons (Spice, Date/Time)
+        // Toggle buttons (Style, Date/Time)
         container.querySelectorAll('.sb-toggle').forEach(btn => {
             btn.addEventListener('click', () => {
                 const active = btn.dataset.active !== 'true';
@@ -695,7 +695,7 @@ export default {
                 }
                 if (el.id === 'sb-spice-turns') {
                     const toggle = container.querySelector('#sb-spice-toggle');
-                    if (toggle) toggle.textContent = `Spice \u00b7 ${el.value}`;
+                    if (toggle) toggle.textContent = `Style \u00b7 ${el.value}`;
                 }
                 if (el.id === 'sb-story-enabled' || el.id === 'sb-story-preset') {
                     updateStoryPromptLabel(container);
@@ -1299,7 +1299,7 @@ async function loadSidebar() {
 
         // Toggle buttons
         setToggle(container, '#sb-spice-toggle', settings.spice_enabled !== false,
-            `Spice \u00b7 ${settings.spice_turns || 3}`);
+            `Style \u00b7 ${settings.spice_turns || 3}`);
         setToggle(container, '#sb-datetime-toggle', settings.inject_datetime === true);
         const storyEnabled = settings.story_engine_enabled === true;
         const storyPreset = settings.story_preset;

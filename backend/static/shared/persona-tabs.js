@@ -2,10 +2,10 @@
 import { switchView } from '../core/router.js';
 
 const TABS = [
-    { id: 'personas', label: 'Personas', icon: '\u{1F3AD}' },
-    { id: 'prompts', label: 'Prompts', icon: '\u{1F464}' },
-    { id: 'toolsets', label: 'Toolsets', icon: '\u{1F527}' },
-    { id: 'spices', label: 'Spices', icon: '\u{1F336}\u{FE0F}' },
+    { id: 'personas', label: 'Identity', icon: '\u{1F9E0}' },
+    { id: 'prompts', label: 'Prompt Stack', icon: '\u{1F4DD}' },
+    { id: 'toolsets', label: 'Tool Matrix', icon: '\u{1F9F0}' },
+    { id: 'spices', label: 'Style Modes', icon: '\u2728' },
 ];
 
 /**

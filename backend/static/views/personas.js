@@ -119,13 +119,15 @@ function render() {
 
     const s = selectedData?.settings || {};
     const isActive = selectedData?.name === getCurrentPersona();
+    const singleIdentityMode = personas.length <= 1;
 
     container.innerHTML = `
         ${renderPersonaTabs('personas')}
         <div class="two-panel">
+            ${singleIdentityMode ? '' : `
             <div class="panel-left panel-list">
                 <div class="panel-list-header">
-                    <span class="panel-list-title">Terminus Profiles</span>
+                    <span class="panel-list-title">Identity Profiles</span>
                     <button class="btn-sm" id="pa-new" title="New from current chat">+</button>
                 </div>
                 <div class="panel-list-items" id="pa-list">
@@ -133,16 +135,16 @@ function render() {
                         <button class="panel-list-item${p.name === selectedName ? ' active' : ''}" data-name="${p.name}">
                             ${avatarImg(p.name, p.trim_color, 'pa-list-avatar', p.avatar)}
                             <div class="pa-list-info">
-                                <span class="pa-list-name">${esc(p.name)}${p.name === defaultPersona ? ' <span class="pa-default-star" title="Default persona">&#x2B50;</span>' : ''}</span>
+                                <span class="pa-list-name">${esc(p.name)}${p.name === defaultPersona ? ' <span class="pa-default-star" title="Default identity">&#x2B50;</span>' : ''}</span>
                                 ${p.tagline ? `<span class="pa-list-tagline">${esc(p.tagline)}</span>` : ''}
                             </div>
                         </button>
                     `).join('')}
-                    ${personas.length === 0 ? '<div class="text-muted" style="padding:16px;font-size:var(--font-sm)">No profiles yet. Click + to create one from your current chat settings.</div>' : ''}
+                    ${personas.length === 0 ? '<div class="text-muted" style="padding:16px;font-size:var(--font-sm)">No identity profile yet.</div>' : ''}
                 </div>
-            </div>
+            </div>`}
             <div class="panel-right">
-                ${selectedData ? renderDetail(selectedData, isActive) : '<div class="view-placeholder"><p>Select a Terminus profile</p></div>'}
+                ${selectedData ? renderDetail(selectedData, isActive, singleIdentityMode) : '<div class="view-placeholder"><p>No Terminus identity profile loaded.</p></div>'}
             </div>
         </div>
     `;
@@ -158,7 +160,7 @@ function getCurrentPersona() {
     return document.getElementById('sb-easy-name')?.textContent?.toLowerCase() || null;
 }
 
-function renderDetail(p, isActive) {
+function renderDetail(p, isActive, singleIdentityMode = false) {
     const s = p.settings || {};
     const trim = s.trim_color || '#0f766e';
     return `
@@ -181,12 +183,12 @@ function renderDetail(p, isActive) {
                         <input type="color" id="pa-s-trim_color" class="pa-trim-swatch" value="${trim}" data-key="trim_color" title="Trim color">
                     </div>
                     <div class="pa-header-actions">
-                        <button class="btn-primary" id="pa-load">Activate</button>
-                        ${p.name === defaultPersona
+                        <button class="btn-primary" id="pa-load">Use Identity</button>
+                        ${singleIdentityMode ? '' : (p.name === defaultPersona
                             ? '<button class="btn-sm" id="pa-clear-default" title="Remove as default">&#x2B50; Default</button>'
-                            : '<button class="btn-sm" id="pa-set-default" title="Set as default for new chats">Set Default</button>'}
-                        <button class="btn-sm" id="pa-duplicate">Duplicate</button>
-                        <button class="btn-sm danger" id="pa-delete">Delete</button>
+                            : '<button class="btn-sm" id="pa-set-default" title="Set as default for new chats">Set Default</button>')}
+                        ${singleIdentityMode ? '' : '<button class="btn-sm" id="pa-duplicate">Duplicate</button>'}
+                        ${singleIdentityMode ? '' : '<button class="btn-sm danger" id="pa-delete">Delete</button>'}
                     </div>
                 </div>
             </div>
@@ -221,7 +223,7 @@ function renderDetail(p, isActive) {
                     </div>
                     <div class="pa-fence">
                         <div class="pa-fence-body">
-                            ${renderSettingField('spice_set', 'Set', s, renderSpiceSetOptions(s.spice_set), { tip: 'Response style pack', view: 'spices' })}
+                            ${renderSettingField('spice_set', 'Set', s, renderSpiceSetOptions(s.spice_set), { tip: 'Response mode pack', view: 'spices' })}
                             <div class="pa-field">
                                 <label>Turns <span class="help-tip" data-tip="Style rotation activates every N turns">?</span></label>
                                 <input type="number" id="pa-s-spice_turns" min="1" max="20" value="${s.spice_turns || 3}" data-key="spice_turns">
