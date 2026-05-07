@@ -5,6 +5,61 @@ All notable changes to Terminus are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-07
+
+### Phase 4: Voice Loop, Tools, Scheduler, Reasoning-Trace, Plugin Port
+
+Terminus now has a heartbeat. Phase 4 completes the M1 rebuild with ElevenLabs voice, Claude tool use, APScheduler background jobs, and a full reasoning-trace system ported from the Sapphire plugin architecture.
+
+#### Added
+
+**Voice (ElevenLabs + macOS fallback)**
+- `POST /api/speak` — Synthesize any text to streaming MP3 (or AIFF via macOS `say`)
+- `POST /api/voice/chat` — Full voice loop: text-in → Claude (streaming) → ElevenLabs audio-out
+- `core/voice.py` — `VoiceEngine` with `stream()`, `synthesize()`, `speak_local()`. Adam voice (`pNInz6obpgDQGcFmaJgB`), `eleven_turbo_v2_5` model, ~300ms first chunk
+- Automatic fallback to macOS `say` if ElevenLabs API key absent
+
+**Claude Tool Use**
+- `core/tools.py` — 5 tools: `web_search` (DuckDuckGo, no API key), `read_file`, `write_file`, `list_directory`, `run_command` (allowlisted safe commands)
+- Security: `write_file` restricted to `~/.terminus/` and `~/Documents/Terminus/`; `run_command` command allowlist; `read_file` blocks `.env`/credentials
+- `core/claude_client.py` rewritten — full tool-use loop with multi-turn, `stream_message()` for voice
+- Tool count: 8 (5 standard + 3 reasoning-trace tools)
+
+**APScheduler Heartbeat**
+- `core/scheduler.py` — `TerminusScheduler` with 4 background jobs
+  - `daily_brief` @ 07:00 — Claude-generated morning summary → `~/.terminus/data/journal/{date}-brief.md`
+  - `journal_prompt` @ 21:00 — Evening reflection → `~/.terminus/data/journal/{date}.md`
+  - `trace_compact` @ 03:00 — Prepend daily summary to trace JSONL
+  - `health_ping` every 30 min — Inserts to `activity_log` table
+- `GET /api/tasks` — List jobs with next run times
+- `POST /api/tasks/{job_id}/run` — Manually trigger any job
+
+**Reasoning-Trace (ported from Sapphire plugin)**
+- `core/tracer.py` — Records every LLM turn and tool call to `~/.terminus/data/traces/{date}.jsonl` + `.md`
+- Correction detection: regex patterns flag turns where Terminus revises a prior claim
+- 3 trace tools exposed to Claude: `read_trace`, `write_journal`, `commit_claim`
+- `GET /api/trace` — Today's trace (or by date param)
+- `GET /api/journal` / `GET /api/journal/{filename}` — List and read journal entries
+
+**Configuration**
+- `config.py` — Added `ELEVENLABS_API_KEY`, `VOICE_ID`, `VOICE_MODEL`, `LLM_MAX_TOKENS=4096`
+- `requirements.txt` — Added `elevenlabs>=2.0.0`, `apscheduler>=3.10.0`, `duckduckgo-search>=6.0.0`
+- Version bumped to 2.1.0
+
+#### Data Layout
+```
+~/.terminus/data/
+├── continuity.db         (Phase 2 — SQLite)
+├── traces/
+│   ├── YYYY-MM-DD.jsonl  (reasoning trace, one entry per turn)
+│   └── YYYY-MM-DD.md     (human-readable mirror)
+└── journal/
+    ├── YYYY-MM-DD.md     (evening journal)
+    └── YYYY-MM-DD-brief.md (morning brief)
+```
+
+---
+
 ## [2.0.0] - 2026-05-07
 
 ### M1-Optimized Rebuild Complete
