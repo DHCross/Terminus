@@ -139,6 +139,12 @@ export const playText = async (txt, cacheKey = null) => {
             ui.updateStatus('Playing cached TTS...');
         } else {
             blob = await api.fetchAudio(clean, ttsCtrl.signal);
+            if (!blob) {
+                isStreaming = false;
+                ttsCtrl = null;
+                ui.hideStatus();
+                return;
+            }
             // Cache if key provided
             if (cacheKey !== null) {
                 // LRU eviction
@@ -278,6 +284,24 @@ function downsample(buffer, sourceSampleRate, targetSampleRate) {
 
 const startRec = async () => {
     try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            const locationHint = window.isSecureContext
+                ? 'This browser does not expose microphone recording.'
+                : 'Microphone access requires a secure origin. Use localhost on the same device, or serve Terminus over HTTPS for remote/mobile access.';
+            alert(locationHint);
+            return false;
+        }
+
+        if (navigator.permissions?.query) {
+            try {
+                const permission = await navigator.permissions.query({ name: 'microphone' });
+                if (permission.state === 'denied') {
+                    alert('Microphone permission is blocked for this site. Use the browser address-bar site settings to allow microphone access, then refresh Terminus.');
+                    return false;
+                }
+            } catch {}
+        }
+
         mediaStream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
                 channelCount: 1,
@@ -310,9 +334,14 @@ const startRec = async () => {
         return true;
     } catch (e) {
         console.error('Mic access error:', e);
-        const msg = e.name === 'NotFoundError' || e.message?.includes('not be found')
-            ? 'No microphone found. Check your audio device.'
-            : 'Mic access denied';
+        let msg = 'Mic access failed';
+        if (e.name === 'NotAllowedError' || e.name === 'SecurityError') {
+            msg = 'Microphone permission was denied. Allow microphone access in the browser site settings for this Terminus origin, then refresh.';
+        } else if (e.name === 'NotFoundError' || e.message?.includes('not be found')) {
+            msg = 'No microphone found. Check your audio device.';
+        } else if (e.name === 'NotReadableError' || e.name === 'AbortError') {
+            msg = 'Microphone is unavailable. Another app may be using it, or macOS privacy settings may be blocking this browser.';
+        }
         alert(msg);
         return false;
     }

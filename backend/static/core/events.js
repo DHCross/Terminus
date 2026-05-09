@@ -62,7 +62,7 @@ export function bindAllEvents() {
             const action = btn.dataset.action;
             const idx = parseInt(btn.dataset.messageIndex);
             if (!isNaN(idx)) {
-                handleToolbar(action, idx);
+                handleToolbar(action, idx, btn);
             }
         }
     });

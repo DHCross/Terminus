@@ -14,6 +14,7 @@ Exposes trace_tools for Claude to read its own traces and write journal entries.
 import json
 import logging
 import re
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -127,6 +128,23 @@ def record_tool_call(function_name: str, result: Any):
 
 TRACE_TOOLS = [
     {
+        "name": "read_my_thinking",
+        "description": (
+            "Read your latest stored extended-thinking block from the current Terminus history database. "
+            "Use this when you need to inspect your own prior reasoning before self-audit, correction, or continuation."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "description": "Number of recent reasoning blocks to return. Default 1, maximum 5.",
+                }
+            },
+            "required": [],
+        },
+    },
+    {
         "name": "read_trace",
         "description": (
             "Read today's (or any date's) conversation trace. "
@@ -206,7 +224,9 @@ TRACE_TOOLS = [
 
 def execute_trace_tool(name: str, inputs: dict) -> str:
     """Execute a trace tool call and return result as string."""
-    if name == "read_trace":
+    if name == "read_my_thinking":
+        return _read_my_thinking(inputs.get("limit", 1))
+    elif name == "read_trace":
         return _read_trace(inputs.get("date"))
     elif name == "write_journal":
         return _write_journal(inputs.get("content", ""), inputs.get("date"))
@@ -218,6 +238,50 @@ def execute_trace_tool(name: str, inputs: dict) -> str:
             inputs.get("retraction_check", "no"),
         )
     return f"Unknown trace tool: {name}"
+
+
+def _read_my_thinking(limit: int = 1) -> str:
+    limit = max(1, min(int(limit or 1), 5))
+    db_path = Path.home() / ".terminus" / "data" / "continuity.db"
+    if not db_path.exists():
+        return "No continuity database found."
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """
+            SELECT timestamp, content, metadata
+            FROM messages
+            WHERE role = 'assistant'
+            ORDER BY timestamp DESC
+            LIMIT 25
+            """
+        ).fetchall()
+        conn.close()
+    except Exception as exc:
+        return f"Failed to read thinking metadata: {exc}"
+
+    blocks = []
+    think_re = re.compile(r"<think>(.*?)</think>", re.DOTALL)
+    for row in rows:
+        reasoning = ""
+        try:
+            metadata = json.loads(row["metadata"] or "{}")
+            reasoning = str(metadata.get("reasoning") or "")
+        except Exception:
+            pass
+        if not reasoning:
+            match = think_re.search(row["content"] or "")
+            if match:
+                reasoning = match.group(1).strip()
+        if reasoning:
+            blocks.append({"timestamp": row["timestamp"], "reasoning": reasoning})
+        if len(blocks) >= limit:
+            break
+
+    if not blocks:
+        return "No stored reasoning blocks found yet."
+    return json.dumps(blocks, indent=2, ensure_ascii=False)
 
 
 def _read_trace(date: Optional[str] = None) -> str:

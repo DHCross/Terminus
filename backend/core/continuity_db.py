@@ -140,12 +140,19 @@ class ContinuityDB:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT role, content FROM messages 
+            SELECT role, content, timestamp, metadata FROM messages 
             WHERE conversation_id = ?
             ORDER BY timestamp ASC
         ''', (conv_id,))
         
-        messages = [dict(row) for row in cursor.fetchall()]
+        messages = []
+        for row in cursor.fetchall():
+            msg = dict(row)
+            try:
+                msg["metadata"] = json.loads(msg.get("metadata") or "{}")
+            except Exception:
+                msg["metadata"] = {}
+            messages.append(msg)
         conn.close()
         return messages
     

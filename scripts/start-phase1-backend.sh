@@ -33,6 +33,22 @@ pip install -q -r "$BACKEND_DIR/requirements.txt"
 echo "✅ Setup complete"
 echo ""
 echo "Starting FastAPI server on http://localhost:8000"
+
+print_lan_urls() {
+    local addrs
+    addrs="$(ifconfig | grep 'inet ' | awk '{print $2}' | grep -E '^(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))\.' || true)"
+    if [ -z "$addrs" ]; then
+        return
+    fi
+
+    echo "LAN URLs for phones and other devices on your network:"
+    while IFS= read -r addr; do
+        [ -n "$addr" ] || continue
+        echo "  http://$addr:8000"
+    done <<< "$addrs"
+}
+
+print_lan_urls
 echo "Press Ctrl+C to stop"
 echo ""
 

@@ -380,12 +380,14 @@ export const streamChat = async (text, onChunk, onComplete, onError, signal = nu
 
 export const fetchAudio = async (text, signal = null) => {
     try {
-        return await fetchWithTimeout('/api/tts', {
+        const result = await fetchWithTimeout('/api/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, output_mode: 'file' }),
             signal
         }, 120000);
+        if (result?.status === 204) return null;
+        return result;
     } catch (e) {
         if (e.message.includes('timeout') && text.length > 500) {
             throw new Error(`TTS timeout (${text.length} chars)`);

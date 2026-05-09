@@ -225,8 +225,27 @@ function getActiveTopicFolder() {
     return String(input?.value || '').trim();
 }
 
-export async function handleCopyMarkdown(idx) {
+export async function handleCopyMarkdown(idx, button = null) {
     try {
+        const domMsg = button?.closest?.('.message');
+        if (domMsg) {
+            if (!domMsg.classList.contains('assistant')) {
+                ui.showToast('Only assistant responses can be copied as markdown', 'error');
+                return;
+            }
+            const contentEl = domMsg.querySelector('.message-content');
+            const clone = contentEl?.cloneNode(true);
+            if (clone) {
+                clone.querySelectorAll('details, .tool-block, .message-metadata, .toolbar').forEach(e => e.remove());
+                const markdown = clone.textContent.trim();
+                if (markdown) {
+                    await navigator.clipboard.writeText(markdown);
+                    ui.showToast('Copied markdown', 'success', 2000);
+                    return;
+                }
+            }
+        }
+
         const hist = await api.fetchHistory();
         const msg = hist[idx];
         if (!msg || msg.role !== 'assistant') {
@@ -376,13 +395,13 @@ export async function handleSaveTopic(idx) {
     }
 }
 
-export function handleToolbar(action, idx) {
+export function handleToolbar(action, idx, button = null) {
     if (action === 'trash') handleTrash(idx);
     else if (action === 'regenerate') handleRegen(idx);
     else if (action === 'continue') handleContinue(idx);
     else if (action === 'edit') handleEdit(idx);
     else if (action === 'replay') handleReplay(idx);
-    else if (action === 'copy-markdown') handleCopyMarkdown(idx);
+    else if (action === 'copy-markdown') handleCopyMarkdown(idx, button);
     else if (action === 'save-topic') handleSaveTopic(idx);
     else if (action === 'save-journal') handleSaveJournal(idx);
 }

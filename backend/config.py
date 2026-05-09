@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     ELEVENLABS_API_KEY: str = os.getenv("ELEVENLABS_API_KEY", "")
 
     # Server
-    HOST: str = "localhost"
+    HOST: str = "0.0.0.0"
     PORT: int = 8000
     DEBUG: bool = False
 
@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 4096
 
     # Voice (ElevenLabs)
-    # Default: Adam (pNInz6obpgDQGcFmaJgB) — warm, clear, versatile
-    VOICE_ID: str = "pNInz6obpgDQGcFmaJgB"
+    # Default: Dan's cloned Terminus voice
+    VOICE_ID: str = "tiaXqVIuY2DO1xhPFLkT"
     VOICE_MODEL: str = "eleven_turbo_v2_5"  # Lowest latency
 
     # Paths

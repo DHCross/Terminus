@@ -11,7 +11,7 @@ async function applyTtsProviderState() {
         const res = await fetch('/api/settings');
         if (!res.ok) return;
         const data = await res.json();
-        const provider = (data.TTS_PROVIDER || '').toLowerCase();
+        const provider = (data.settings?.TTS_PROVIDER || data.TTS_PROVIDER || '').toLowerCase();
         const lastProvider = localStorage.getItem('tts-last-provider');
 
         const ttsBtn = document.getElementById('tts-toggle-btn');

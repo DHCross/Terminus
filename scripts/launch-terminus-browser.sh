@@ -8,12 +8,25 @@ DEFAULT_URL="https://localhost:8073"
 STARTUP_WAIT_SECONDS="${STARTUP_WAIT_SECONDS:-60}"
 SAPPHIRE_NATIVE_DIR="$DEFAULT_NATIVE_DIR"
 STARTUP_PROMPT="${STARTUP_PROMPT:-}"
+OPEN_LAN_URL="${OPEN_LAN_URL:-0}"
+
+first_lan_url() {
+  local addr
+  addr="$(ifconfig | grep 'inet ' | awk '{print $2}' | grep -E '^(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))\.' | head -n 1 || true)"
+  if [ -n "$addr" ]; then
+    echo "https://$addr:8073"
+  fi
+}
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --prompt)
       STARTUP_PROMPT="${2:-}"
       shift 2
+      ;;
+    --open-lan)
+      OPEN_LAN_URL=1
+      shift
       ;;
     *)
       echo "Unknown argument: $1"
@@ -70,9 +83,23 @@ else
 fi
 
 if lsof -tiTCP:8073 -sTCP:LISTEN >/dev/null 2>&1; then
+  open_url="$DEFAULT_URL"
+  if [ "$OPEN_LAN_URL" = "1" ]; then
+    lan_url="$(first_lan_url)"
+    if [ -n "$lan_url" ]; then
+      open_url="$lan_url"
+    else
+      echo "No LAN address detected; falling back to $DEFAULT_URL"
+    fi
+  fi
+
   echo "Opening $DEFAULT_URL"
+  if [ "$open_url" != "$DEFAULT_URL" ]; then
+    echo "Using LAN URL for this launch: $open_url"
+  fi
   print_lan_urls
-  open "$DEFAULT_URL"
+  echo "Use the localhost URL on this Mac and the LAN URL on your phone or other devices."
+  open "$open_url"
 else
   echo "Backend did not bind :8073 within ${STARTUP_WAIT_SECONDS}s."
   echo "Check /tmp/sapphire-native.log for details."

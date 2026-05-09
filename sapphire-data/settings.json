@@ -19,7 +19,9 @@
     "FASTER_WHISPER_NUM_WORKERS": 4
   },
   "tts": {
-    "TTS_PROVIDER": "none"
+    "TTS_PROVIDER": "elevenlabs",
+    "TTS_ELEVENLABS_MODEL": "eleven_turbo_v2_5",
+    "TTS_ELEVENLABS_VOICE_ID": "tiaXqVIuY2DO1xhPFLkT"
   },
   "setup": {
     "SETUP_WIZARD_STEP": 4
