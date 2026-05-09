@@ -32,30 +32,30 @@
     /* --msg-avatar-size: 32px; */
     
     /* =========================================================================
-       TRIM / ACCENT - Theme's signature color for decorative accents
+       TRIM / ACCENT - Civic Ruin (Tarnished Gold)
        ========================================================================= */
-    --trim: #0f766e;
-    --trim-glow: rgba(15, 118, 110, 0.3);
+    --trim: #c2a675;
+    --trim-glow: rgba(194, 166, 117, 0.3);
     
     /* =========================================================================
-       COLORS - CORE
+       COLORS - CORE (Void Black & Ashen Grey)
        ========================================================================= */
-    --bg: #121212;
-    --bg-secondary: #1a1a1a;
-    --bg-dark: #222;
-    --bg-tertiary: #2c2c2c;
-    --bg-hover: #383838;
-    --bg-inset: rgba(0, 0, 0, 0.25);
-    --text: #e0e0e0;
-    --text-bright: #fff;
-    --text-light: #ddd;
-    --text-secondary: #ccc;
-    --text-tertiary: #aaa;
-    --text-muted: #888;
-    --text-dim: #666;
-    --border: #333;
-    --border-light: #444;
-    --border-hover: #555;
+    --bg: #0a0a0c;
+    --bg-secondary: #1a1a1e;
+    --bg-dark: #050508;
+    --bg-tertiary: #232328;
+    --bg-hover: #2d2d34;
+    --bg-inset: rgba(0, 0, 0, 0.4);
+    --text: #e8e1db;
+    --text-bright: #ffffff;
+    --text-light: #d0c5b7;
+    --text-secondary: #b5a47e;
+    --text-tertiary: #8c8c94;
+    --text-muted: #7a7a85;
+    --text-dim: #5c5c66;
+    --border: #33333a;
+    --border-light: #44444c;
+    --border-hover: #55555e;
     
     /* =========================================================================
        OVERLAYS & SHADOWS
