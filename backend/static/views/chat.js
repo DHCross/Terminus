@@ -481,9 +481,13 @@ export default {
                 return;
             }
 
-            const chatSelect = getElements().chatSelect;
-            if (chatSelect) chatSelect.value = chatName;
-            await handleChatChange();
+            const chatSelect = getElements().chatSelect || document.getElementById('chat-select');
+            if (chatSelect) {
+                chatSelect.value = chatName;
+                chatSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                await handleChatChange(chatName);
+            }
             const rowTopic = normalizeTopicFolder(item.dataset.topicFolder || '');
             if (rowTopic) {
                 _selectedTopic = rowTopic;

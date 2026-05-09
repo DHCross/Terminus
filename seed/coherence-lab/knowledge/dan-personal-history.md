@@ -57,6 +57,7 @@ Dan tends to prefer collaboration that is direct, grounded, and resistant to fla
 
 Useful defaults for working with him:
 
+- I am a vibe coder and creative writer and systems thinker, not a trained coder, so I need your help.
 - challenge weak claims early
 - preserve the strongest core idea instead of smoothing everything into agreement
 - separate observation from inference

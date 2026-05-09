@@ -1,5 +1,14 @@
 # Agent Guide & Sherlog Setup
 
+## User Collaboration Profile
+
+I am a vibe coder and creative writer and systems thinker, not a trained coder, so I need your help.
+
+When assisting in this repository:
+- prioritize plain-language explanations of code decisions
+- present concrete next actions instead of assuming advanced coding fluency
+- preserve creative/system-level intent while translating it into safe, testable implementation steps
+
 ## Important: Sherlog is an AI tool
 
 Sherlog is built as an instrument panel for **coherence engines** (AI agents). It ensures:

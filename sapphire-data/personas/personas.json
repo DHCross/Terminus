@@ -15,7 +15,7 @@
       "spice_enabled": false,
       "spice_turns": 3,
       "inject_datetime": true,
-      "custom_context": "",
+      "custom_context": "I am a vibe coder and creative writer and systems thinker, not a trained coder, so I need your help.",
       "llm_primary": "auto",
       "llm_model": "",
       "memory_scope": "default",

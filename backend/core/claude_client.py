@@ -1,6 +1,7 @@
 """
-Claude LLM Client Wrapper — with tool use and streaming support
+Claude LLM Client Wrapper - with tool use and streaming support
 """
+import os
 import json
 import logging
 from pathlib import Path
@@ -10,11 +11,51 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
+INTERNAL_RPG_PACKET_RELATIVE_PATH = Path("sapphire-data") / "prompts" / "context" / "terminus_rpg_free_alpha_v0_1.md"
+TERMINUS_RPG_REPO_ROOT = Path(
+    os.environ.get("TERMINUS_RPG_REPO_ROOT", "/Users/dancross/Dev/GitHub/Terminus RPG")
+).expanduser()
+RPG_REFERENCE_FILES = (
+    ("Terminus RPG Free Alpha", "terminus_rpg_free_alpha_v0_1.md"),
+    ("Terminus RPG Campaign Setting", "terminus_campaign_setting.md"),
+)
+RPG_PACKET_PRESETS = {"terminus_lab", "CREATOR_MIRROR"}
+
 FALLBACK_SYSTEM_PROMPT = """You are Terminus — a self-hosted AI assistant running natively on a Mac Mini M1. \
 You are capable, thoughtful, and direct. You have access to tools: web search, file read/write, \
 directory listing, shell commands, and reasoning-trace tools for self-audit. \
 Use tools when they would genuinely help. Be concise unless depth is warranted. \
 You know your own version history and codebase via /api/changelog and /api/version."""
+
+
+def _load_rpg_reference_packets() -> str:
+    reference_paths = [
+        (title, TERMINUS_RPG_REPO_ROOT / filename)
+        for title, filename in RPG_REFERENCE_FILES
+    ]
+
+    fallback_rules_path = settings.BACKEND_DIR.parent / INTERNAL_RPG_PACKET_RELATIVE_PATH
+    if not reference_paths[0][1].exists() and fallback_rules_path.exists():
+        reference_paths[0] = (reference_paths[0][0], fallback_rules_path)
+
+    rendered_packets = []
+    for title, packet_path in reference_paths:
+        if not packet_path.exists():
+            continue
+        packet_text = packet_path.read_text(encoding="utf-8").strip()
+        if not packet_text:
+            continue
+        rendered_packets.append(f"{title} ({packet_path.name}):\n\n{packet_text}")
+
+    if not rendered_packets:
+        return ""
+
+    return (
+        "Terminus RPG Reference Packets (authoritative context):\n"
+        "Use these packets as source-of-truth design context for Terminus RPG rules, setting, and campaign assumptions.\n"
+        "If deeper source inspection is needed, use the repo tools with repo='terminus_rpg'.\n\n"
+        + "\n\n".join(rendered_packets)
+    )
 
 
 def load_system_prompt(preset_name: str = "terminus_lab") -> str:
@@ -56,7 +97,15 @@ def load_system_prompt(preset_name: str = "terminus_lab") -> str:
             f"Runtime context: your active provider is Anthropic Claude, "
             f"and your active model identifier is {settings.LLM_MODEL}."
         )
-        return f"{prompt}\n\n{runtime_context}"
+
+        packet_block = ""
+        if preset_name in RPG_PACKET_PRESETS:
+            packet_block = _load_rpg_reference_packets()
+
+        blocks = [prompt, runtime_context]
+        if packet_block:
+            blocks.append(packet_block)
+        return "\n\n".join(blocks)
     except Exception as exc:
         logger.warning("Failed to load Terminus persona prompt: %s", exc)
         return FALLBACK_SYSTEM_PROMPT

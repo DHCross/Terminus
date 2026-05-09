@@ -34,10 +34,13 @@ DEFAULT_REPO = "terminus"
 KNOWN_REPOS = {
     "terminus": "/Users/dancross/Dev/GitHub/Terminus",
     "shipyard": "/Users/dancross/Dev/GitHub/Shipyard",
+    "terminus_rpg": "/Users/dancross/Dev/GitHub/Terminus RPG",
     "raven_corpus": "/Users/dancross/Dev/GitHub/RavenCalder_Corpus",
 }
-WRITABLE_REPOS = {"raven_corpus"}
-REPO_ENUM = ["terminus", "shipyard", "raven_corpus"]
+WRITABLE_REPOS = {"raven_corpus", "terminus_rpg"}
+REPO_ENUM = ["terminus", "shipyard", "terminus_rpg", "raven_corpus"]
+WRITABLE_REPO_ENUM = ["terminus_rpg", "raven_corpus"]
+WRITABLE_REPO_DESCRIPTION = "Writable repository. Use terminus_rpg or raven_corpus."
 
 EXCLUDED_DIRS = {
     ".git",
@@ -140,6 +143,13 @@ def _repo_root(repo: str = DEFAULT_REPO) -> Path:
         if (candidate / "AGENTS.md").exists():
             return candidate
         raise ValueError("Shipyard repository root is not available.")
+    if repo_key == "terminus_rpg":
+        override = os.environ.get("TERMINUS_RPG_REPO_ROOT")
+        candidate = Path(override).expanduser() if override else Path(KNOWN_REPOS["terminus_rpg"])
+        candidate = candidate.resolve()
+        if candidate.exists() and candidate.is_dir():
+            return candidate
+        raise ValueError("Terminus RPG repository root is not available.")
     if repo_key == "raven_corpus":
         override = os.environ.get("RAVEN_CALDER_CORPUS_ROOT") or os.environ.get("RAVEN_CORPUS_ROOT")
         candidate = Path(override).expanduser() if override else Path(KNOWN_REPOS["raven_corpus"])
@@ -147,7 +157,7 @@ def _repo_root(repo: str = DEFAULT_REPO) -> Path:
         if candidate.exists() and candidate.is_dir():
             return candidate
         raise ValueError("Raven Calder corpus root is not available.")
-    raise ValueError("Unknown repo. Use 'terminus', 'shipyard', or 'raven_corpus'.")
+    raise ValueError("Unknown repo. Use 'terminus', 'shipyard', 'terminus_rpg', or 'raven_corpus'.")
 
 
 def _is_excluded_path(path: Path) -> bool:
@@ -382,7 +392,7 @@ def repo_read_file(path: str, start_line: int = 1, max_lines: int = 240, repo: s
 def _ensure_writable_repo(repo: str):
     repo_key = (repo or DEFAULT_REPO).strip().lower()
     if repo_key not in WRITABLE_REPOS:
-        raise ValueError("Write access is only enabled for repo='raven_corpus'.")
+        raise ValueError("Write access is only enabled for repo='terminus_rpg' or repo='raven_corpus'.")
 
 
 def repo_write_file(path: str, content: str, overwrite: bool = False, create_dirs: bool = True, repo: str = DEFAULT_REPO):
@@ -784,7 +794,7 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "repo_tree",
-            "description": "List files and directories in an allowed repository with safety exclusions. Use repo='terminus' for Terminus, repo='shipyard' for Shipyard, or repo='raven_corpus' for the Raven Calder corpus.",
+            "description": "List files and directories in an allowed repository with safety exclusions. Use repo='terminus' for Terminus, repo='shipyard' for Shipyard, repo='terminus_rpg' for the Terminus RPG repo, or repo='raven_corpus' for the Raven Calder corpus.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -802,7 +812,7 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "repo_search",
-            "description": "Search an allowed repository using ripgrep with bounded output and safety exclusions. Use repo='shipyard' for Shipyard diagnostics or repo='raven_corpus' for Raven Calder corpus research.",
+            "description": "Search an allowed repository using ripgrep with bounded output and safety exclusions. Use repo='shipyard' for Shipyard diagnostics, repo='terminus_rpg' for Terminus RPG source, or repo='raven_corpus' for Raven Calder corpus research.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -822,7 +832,7 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "ripgrep_search",
-            "description": "Run bounded ripgrep (`rg`) search over an allowed repository. This is the preferred tool for fast codebase issue discovery in Terminus or Shipyard and corpus research in Raven Calder.",
+            "description": "Run bounded ripgrep (`rg`) search over an allowed repository. This is the preferred tool for fast codebase issue discovery in Terminus, Shipyard, or the Terminus RPG repo, and for corpus research in Raven Calder.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -864,11 +874,11 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "repo_write_file",
-            "description": "Write a UTF-8 text file inside repo='raven_corpus'. Paths remain rooted under the Raven Calder corpus and sensitive/binary paths are blocked.",
+            "description": "Write a UTF-8 text file inside a writable repository. Paths remain rooted under the selected repo and sensitive/binary paths are blocked.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "repo": {"type": "string", "enum": ["raven_corpus"], "description": "Writable repository. Must be raven_corpus."},
+                    "repo": {"type": "string", "enum": WRITABLE_REPO_ENUM, "description": WRITABLE_REPO_DESCRIPTION},
                     "path": {"type": "string", "description": "Repo-relative file path to create or overwrite."},
                     "content": {"type": "string", "description": "UTF-8 text content to write, capped at 120000 characters."},
                     "overwrite": {"type": "boolean", "description": "Whether to replace an existing file. Defaults to false."},
@@ -883,11 +893,11 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "repo_append_file",
-            "description": "Append UTF-8 text to a file inside repo='raven_corpus'. Paths remain rooted under the Raven Calder corpus and sensitive/binary paths are blocked.",
+            "description": "Append UTF-8 text to a file inside a writable repository. Paths remain rooted under the selected repo and sensitive/binary paths are blocked.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "repo": {"type": "string", "enum": ["raven_corpus"], "description": "Writable repository. Must be raven_corpus."},
+                    "repo": {"type": "string", "enum": WRITABLE_REPO_ENUM, "description": WRITABLE_REPO_DESCRIPTION},
                     "path": {"type": "string", "description": "Repo-relative file path."},
                     "content": {"type": "string", "description": "UTF-8 text content to append, capped at 120000 characters."},
                     "create_dirs": {"type": "boolean", "description": "Whether to create parent directories. Defaults to true."},
@@ -936,11 +946,11 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "notebook_create",
-            "description": "Create a clean nbformat 4 Python .ipynb notebook inside repo='raven_corpus'.",
+            "description": "Create a clean nbformat 4 Python .ipynb notebook inside a writable repository.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "repo": {"type": "string", "enum": ["raven_corpus"], "description": "Writable repository. Must be raven_corpus."},
+                    "repo": {"type": "string", "enum": WRITABLE_REPO_ENUM, "description": WRITABLE_REPO_DESCRIPTION},
                     "path": {"type": "string", "description": "Repo-relative .ipynb path."},
                     "title": {"type": "string", "description": "Notebook title."},
                     "kind": {"type": "string", "enum": ["experiment", "tutorial"], "description": "Notebook shape. Defaults to experiment."},
@@ -955,11 +965,11 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "notebook_update_cell",
-            "description": "Replace one cell's source in a .ipynb notebook inside repo='raven_corpus', optionally changing cell type and clearing outputs.",
+            "description": "Replace one cell's source in a .ipynb notebook inside a writable repository, optionally changing cell type and clearing outputs.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "repo": {"type": "string", "enum": ["raven_corpus"], "description": "Writable repository. Must be raven_corpus."},
+                    "repo": {"type": "string", "enum": WRITABLE_REPO_ENUM, "description": WRITABLE_REPO_DESCRIPTION},
                     "path": {"type": "string", "description": "Repo-relative .ipynb path."},
                     "cell_index": {"type": "integer", "description": "Zero-based cell index to update."},
                     "source": {"type": "string", "description": "Replacement cell source."},
@@ -975,11 +985,11 @@ TOOLS = [
         "is_local": True,
         "function": {
             "name": "notebook_append_cell",
-            "description": "Append a markdown, code, or raw cell to a .ipynb notebook inside repo='raven_corpus'.",
+            "description": "Append a markdown, code, or raw cell to a .ipynb notebook inside a writable repository.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "repo": {"type": "string", "enum": ["raven_corpus"], "description": "Writable repository. Must be raven_corpus."},
+                    "repo": {"type": "string", "enum": WRITABLE_REPO_ENUM, "description": WRITABLE_REPO_DESCRIPTION},
                     "path": {"type": "string", "description": "Repo-relative .ipynb path."},
                     "source": {"type": "string", "description": "Cell source to append."},
                     "cell_type": {"type": "string", "enum": ["markdown", "code", "raw"], "description": "Cell type. Defaults to markdown."},

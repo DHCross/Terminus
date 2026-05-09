@@ -1,0 +1,32 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Start Terminus in the browser (backend + web frontend)
+    cmds:
+      - task: launch
+
+  launch:
+    desc: Start Terminus backend and open the web frontend
+    cmds:
+      - ./scripts/launch-terminus-web.sh
+
+  launch:lan:
+    desc: Start Terminus and open using LAN URL
+    cmds:
+      - ./scripts/launch-terminus-web.sh --open-lan
+
+  launch:mirror:
+    desc: Start Terminus with CREATOR_MIRROR prompt and open web UI
+    cmds:
+      - STARTUP_PROMPT=CREATOR_MIRROR ./scripts/launch-terminus-web.sh --prompt CREATOR_MIRROR
+
+  stop:
+    desc: Stop Terminus backend and Electron
+    cmds:
+      - make stop
+
+  kill:server:
+    desc: Kill the running Terminus server
+    cmds:
+      - task: stop

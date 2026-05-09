@@ -23,15 +23,29 @@ export async function populateChatDropdown() {
     }
 }
 
-export async function handleChatChange() {
+export async function handleChatChange(chatName = null) {
     const { chatSelect } = getElements();
     if (getIsProc()) {
         console.log('Cannot switch chats while processing');
         return;
     }
-    
-    const selectedChat = chatSelect.value;
+
+    const selectedChat = typeof chatName === 'string' && chatName.trim()
+        ? chatName.trim()
+        : String(chatSelect?.value || '').trim();
     if (!selectedChat) return;
+
+    // Keep the hidden state select in sync even if the target chat was not in its current options.
+    if (chatSelect) {
+        let option = [...chatSelect.options].find(opt => opt.value === selectedChat);
+        if (!option) {
+            option = document.createElement('option');
+            option.value = selectedChat;
+            option.textContent = selectedChat;
+            chatSelect.appendChild(option);
+        }
+        chatSelect.value = selectedChat;
+    }
     
     try {
         audio.stop();
