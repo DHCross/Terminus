@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -28,6 +29,14 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[5]
 
 
+def _is_safe_npm_arg(arg: str) -> bool:
+    """
+    Validates that an argument is safe to pass to npm run.
+    Allows alphanumeric characters, hyphens, underscores, colons, and dots.
+    """
+    return re.fullmatch(r"[a-zA-Z0-9:\-_.]+", arg) is not None
+
+
 def _run_npm_script(script: str, args=None, timeout=90):
     repo_root = _repo_root()
     if not (repo_root / "package.json").exists():
@@ -37,9 +46,24 @@ def _run_npm_script(script: str, args=None, timeout=90):
             "error": "No package.json found at resolved Terminus repo root.",
         }
 
+    if not _is_safe_npm_arg(script):
+        return {
+            "ok": False,
+            "repo_root": str(repo_root),
+            "error": f"Invalid npm script name: {script}",
+        }
+
     command = ["npm", "run", script, "--"]
     if args:
-        command.extend(args)
+        for arg in args:
+            arg_str = str(arg)
+            if not _is_safe_npm_arg(arg_str):
+                return {
+                    "ok": False,
+                    "repo_root": str(repo_root),
+                    "error": f"Invalid argument: {arg_str}",
+                }
+            command.append(arg_str)
 
     try:
         completed = subprocess.run(
