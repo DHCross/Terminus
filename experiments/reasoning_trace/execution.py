@@ -1,5 +1,5 @@
 import uuid
-from typing import Callable, Tuple
+from typing import Callable
 from models import ExperimentRun, ReasoningMirror
 from capture import generate_reasoning_mirror
 from conditions import build_condition_prompt

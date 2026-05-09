@@ -1,7 +1,6 @@
 import argparse
 import sys
 import os
-import json
 from execution import run_condition_pipeline
 from scoring import score_run
 from models import RunLogger
@@ -55,7 +54,7 @@ except ImportError as e:
     _generate_fn = mock_generate
 
 def run_experiment(base_prompt: str, single_pass: bool = True):
-    print(f"Running Experiment: Reasoning Trace Injection")
+    print("Running Experiment: Reasoning Trace Injection")
     print(f"Base Prompt: '{base_prompt}'\n")
     print(f"Mode: {'Single-Pass' if single_pass else 'Two-Pass'}")
 

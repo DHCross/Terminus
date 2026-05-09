@@ -1,5 +1,4 @@
 import re
-from typing import Dict, Any
 from models import ExperimentRun, Metrics, Flags
 
 def calculate_contradiction_score(response: str, trace_content: str) -> float:
@@ -57,7 +56,8 @@ def calculate_specificity_score(response: str) -> float:
     numbers = sum(1 for w in words if w.isdigit())
 
     total = len(words)
-    if total == 0: return 0.0
+    if total == 0:
+        return 0.0
 
     score = min(((capitalized + numbers) / total) * 5.0, 1.0)
     return score
