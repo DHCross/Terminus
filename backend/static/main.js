@@ -32,6 +32,7 @@ const VIEW_MODULES = {
     spices:   `./views/spices.js${_v}`,
     schedule: `./views/schedule.js${_v}`,
     mind:     `./views/mind.js${_v}`,
+    journal:  `./views/journal.js${_v}`,
     settings: `./views/settings.js${_v}`,
 };
 

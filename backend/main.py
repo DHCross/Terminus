@@ -459,6 +459,14 @@ class TranscriptionResponse(BaseModel):
     segments: list
     model: str
 
+class JournalSaveRequest(BaseModel):
+    content: str
+    date: str | None = None
+    mode: str | None = "quote"
+    topic: str | None = ""
+    chat_name: str | None = ""
+    source_timestamp: str | None = None
+
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -855,6 +863,65 @@ async def get_journal_entry(filename: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="Entry not found")
     return {"filename": filename, "content": path.read_text(encoding="utf-8")}
+
+
+@app.post("/api/journal/save")
+async def save_journal_entry(payload: JournalSaveRequest):
+    """Save a journal entry into the tracer journal directory."""
+    from core.tracer import JOURNAL_DIR
+
+    content = (payload.content or "").strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="content is required")
+
+    requested_date = (payload.date or "").strip()
+    if requested_date:
+        try:
+            datetime.strptime(requested_date, "%Y-%m-%d")
+            date_str = requested_date
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
+    else:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    mode = (payload.mode or "quote").strip().lower()
+    if mode not in {"quote", "summary"}:
+        mode = "quote"
+
+    topic = (payload.topic or "").strip() or ("Thread Summary" if mode == "summary" else "Quote")
+    chat_name = (payload.chat_name or "").strip()
+    source_timestamp = (payload.source_timestamp or "").strip()
+    now_iso = datetime.now().isoformat(timespec="seconds")
+
+    JOURNAL_DIR.mkdir(parents=True, exist_ok=True)
+    journal_path = JOURNAL_DIR / f"{date_str}.md"
+
+    header = f"# Terminus Journal — {date_str}\n\n"
+    meta_lines = [
+        f"- saved_at: {now_iso}",
+        f"- mode: {mode}",
+        f"- topic: {topic}",
+    ]
+    if chat_name:
+        meta_lines.append(f"- chat: {chat_name}")
+    if source_timestamp:
+        meta_lines.append(f"- source_timestamp: {source_timestamp}")
+
+    entry_block = (
+        "## Entry\n\n"
+        + "\n".join(meta_lines)
+        + "\n\n"
+        + content
+        + "\n"
+    )
+
+    if journal_path.exists():
+        existing = journal_path.read_text(encoding="utf-8").rstrip()
+        journal_path.write_text(existing + "\n\n---\n\n" + entry_block, encoding="utf-8")
+    else:
+        journal_path.write_text(header + entry_block, encoding="utf-8")
+
+    return {"status": "saved", "filename": journal_path.name, "path": str(journal_path)}
 
 
 @app.get("/api/version")

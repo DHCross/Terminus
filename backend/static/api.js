@@ -151,6 +151,9 @@ export const saveJournalEntry = (payload) => fetchWithTimeout('/api/journal/save
     body: JSON.stringify(payload || {})
 }, 10000);
 
+export const fetchJournalEntries = () => fetchWithTimeout('/api/journal', {}, 10000);
+export const fetchJournalEntry = (filename) => fetchWithTimeout(`/api/journal/${encodeURIComponent(filename)}`, {}, 10000);
+
 export const fetchTopics = (topic = '', limit = 100) => {
     const params = new URLSearchParams();
     if (topic) params.set('topic', topic);
