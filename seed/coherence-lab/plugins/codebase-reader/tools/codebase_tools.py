@@ -140,7 +140,8 @@ def _repo_root(repo: str = DEFAULT_REPO) -> Path:
         override = os.environ.get("SHIPYARD_REPO_ROOT")
         candidate = Path(override).expanduser() if override else Path(KNOWN_REPOS["shipyard"])
         candidate = candidate.resolve()
-        if (candidate / "AGENTS.md").exists():
+        repo_markers = ("README.md", "package.json", ".git")
+        if candidate.exists() and candidate.is_dir() and any((candidate / marker).exists() for marker in repo_markers):
             return candidate
         raise ValueError("Shipyard repository root is not available.")
     if repo_key == "terminus_rpg":
