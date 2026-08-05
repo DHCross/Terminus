@@ -155,6 +155,18 @@ class ClaudeClient:
         while True:
             response = self.client.messages.create(**kwargs)
 
+            try:
+                from core.usage_tracker import record_usage
+                usage = getattr(response, "usage", None)
+                if usage:
+                    in_tok = getattr(usage, "input_tokens", 0) or 0
+                    out_tok = getattr(usage, "output_tokens", 0) or 0
+                    c_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+                    c_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
+                    record_usage(self.model, in_tok, out_tok, c_read, c_write)
+            except Exception as e:
+                logger.error(f"Failed to record usage: {e}")
+
             # Check if Claude wants to use tools
             tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
             text_blocks = [b for b in response.content if b.type == "text"]
@@ -233,6 +245,18 @@ class ClaudeClient:
 
         while True:
             response = self.client.messages.create(**kwargs)
+
+            try:
+                from core.usage_tracker import record_usage
+                usage = getattr(response, "usage", None)
+                if usage:
+                    in_tok = getattr(usage, "input_tokens", 0) or 0
+                    out_tok = getattr(usage, "output_tokens", 0) or 0
+                    c_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+                    c_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
+                    record_usage(self.model, in_tok, out_tok, c_read, c_write)
+            except Exception as e:
+                logger.error(f"Failed to record usage: {e}")
 
             # Collect thinking and text blocks
             thinking_parts = []
@@ -322,6 +346,19 @@ class ClaudeClient:
             for text_chunk in stream.text_stream:
                 full_response += text_chunk
                 yield text_chunk
+
+        try:
+            final_message = stream.get_final_message()
+            from core.usage_tracker import record_usage
+            usage = getattr(final_message, "usage", None)
+            if usage:
+                in_tok = getattr(usage, "input_tokens", 0) or 0
+                out_tok = getattr(usage, "output_tokens", 0) or 0
+                c_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+                c_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
+                record_usage(self.model, in_tok, out_tok, c_read, c_write)
+        except Exception as e:
+            logger.error(f"Failed to record usage in stream_message: {e}")
 
         self.conversation_history.append({"role": "assistant", "content": full_response})
 

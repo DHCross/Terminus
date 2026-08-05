@@ -34,6 +34,7 @@ except ImportError:
 WRITABLE_ROOTS = [
     Path.home() / ".terminus",
     Path.home() / "Documents" / "Terminus",
+    Path("/Users/dancross/Dev/GitHub/Shipyard"),
 ]
 
 # Sensitive files that read_file must never return
@@ -95,7 +96,7 @@ READ_FILE_TOOL = {
 WRITE_FILE_TOOL = {
     "name": "write_file",
     "description": (
-        "Write content to a file. Restricted to ~/.terminus/ and ~/Documents/Terminus/. "
+        "Write content to a file. Restricted to ~/.terminus/, ~/Documents/Terminus/, and /Users/dancross/Dev/GitHub/Shipyard/. "
         "Use this to save notes, journal entries, or generated content."
     ),
     "input_schema": {
@@ -103,7 +104,7 @@ WRITE_FILE_TOOL = {
         "properties": {
             "path": {
                 "type": "string",
-                "description": "Path within ~/.terminus/ or ~/Documents/Terminus/.",
+                "description": "Path within ~/.terminus/, ~/Documents/Terminus/, or /Users/dancross/Dev/GitHub/Shipyard/.",
             },
             "content": {
                 "type": "string",
@@ -273,7 +274,7 @@ def _write_file(inputs: dict) -> str:
     )
     if not allowed:
         return (
-            f"Write denied: path must be inside ~/.terminus/ or ~/Documents/Terminus/. "
+            f"Write denied: path must be inside ~/.terminus/, ~/Documents/Terminus/, or /Users/dancross/Dev/GitHub/Shipyard/. "
             f"Got: {path}"
         )
 
