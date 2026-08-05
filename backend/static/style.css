@@ -4601,7 +4601,8 @@ a.gallery-caption:hover {
 }
 
 #credit-balance {
-    display: none !important;
+    display: inline-flex;
+    align-items: center;
     font-size: 11px;
     font-weight: 500;
     background: rgba(255,255,255,0.07);
@@ -4614,7 +4615,7 @@ a.gallery-caption:hover {
     cursor: pointer;
     user-select: none;
 }
-#credit-balance:empty { display: none; }
+#credit-balance:empty { display: none !important; }
 #credit-balance.low {
     color: #ff9b4a;
     background: rgba(255,155,74,0.13);
