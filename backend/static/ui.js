@@ -144,24 +144,70 @@ const setPersonaAvatar = (img, personaName) => {
 
 const createToolbar = (idx, total, role = 'user') => {
     const tb = createElem('div', { class: 'toolbar' });
-    const buttons = [
+
+    // Primary always-visible buttons
+    const primaryButtons = [
         ['trash-btn', 'trash', '\u{1F5D1}\uFE0F', 'Delete'],
         ['continue-btn', 'continue', '\u{25B6}\uFE0F', 'Continue'],
         ['edit-btn', 'edit', '\u{270F}\uFE0F', 'Edit'],
-        ['replay-btn', 'replay', '\u{1F50A}', 'Replay TTS']
+    ];
+
+    // Secondary buttons collapsed into overflow ⋮ menu
+    const secondaryButtons = [
+        ['replay-btn', 'replay', '\u{1F50A}', 'Replay TTS'],
     ];
 
     if (role === 'assistant') {
-        buttons.splice(4, 0, ['copy-md-btn', 'copy-markdown', '📋', 'Copy as Markdown']);
-        buttons.splice(5, 0, ['topics-btn', 'save-topic', '🗂', 'Save to Topics']);
-        buttons.splice(6, 0, ['journal-btn', 'save-journal', '📝', 'Save to Journal']);
+        secondaryButtons.push(
+            ['copy-md-btn', 'copy-markdown', '📋', 'Copy as Markdown'],
+            ['topics-btn', 'save-topic', '🗂', 'Save to Topics'],
+            ['journal-btn', 'save-journal', '📝', 'Save to Journal'],
+        );
     }
 
-    buttons.forEach(([cls, act, icon, title]) => {
+    primaryButtons.forEach(([cls, act, icon, title]) => {
         const btn = createElem('button', { class: cls, 'data-action': act, 'data-message-index': idx }, icon);
         btn.title = title;
         tb.appendChild(btn);
     });
+
+    // Build overflow menu
+    const overflowWrap = createElem('div', { class: 'toolbar-overflow' });
+    const overflowBtn = createElem('button', { class: 'toolbar-overflow-btn', title: 'More actions' }, '\u22EE');
+    const overflowMenu = createElem('div', { class: 'toolbar-overflow-menu' });
+
+    secondaryButtons.forEach(([cls, act, icon, title]) => {
+        const menuBtn = createElem('button', { class: cls, 'data-action': act, 'data-message-index': idx });
+        const iconSpan = createElem('span', { class: 'overflow-icon' }, icon);
+        menuBtn.appendChild(iconSpan);
+        menuBtn.appendChild(document.createTextNode(title));
+        overflowMenu.appendChild(menuBtn);
+    });
+
+    overflowMenu.addEventListener('click', (e) => {
+        if (e.target.closest('button[data-action]')) {
+            overflowWrap.classList.remove('open');
+        }
+    });
+
+    overflowBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = overflowWrap.classList.toggle('open');
+        if (isOpen) {
+            const closeOnOutside = (ev) => {
+                if (!overflowWrap.contains(ev.target)) {
+                    overflowWrap.classList.remove('open');
+                    document.removeEventListener('click', closeOnOutside, true);
+                }
+            };
+            document.addEventListener('click', closeOnOutside, true);
+        }
+    });
+
+    overflowWrap.appendChild(overflowBtn);
+    overflowWrap.appendChild(overflowMenu);
+    tb.appendChild(overflowWrap);
+
     return tb;
 };
 
