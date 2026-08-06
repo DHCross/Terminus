@@ -67,17 +67,17 @@ export function bindAllEvents() {
         }
     });
 
-    // Local API spend estimate — click to set external remaining credit reference
+    // Local API spend estimate — click to set current credit balance
     document.getElementById('credit-balance')?.addEventListener('click', async () => {
         const { fetchBalance, setBalance } = await import('../api.js');
         const current = await fetchBalance();
         const input = prompt(
-            `Set manual account credit reference:\n\n` +
-            `Shared local spend since reset: $${current?.session_spent?.toFixed(4) || '?'}\n` +
-            `Shared tracked total: $${current?.total_spent?.toFixed(4) || '?'}\n` +
-            `Current manual remaining credit: $${current?.remaining?.toFixed(2) || '?'}\n\n` +
-            `This tracker can aggregate local projects that use the same tracker file. It still does not know about other Claude usage automatically.`,
-            current?.remaining ?? '5.00'
+            `Enter your CURRENT Anthropic credit balance (what you have left right now).\n\n` +
+            `Terminus will track spend from this point and show you how much remains.\n\n` +
+            `Current tracked remaining: $${current?.remaining?.toFixed(2) || '?'}\n` +
+            `Total spend tracked: $${current?.total_spent?.toFixed(4) || '0'}\n` +
+            `Session spend: $${current?.session_spent?.toFixed(4) || '0'}`,
+            current?.remaining ?? ''
         );
         if (input !== null && !isNaN(parseFloat(input))) {
             await setBalance(parseFloat(input));

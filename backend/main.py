@@ -1067,8 +1067,11 @@ _chat_settings: dict = {
 
 CLAUDE_MODEL_OPTIONS = {
     "claude-haiku-4-5": "Claude Haiku 4.5",
+    "claude-sonnet-4-5": "Claude Sonnet 4.5",
     "claude-sonnet-4-6": "Claude Sonnet 4.6",
-    "claude-opus-4-7": "Claude Opus 4.7",
+    "claude-sonnet-5": "Claude Sonnet 5",
+    "claude-opus-4-5": "Claude Opus 4.5",
+    "claude-opus-5": "Claude Opus 5",
 }
 
 
@@ -1423,7 +1426,15 @@ async def set_privacy(body: dict):
 
 @app.get("/api/usage/balance")
 async def get_balance():
-    return {"balance": 0, "session_spent": 0, "currency": "USD"}
+    from core.usage_tracker import get_balance as _get_balance
+    return _get_balance()
+
+
+@app.post("/api/usage/balance")
+async def set_usage_balance(body: dict):
+    from core.usage_tracker import set_balance
+    amount = float(body.get("balance", 0.0))
+    return set_balance(amount)
 
 
 # ── Plugin directories ───────────────────────────────────────────────────────
