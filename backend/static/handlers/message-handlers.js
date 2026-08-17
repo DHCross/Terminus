@@ -150,10 +150,10 @@ function stripMarkdownForTopic(text) {
         .trim();
 }
 
-function inferTopic(text, fallback = 'Journal Entry') {
+function inferTopic(text, fallback = 'Journal Entry', maxLen = 64) {
     const clean = stripMarkdownForTopic(text);
     if (!clean) return fallback;
-    return clean.length > 64 ? `${clean.slice(0, 64).trimEnd()}...` : clean;
+    return clean.length > maxLen ? `${clean.slice(0, maxLen).trimEnd()}...` : clean;
 }
 
 function getMessageText(msg) {
@@ -325,7 +325,7 @@ export async function handleSaveJournal(idx) {
             content
         });
 
-        ui.showToast(`Saved ${mode} to journal`, 'success');
+        ui.showToast('Saved to journal', 'success');
     } catch (e) {
         console.error('Save journal failed:', e);
         ui.showToast(`Save failed: ${e.message || 'unknown error'}`, 'error');
@@ -343,7 +343,7 @@ export async function handleSaveTopic(idx) {
 
         const baseText = getMessageText(msg);
         const activeTopic = getActiveTopicFolder();
-        const defaultTopic = activeTopic || inferTopic(baseText, 'General');
+        const defaultTopic = activeTopic || inferTopic(baseText, 'General', 40);
         
         const topicInput = prompt('Save quote to Topic Folder:', defaultTopic);
         if (topicInput === null) return; // User pressed Cancel

@@ -66,6 +66,55 @@ def _scheduler_generate(prompt: str) -> str:
             continue
     raise RuntimeError(f"Scheduler generate failed: {last_err}")
 
+
+def _rewrite_as_journal_entry(content: str, topic: str = "") -> str:
+    """
+    Rewrite saved content as a first-person journal entry in Terminus's own voice.
+
+    The journal is Terminus's personal record, not a transcript. When the frontend
+    saves a quote or thread summary, we ask the LLM to reframe it as a genuine
+    reflection — preserving every concrete fact but dropping the raw blockquote /
+    bullet-list transcript shape. Falls back to the original content if no provider
+    is reachable or the rewrite comes back empty.
+    """
+    if not content or not content.strip():
+        return content
+
+    prompt = (
+        "You are Terminus, a self-hosted AI assistant writing a personal journal entry "
+        "in your own first-person voice.\n\n"
+        "Rewrite the content below as a genuine first-person journal entry — your own "
+        "reflection, not a report, not a summary list, and not a transcript or quote. "
+        "Preserve every concrete fact: names, dates, numbers, decisions, and commitments. "
+        "Convert dialogue and quoted text into your own narration and reasoning "
+        '("I said", "I pushed back", "I noted", "Dan raised").\n\n'
+        "Rules:\n"
+        '- Write as "I" throughout.\n'
+        '- Do not use blockquote (">") formatting.\n'
+        "- Do not use bullet lists that just re-list the original message.\n"
+        '- Do not write "the user said" or quote the original verbatim.\n'
+        "- Keep it honest and structurally precise; keep the emotional register accurate "
+        "without flattery.\n\n"
+        f"Topic: {topic or 'Journal Entry'}\n\n"
+        f"Content to rewrite:\n{content.strip()}"
+    )
+
+    # Snapshot shared chat histories so this background rewrite never pollutes the
+    # active conversation. send_message() mutates conversation_history in place.
+    saved_claude = list(claude_client.conversation_history)
+    saved_deepseek = list(deepseek_client.conversation_history)
+    try:
+        rewritten = _scheduler_generate(prompt)
+        if rewritten and rewritten.strip():
+            return rewritten.strip()
+    except Exception as e:
+        logger.warning(f"[journal] First-person rewrite failed, keeping original: {e}")
+    finally:
+        claude_client.conversation_history = saved_claude
+        deepseek_client.conversation_history = saved_deepseek
+
+    return content
+
 scheduler = get_scheduler(generate_fn=_scheduler_generate, db=continuity_db)
 
 # Long-term memory (Phase 3). Gracefully degrades if chromadb isn't installed.
@@ -1332,6 +1381,13 @@ async def save_journal_entry(payload: JournalSaveRequest):
     chat_name = (payload.chat_name or "").strip()
     source_timestamp = (payload.source_timestamp or "").strip()
     now_iso = datetime.now().isoformat(timespec="seconds")
+
+    # Journal entries are first-person reflections, not transcripts. Rewrite the
+    # saved quote/summary into Terminus's own voice (gracefully falls back to the
+    # original content if no LLM provider is reachable). Runs in a thread so the
+    # blocking LLM call never stalls the event loop.
+    import asyncio
+    content = await asyncio.to_thread(_rewrite_as_journal_entry, content, topic)
 
     JOURNAL_DIR.mkdir(parents=True, exist_ok=True)
     journal_path = JOURNAL_DIR / f"{date_str}.md"
