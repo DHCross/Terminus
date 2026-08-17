@@ -18,6 +18,7 @@ import uuid
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
@@ -33,6 +34,7 @@ from core.stt import get_stt_engine
 from core.voice import get_voice_engine
 from core.tracer import record_turn
 from core.scheduler import get_scheduler
+from core.memory import init_memory, get_memory
 from core.tools import all_tools
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -65,6 +67,68 @@ def _scheduler_generate(prompt: str) -> str:
     raise RuntimeError(f"Scheduler generate failed: {last_err}")
 
 scheduler = get_scheduler(generate_fn=_scheduler_generate, db=continuity_db)
+
+# Long-term memory (Phase 3). Gracefully degrades if chromadb isn't installed.
+memory = init_memory(settings.VECTOR_DB_PATH, settings.MEMORY_EMBED_MODEL)
+
+# Phrases that signal the user is stating something worth remembering long-term.
+# Used by the heuristic auto-indexer to avoid bloating the vector store with every turn.
+_MEMORY_TRIGGER_PHRASES = (
+    "remember", "note that", "my preference", "i prefer", "i like", "i hate",
+    "decide", "decision", "we settled on", "from now on", "always", "never",
+    "my name is", "i'm working on", "the goal is", "don't forget",
+)
+
+def _maybe_enrich_with_recall(user_message: str) -> str:
+    """
+    Prepend relevant long-term memories to the user message before sending to the LLM.
+    The original user message is what gets stored in continuity_db — this enrichment
+    is purely for giving the LLM context. Returns the original message unchanged if
+    memory is unavailable or no relevant memories are found.
+    """
+    if not settings.AUTO_MEMORY_INDEX or not memory.available:
+        return user_message
+    try:
+        recall = memory.query("sessions", user_message, n_results=3)
+        if "No memories found" in recall or "not available" in recall.lower():
+            return user_message
+        # Only inject if we actually got matches (the query returns a header + matches)
+        if recall.count("\n") < 2:
+            return user_message
+        return (
+            f"[Long-term memory recall — relevant past context]\n{recall}\n\n"
+            f"[End memory recall]\n\n"
+            f"User message: {user_message}"
+        )
+    except Exception as e:
+        logger.debug(f"[memory] recall enrichment skipped: {e}")
+        return user_message
+
+def _maybe_index_turn(user_message: str, assistant_response: str, conv_id: Optional[str] = None):
+    """
+    Heuristic auto-indexer: if the user's message contains a memory-trigger phrase,
+    store the user message + a snippet of the assistant response in the 'sessions'
+    collection. This avoids an extra LLM call per turn while still capturing
+    explicit preferences and decisions. The agent can always use memory_remember
+    for higher-signal items.
+    """
+    if not settings.AUTO_MEMORY_INDEX or not memory.available:
+        return
+    try:
+        msg_lower = user_message.lower()
+        if not any(phrase in msg_lower for phrase in _MEMORY_TRIGGER_PHRASES):
+            return
+        content = f"User: {user_message[:500]}\nAssistant: {assistant_response[:500]}"
+        memory.add(
+            collection="sessions",
+            content=content,
+            metadata={
+                "conversation_id": conv_id or current_conversation_id or "unknown",
+                "type": "auto_indexed_turn",
+            },
+        )
+    except Exception as e:
+        logger.debug(f"[memory] auto-index skipped: {e}")
 
 current_conversation_id: str = None
 current_toolset_name: str = "all"
@@ -706,6 +770,35 @@ async def get_config():
     )
 
 
+@app.get("/api/health")
+async def health():
+    """Health + capability status: LLM readiness, scheduler, browser CDP ports, macOS AX permission."""
+    ax = {"granted": None, "detail": "not probed"}
+    try:
+        from core.macos_controller import macos_controller
+        ax = macos_controller.ax_status()
+    except Exception as e:
+        ax = {"granted": False, "detail": f"probe error: {e}"}
+
+    browser_state = {"user_cdp_port": False, "dedicated_cdp_port": False}
+    try:
+        from core.browser_engine import _cdp_port_open, USER_CDP_PORT, DEDICATED_CDP_PORT
+        browser_state = {
+            "user_cdp_port": _cdp_port_open(USER_CDP_PORT),
+            "dedicated_cdp_port": _cdp_port_open(DEDICATED_CDP_PORT),
+        }
+    except Exception:
+        pass
+
+    return {
+        "ready": bool(settings.ANTHROPIC_API_KEY or settings.DEEPSEEK_API_KEY),
+        "scheduler_running": bool(scheduler._scheduler and scheduler._scheduler.running),
+        "macos_ax": ax,
+        "browser_cdp": browser_state,
+        "memory": memory.status(),
+    }
+
+
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Send a message to primary LLM with tool use, falling back to backup provider if needed."""
@@ -729,7 +822,8 @@ async def chat(request: ChatRequest):
     for provider_name, client in candidates:
         try:
             logger.info(f"Chat turn with {provider_name} ({client.model})...")
-            response_text = client.send_message(request.message)
+            enriched = _maybe_enrich_with_recall(request.message)
+            response_text = client.send_message(enriched)
             _sync_after_turn(client)
             continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "user", request.message)
             continuity_db.add_message(
@@ -740,6 +834,7 @@ async def chat(request: ChatRequest):
                 metadata={"provider": provider_name, "model": client.model}
             )
             record_turn(request.message, response_text)
+            _maybe_index_turn(request.message, response_text, conv_id=current_conversation_id)
             return ChatResponse(response=response_text, model=client.model)
         except Exception as e:
             logger.warning(f"Provider {provider_name} failed: {e}. Trying fallback...")
@@ -1104,8 +1199,69 @@ async def clear_history():
 
 @app.get("/api/tasks")
 async def list_tasks():
-    """List scheduled tasks with next run times."""
-    return {"jobs": scheduler.list_jobs()}
+    """List scheduled tasks with next run times and persisted task metadata."""
+    jobs = scheduler.list_jobs()
+    # Enrich with persisted metadata (instruction, watchdog flag, schedule desc, clean name)
+    persisted = scheduler._load_custom_tasks()
+    for j in jobs:
+        meta = persisted.get(j["id"], {})
+        # APScheduler prefixes job names with "Task: " — use the clean persisted name instead
+        if meta.get("name"):
+            j["name"] = meta["name"]
+        j["instruction"] = meta.get("instruction", "")
+        j["watchdog"] = bool(meta.get("watchdog", False))
+        j["schedule_desc"] = meta.get("schedule", "")
+    return {"jobs": jobs}
+
+
+@app.post("/api/tasks")
+async def create_task(body: dict):
+    """Create a new scheduled task or watchdog via the API (used by the UI panel)."""
+    name = (body.get("name") or "").strip()
+    instruction = (body.get("instruction") or "").strip()
+    if not name or not instruction:
+        raise HTTPException(status_code=400, detail="name and instruction are required")
+    interval_minutes = body.get("interval_minutes")
+    cron_hour = body.get("cron_hour")
+    cron_minute = body.get("cron_minute")
+    watchdog = bool(body.get("watchdog", True))
+    result = scheduler.add_custom_task(
+        name=name,
+        instruction=instruction,
+        interval_minutes=int(interval_minutes) if interval_minutes is not None else None,
+        cron_hour=int(cron_hour) if cron_hour is not None else None,
+        cron_minute=int(cron_minute) if cron_minute is not None else None,
+        watchdog=watchdog,
+    )
+    return {"status": "created", "message": result}
+
+
+@app.delete("/api/tasks/{job_id}")
+async def delete_task(job_id: str):
+    """Cancel and remove a scheduled task."""
+    result = scheduler.cancel_task(job_id)
+    return {"status": "cancelled", "job_id": job_id, "message": result}
+
+
+@app.get("/api/tasks/{job_id}/log")
+async def task_log(job_id: str):
+    """Return the watchdog run history for a task from the journal."""
+    from core.scheduler import JOURNAL_DIR
+    # Search all dated watchdog logs for entries mentioning this task_id
+    entries = []
+    if JOURNAL_DIR.exists():
+        for log_file in sorted(JOURNAL_DIR.glob("*-watchdog.md"), reverse=True)[:14]:
+            try:
+                content = log_file.read_text(encoding="utf-8")
+                date = log_file.stem.replace("-watchdog", "")
+                # Split on the ### headers and keep entries mentioning this job_id
+                for block in content.split("\n### ")[1:]:
+                    if job_id in block:
+                        header_line = block.split("\n")[0]
+                        entries.append({"date": date, "entry": f"### {block.strip()}"})
+            except Exception:
+                continue
+    return {"job_id": job_id, "entries": entries[:50]}
 
 
 @app.post("/api/tasks/{job_id}/run")

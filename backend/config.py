@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     BACKEND_DIR: Path = Path(__file__).parent
     DATA_DIR: Path = Path.home() / ".terminus" / "data"
 
+    # Long-term memory (Phase 3)
+    # Default: local SSD for M1 speed (the rebuild goal is to move OFF the external drive).
+    # Override via .env to point at an external drive if needed, e.g.
+    #   VECTOR_DB_PATH=/Volumes/My Passport/terminus-vector
+    VECTOR_DB_PATH: Path = Path.home() / ".terminus" / "data" / "vector"
+    MEMORY_EMBED_MODEL: str = "all-MiniLM-L6-v2"
+    AUTO_MEMORY_INDEX: bool = True  # auto-index memorable content after each assistant turn
+
     class Config:
         # .env lives at the repo root, one level above backend/
         env_file = str(Path(__file__).parent.parent / ".env")

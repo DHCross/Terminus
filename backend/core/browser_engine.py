@@ -8,12 +8,25 @@ Enables Terminus to:
   - Intelligently fill out forms (job applications, registrations, etc.)
   - Click buttons and submit forms
   - Capture screenshots to ~/.terminus/screenshots/
+
+Session persistence strategy (fixes "no active session" / "starts logged out"):
+  1. Try to attach via CDP to port 9222 — the user's daily Chrome if they
+     launched it with scripts/launch_chrome_cdp.sh. Reuses real logins/Bitwarden.
+  2. Fallback: launch a DEDICATED persistent Chrome at ~/.terminus/chrome-profile
+     with --remote-debugging-port=9223. We record its PID. On FastAPI restart,
+     we re-attach via CDP to 9223 instead of relaunching (relaunching would fail
+     because the orphaned Chrome still holds the profile directory lock — that
+     was the root cause of "no active session" after uvicorn reload).
+  3. browser_close() disconnects Playwright but does NOT kill the dedicated
+     Chrome process, so the session survives the next browser_open.
 """
 
 import concurrent.futures
+import json
 import logging
 import os
 import re
+import socket
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -28,6 +41,63 @@ except ImportError:
     logger.warning("Playwright not installed — browser automation tools disabled")
 
 
+# CDP endpoint for the user's daily Chrome (opt-in via scripts/launch_chrome_cdp.sh)
+USER_CDP_PORT = 9222
+# CDP endpoint for Terminus's dedicated persistent Chrome
+DEDICATED_CDP_PORT = 9223
+# Where the dedicated Chrome's user data dir lives
+DEDICATED_PROFILE_DIR = Path.home() / ".terminus" / "chrome-profile"
+# PID file so we can detect our dedicated Chrome across restarts
+PID_FILE = Path.home() / ".terminus" / "data" / "chrome-cdp.pid"
+
+
+def _cdp_port_open(port: int, host: str = "127.0.0.1", timeout_s: float = 0.4) -> bool:
+    """Cheap socket probe — True if something is listening on the CDP port."""
+    try:
+        with socket.create_connection((host, port), timeout=timeout_s):
+            return True
+    except OSError:
+        return False
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+
+def _read_dedicated_pid() -> Optional[int]:
+    if not PID_FILE.exists():
+        return None
+    try:
+        data = json.loads(PID_FILE.read_text(encoding="utf-8"))
+        pid = int(data.get("pid", 0))
+        return pid if pid > 0 else None
+    except Exception:
+        return None
+
+
+def _write_dedicated_pid(pid: int, port: int = DEDICATED_CDP_PORT) -> None:
+    PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        PID_FILE.write_text(
+            json.dumps({"pid": pid, "port": port, "started_at": time.time()}),
+            encoding="utf-8",
+        )
+    except Exception as e:
+        logger.debug(f"[browser] Could not write PID file: {e}")
+
+
+def _clear_dedicated_pid() -> None:
+    try:
+        if PID_FILE.exists():
+            PID_FILE.unlink()
+    except Exception:
+        pass
+
+
 class BrowserEngine:
     """
     Manages a persistent Google Chrome browser instance for Terminus.
@@ -38,9 +108,10 @@ class BrowserEngine:
     def __init__(self):
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="browser_worker")
         self._playwright: Optional[Any] = None
-        self._browser: Optional[Any] = None
-        self._context: Optional[Any] = None
+        self._browser: Optional[Any] = None  # CDP connection (lightweight)
+        self._context: Optional[Any] = None  # persistent context (only when we launched it)
         self._page: Optional[Any] = None
+        self._attach_mode: Optional[str] = None  # "user_cdp" | "dedicated_cdp" | "dedicated_launched"
         self._screenshots_dir = Path.home() / ".terminus" / "screenshots"
         self._screenshots_dir.mkdir(parents=True, exist_ok=True)
 
@@ -49,83 +120,151 @@ class BrowserEngine:
         future = self._executor.submit(fn, *args, **kwargs)
         return future.result(timeout=timeout)
 
+    # ── Connection lifecycle ────────────────────────────────────────────────
+
+    def _start_playwright(self) -> Any:
+        if self._playwright is None:
+            self._playwright = sync_playwright().start()
+        return self._playwright
+
+    def _attach_cdp(self, port: int, mode_label: str) -> bool:
+        """Try to connect_over_cdp to a running Chrome on `port`. Returns True on success."""
+        if not _cdp_port_open(port):
+            return False
+        try:
+            pw = self._start_playwright()
+            self._browser = pw.chromium.connect_over_cdp(f"http://127.0.0.1:{port}", timeout=2000)
+            contexts = self._browser.contexts
+            if contexts:
+                self._context = contexts[0]
+                pages = self._context.pages
+                self._page = pages[-1] if pages else self._context.new_page()
+            else:
+                self._context = self._browser.new_context()
+                self._page = self._context.new_page()
+            self._attach_mode = mode_label
+            logger.info(f"[browser] Attached via CDP port {port} ({mode_label})")
+            return True
+        except Exception as e:
+            logger.debug(f"[browser] CDP attach to port {port} failed: {e}")
+            # Clean up partial state so a relaunch can proceed cleanly
+            self._browser = None
+            self._context = None
+            self._page = None
+            return False
+
+    def _launch_dedicated_chrome(self, headless: bool = False) -> bool:
+        """Launch our dedicated persistent Chrome with CDP on port 9223."""
+        DEDICATED_PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+        pw = self._start_playwright()
+        args = [
+            f"--remote-debugging-port={DEDICATED_CDP_PORT}",
+            "--disable-blink-features=AutomationControlled",
+        ]
+        try:
+            self._context = pw.chromium.launch_persistent_context(
+                user_data_dir=str(DEDICATED_PROFILE_DIR),
+                channel="chrome",
+                headless=headless,
+                args=args,
+                viewport={"width": 1280, "height": 900},
+                user_agent=(
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                ),
+            )
+            logger.info(f"[browser] Launched dedicated Chrome with CDP port {DEDICATED_CDP_PORT}, profile {DEDICATED_PROFILE_DIR}")
+        except Exception as e:
+            logger.warning(f"[browser] Persistent Chrome launch failed ({e}), falling back to bundled chromium")
+            self._context = pw.chromium.launch_persistent_context(
+                user_data_dir=str(DEDICATED_PROFILE_DIR),
+                headless=headless,
+                args=args,
+                viewport={"width": 1280, "height": 900},
+            )
+
+        pages = self._context.pages
+        self._page = pages[0] if pages else self._context.new_page()
+        self._browser = None  # we own the context, not a CDP browser handle
+        self._attach_mode = "dedicated_launched"
+
+        # Best-effort PID capture for cross-restart detection.
+        # launch_persistent_context doesn't expose the PID directly; probe the port
+        # and record a marker. The PID is best-effort — the port check is the
+        # primary signal used by _attach_cdp on the next restart.
+        try:
+            import subprocess
+            r = subprocess.run(
+                ["lsof", "-ti", f"tcp:{DEDICATED_CDP_PORT}", "-sTCP:LISTEN"],
+                capture_output=True, text=True, timeout=3,
+            )
+            pids = [int(p) for p in r.stdout.split() if p.isdigit()]
+            if pids:
+                _write_dedicated_pid(pids[0], DEDICATED_CDP_PORT)
+        except Exception as e:
+            logger.debug(f"[browser] Could not capture dedicated Chrome PID: {e}")
+        return True
+
     def _ensure_browser_sync(self, headless: bool = False) -> Any:
         if not PLAYWRIGHT_AVAILABLE:
             raise RuntimeError("Playwright is not installed. Please install playwright.")
 
-        if self._playwright is None:
-            self._playwright = sync_playwright().start()
-
-        # 1. First attempt: Connect to an existing running Chrome instance (CDP port 9222)
-        if self._context is None and (self._browser is None or not self._browser.is_connected()):
+        # If we already have a usable connection, just ensure a page exists.
+        if self._context is not None:
             try:
-                self._browser = self._playwright.chromium.connect_over_cdp("http://localhost:9222", timeout=2000)
-                contexts = self._browser.contexts
-                if contexts:
-                    self._context = contexts[0]
+                _ = self._context.pages  # cheap liveness probe
+                if self._page is None or self._page.is_closed():
                     pages = self._context.pages
                     self._page = pages[-1] if pages else self._context.new_page()
-                else:
-                    self._context = self._browser.new_context()
-                    self._page = self._context.new_page()
-                logger.info("[browser] Connected to user's existing Chrome instance via CDP (port 9222)")
                 return self._page
             except Exception:
-                pass  # Chrome not running with CDP on port 9222
+                # Context died — fall through to re-attach.
+                logger.info("[browser] Existing context unusable, re-attaching")
+                self._reset_connection_state()
 
-        # 2. Second attempt: Launch with persistent profile so Bitwarden and logins persist permanently
-        if self._context is None:
-            user_data_dir = Path.home() / ".terminus" / "chrome-profile"
-            user_data_dir.mkdir(parents=True, exist_ok=True)
-            try:
-                self._context = self._playwright.chromium.launch_persistent_context(
-                    user_data_dir=str(user_data_dir),
-                    channel="chrome",
-                    headless=headless,
-                    args=["--disable-blink-features=AutomationControlled"],
-                    viewport={"width": 1280, "height": 900},
-                    user_agent=(
-                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-                    ),
-                )
-                logger.info(f"[browser] Google Chrome launched with persistent profile at {user_data_dir}")
-            except Exception as e:
-                logger.warning(f"[browser] Persistent Chrome launch failed ({e}), falling back to chromium")
-                self._context = self._playwright.chromium.launch_persistent_context(
-                    user_data_dir=str(user_data_dir),
-                    headless=headless,
-                    args=["--disable-blink-features=AutomationControlled"],
-                    viewport={"width": 1280, "height": 900},
-                )
+        # 1. User's daily Chrome on 9222 (opt-in via launch_chrome_cdp.sh)
+        if self._attach_cdp(USER_CDP_PORT, "user_cdp"):
+            return self._page
 
-            pages = self._context.pages
-            self._page = pages[0] if pages else self._context.new_page()
+        # 2. Re-attach to our dedicated Chrome on 9223 (survives uvicorn restart)
+        if self._attach_cdp(DEDICATED_CDP_PORT, "dedicated_cdp"):
+            return self._page
 
-        if self._page is None or self._page.is_closed():
-            self._page = self._context.new_page()
+        # 3. Launch a fresh dedicated Chrome
+        return self._page if self._launch_dedicated_chrome(headless=headless) else None
 
-        return self._page
+    def _reset_connection_state(self) -> None:
+        """Drop all Playwright handles without killing any Chrome process."""
+        # Do NOT close _context/_browser here — that would kill the dedicated
+        # Chrome. Just forget our handles so _ensure_browser_sync re-attaches.
+        self._browser = None
+        self._context = None
+        self._page = None
+        self._attach_mode = None
 
     def _get_active_page(self, auto_ensure: bool = True) -> Any:
         """Get the active page, auto-recovering if closed or if user opened new tabs."""
-        if self._page is not None and not self._page.is_closed():
-            return self._page
+        # Liveness check on the existing connection
+        if self._context is not None and self._page is not None and not self._page.is_closed():
+            try:
+                _ = self._page.url  # raises if the connection is gone
+                return self._page
+            except Exception:
+                logger.info("[browser] Page connection lost, re-attaching")
+                self._reset_connection_state()
 
-        # Check if context has any open pages
+        # Try to recover from an existing context (same process)
         if self._context is not None:
             try:
                 pages = self._context.pages
                 if pages:
                     self._page = pages[-1]
                     return self._page
-                else:
-                    self._page = self._context.new_page()
-                    return self._page
             except Exception as e:
                 logger.debug(f"[browser] Context page recovery error: {e}")
+                self._reset_connection_state()
 
-        # Auto-ensure/connect
+        # Auto-ensure/connect (re-attaches via CDP if Chrome is still alive)
         if auto_ensure:
             try:
                 return self._ensure_browser_sync()
@@ -133,6 +272,34 @@ class BrowserEngine:
                 logger.warning(f"[browser] Could not auto-ensure browser: {e}")
                 return None
         return None
+
+    # ── Public tool API ─────────────────────────────────────────────────────
+
+    def status(self) -> str:
+        """Return a human-readable connection status for diagnostics."""
+        def _task():
+            user_port = _cdp_port_open(USER_CDP_PORT)
+            dedicated_port = _cdp_port_open(DEDICATED_CDP_PORT)
+            pid = _read_dedicated_pid()
+            pid_alive = _pid_alive(pid) if pid else False
+            attached = self._attach_mode or "none"
+            page_ok = False
+            url = ""
+            if self._page is not None:
+                try:
+                    url = self._page.url
+                    page_ok = True
+                except Exception:
+                    page_ok = False
+            return (
+                f"**Browser Status**\n"
+                f"- User Chrome CDP (port {USER_CDP_PORT}): {'listening' if user_port else 'not running'}\n"
+                f"- Dedicated Chrome CDP (port {DEDICATED_CDP_PORT}): {'listening' if dedicated_port else 'not running'}\n"
+                f"- Dedicated PID file: {pid or 'none'} ({'alive' if pid_alive else 'stale/none'})\n"
+                f"- Current attach mode: {attached}\n"
+                f"- Active page: {'yes' if page_ok else 'no'}{f' ({url})' if url else ''}"
+            )
+        return self._run_in_worker(_task)
 
     def get_tabs(self) -> str:
         """List all open tabs in the browser."""
@@ -519,31 +686,76 @@ class BrowserEngine:
 
         return self._run_in_worker(_task)
 
-    def close(self) -> str:
+    def close(self, kill_chrome: bool = False) -> str:
         """
-        Closes the active browser session.
+        Disconnect from the browser session.
+
+        By default (kill_chrome=False) this ONLY drops Playwright's handles —
+        the dedicated Chrome process keeps running so the next browser_open
+        re-attaches to the same logged-in session via CDP port 9223. This is
+        the fix for "starts logged out" / "no active session" across tasks.
+
+        Pass kill_chrome=True to fully terminate the dedicated Chrome process
+        (the user's daily Chrome on port 9222 is never killed by Terminus).
         """
         def _task():
+            killed_pid = None
             try:
                 if self._page and not self._page.is_closed():
-                    self._page.close()
-                if self._context:
-                    self._context.close()
-                if self._browser:
-                    self._browser.close()
-                if self._playwright:
-                    self._playwright.stop()
+                    try:
+                        self._page.close()
+                    except Exception:
+                        pass
+                # Only close the context if WE launched it (dedicated_launched).
+                # If we attached via CDP (user_cdp / dedicated_cdp), closing the
+                # context would kill the user's Chrome — never do that.
+                if self._context is not None and self._attach_mode == "dedicated_launched":
+                    try:
+                        self._context.close()
+                    except Exception:
+                        pass
+                if self._browser is not None:
+                    try:
+                        self._browser.close()
+                    except Exception:
+                        pass
             except Exception as e:
                 logger.warning(f"[browser] Error during browser close: {e}")
             finally:
                 self._page = None
                 self._context = None
                 self._browser = None
-                self._playwright = None
+                self._attach_mode = None
 
-            return "Browser session closed successfully."
+            if kill_chrome:
+                pid = _read_dedicated_pid()
+                if pid and _pid_alive(pid):
+                    try:
+                        os.kill(pid, 15)  # SIGTERM
+                        killed_pid = pid
+                        _clear_dedicated_pid()
+                    except Exception as e:
+                        logger.warning(f"[browser] Could not kill dedicated Chrome PID {pid}: {e}")
+                else:
+                    # Fallback: kill anything listening on the dedicated CDP port
+                    try:
+                        import subprocess
+                        subprocess.run(
+                            ["sh", "-c", f"lsof -ti tcp:{DEDICATED_CDP_PORT} -sTCP:LISTEN | xargs kill 2>/dev/null || true"],
+                            timeout=5,
+                        )
+                    except Exception:
+                        pass
+
+            if killed_pid:
+                return f"Browser disconnected and dedicated Chrome (PID {killed_pid}) terminated."
+            return "Browser session disconnected. Dedicated Chrome keeps running for session persistence."
 
         return self._run_in_worker(_task)
+
+    def shutdown(self) -> str:
+        """Fully terminate the dedicated Chrome process (alias for close(kill_chrome=True))."""
+        return self.close(kill_chrome=True)
 
 
 # Global singleton instance

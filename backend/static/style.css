@@ -7932,3 +7932,84 @@ body.hide-reasoning .accordion-think,
     width: 38px;
     height: 38px;
 }
+
+/* ── Watchdogs view (Phase 4) ────────────────────────────────────────────── */
+.wd-view { display: flex; flex-direction: column; height: 100%; }
+.wd-view .view-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 24px; border-bottom: 1px solid var(--border, #2a2a2a);
+}
+.wd-view .view-header h2 { margin: 0; font-size: var(--font-lg, 18px); }
+.wd-view .view-subtitle { color: var(--text-muted); font-size: var(--font-sm, 13px); flex: 1; }
+.wd-view .view-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
+
+.wd-card {
+    background: var(--surface, #1e1e1e);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: var(--radius-md, 8px);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    position: relative;
+}
+.wd-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.wd-name { font-weight: 600; font-size: var(--font-md, 14px); flex: 1; }
+.wd-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+}
+.wd-badge-on { background: rgba(99, 179, 237, 0.18); color: #63b3ed; }
+.wd-badge-off { background: rgba(140, 140, 140, 0.18); color: var(--text-muted); }
+.wd-schedule { color: var(--text-muted); font-size: var(--font-sm, 13px); margin-bottom: 6px; }
+.wd-instruction {
+    color: var(--text, #e0e0e0); font-size: var(--font-sm, 13px);
+    opacity: 0.85; line-height: 1.5; margin-bottom: 8px;
+    border-left: 2px solid var(--border, #2a2a2a); padding-left: 10px;
+}
+.wd-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+.wd-log-panel {
+    margin-top: 16px; display: none;
+    background: var(--surface, #1e1e1e);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: var(--radius-md, 8px);
+    overflow: hidden;
+}
+.wd-log-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid var(--border, #2a2a2a);
+    font-weight: 600; font-size: var(--font-sm, 13px);
+}
+.wd-log-body { max-height: 320px; overflow-y: auto; }
+.wd-log-entry { padding: 10px 14px; border-bottom: 1px solid var(--border, #2a2a2a); }
+.wd-log-date { color: var(--text-muted); font-size: var(--font-xs, 11px); margin-bottom: 4px; }
+.wd-log-pre {
+    margin: 0; white-space: pre-wrap; word-break: break-word;
+    font-family: var(--font-mono, monospace); font-size: var(--font-xs, 11px);
+    line-height: 1.5; color: var(--text, #e0e0e0);
+}
+
+/* Watchdog editor modal */
+.wd-editor-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+.wd-editor {
+    background: var(--surface-elevated, #252525);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: var(--radius-lg, 12px);
+    padding: 24px; width: 90%; max-width: 520px;
+    display: flex; flex-direction: column; gap: 14px;
+}
+.wd-editor h3 { margin: 0 0 4px 0; }
+.wd-field { display: flex; flex-direction: column; gap: 4px; }
+.wd-field-row { display: flex; gap: 12px; }
+.wd-field-row .wd-field { flex: 1; }
+.wd-label { font-size: var(--font-sm, 13px); color: var(--text-muted); }
+.wd-field input, .wd-field textarea {
+    background: var(--surface, #1e1e1e); border: 1px solid var(--border, #2a2a2a);
+    border-radius: var(--radius-sm, 6px); padding: 8px 10px; color: var(--text, #e0e0e0);
+    font-family: inherit; font-size: var(--font-sm, 13px);
+}
+.wd-field textarea { resize: vertical; min-height: 70px; }
+.wd-checkbox { display: flex; align-items: center; gap: 8px; font-size: var(--font-sm, 13px); }
+.wd-editor-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }

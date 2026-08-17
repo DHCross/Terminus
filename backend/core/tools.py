@@ -296,7 +296,31 @@ BROWSER_SWITCH_TAB_TOOL = {
 BROWSER_CLOSE_TOOL = {
     "name": "browser_close",
     "description": (
-        "Close the active Chrome browser session. Call this after finishing a web automation task."
+        "Disconnect from the active browser session. By default this ONLY drops Terminus's "
+        "connection — the dedicated Chrome process keeps running so the next browser_open "
+        "re-attaches to the same logged-in session (cookies and logins persist across calls "
+        "and across FastAPI restarts). Pass kill_chrome=true to fully terminate the dedicated "
+        "Chrome process when you genuinely want a clean slate. The user's daily Chrome on port "
+        "9222 is never killed by this tool."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "kill_chrome": {
+                "type": "boolean",
+                "description": "If true, terminate the dedicated Chrome process (port 9223) entirely. Default false — keep the session alive for reuse.",
+            },
+        },
+    },
+}
+
+BROWSER_STATUS_TOOL = {
+    "name": "browser_status",
+    "description": (
+        "Report the current browser connection state: which CDP port is listening, whether "
+        "the dedicated Chrome PID is alive, the current attach mode, and the active page URL. "
+        "Use this to diagnose 'no active session' errors or to confirm a session is still "
+        "logged in before navigating."
     ),
     "input_schema": {
         "type": "object",
@@ -342,7 +366,11 @@ SCHEDULE_TASK_TOOL = {
     "description": (
         "Schedule an autonomous recurring background watchdog task or reminder. "
         "Terminus will execute the task instruction in the background on the specified interval or daily schedule, "
-        "and post a native macOS banner notification when new results or findings are discovered."
+        "and post a native macOS banner notification when new results or findings are discovered. "
+        "When watchdog=true (default), the task runs with FULL TOOL ACCESS (browser_open, browser_read_page, "
+        "memory_remember, desktop_screenshot, web_search, etc.) and uses long-term memory for de-duplication — "
+        "you will only be notified when something actually CHANGES since the last run. Set watchdog=false for "
+        "simple LLM-only reminders or digests that don't need tools or de-duplication."
     ),
     "input_schema": {
         "type": "object",
@@ -353,7 +381,7 @@ SCHEDULE_TASK_TOOL = {
             },
             "instruction": {
                 "type": "string",
-                "description": "The exact instruction or search to execute on each run.",
+                "description": "The exact instruction or search to execute on each run. For watchdog tasks, be specific about the URL to check and what constitutes a 'new' finding (e.g. 'Open https://example.com/jobs, read the page, list any job titles containing security that weren't in your last run.').",
             },
             "interval_minutes": {
                 "type": "integer",
@@ -366,6 +394,10 @@ SCHEDULE_TASK_TOOL = {
             "cron_minute": {
                 "type": "integer",
                 "description": "Minute of the hour (0-59, defaults to 0).",
+            },
+            "watchdog": {
+                "type": "boolean",
+                "description": "If true (default), the task runs with full tool access (browser, memory, desktop) and memory-based de-duplication — only notifies on changes. If false, runs as a simple LLM-only reminder.",
             },
         },
         "required": ["name", "instruction"],
@@ -727,6 +759,162 @@ SYSTEM_NOTIFY_TOOL = {
     },
 }
 
+# ── macOS Active-Window Context Tools (Pillar 1 extension) ────────────────────
+
+MACOS_AX_STATUS_TOOL = {
+    "name": "macos_ax_status",
+    "description": (
+        "Check whether Terminus has macOS Accessibility (AX) permission. Reading the active "
+        "window's text via macos_read_active_window / macos_list_windows requires the host "
+        "Terminal/uvicorn app to be granted Accessibility in System Settings → Privacy & "
+        "Security → Accessibility. Call this first if those tools return permission errors."
+    ),
+    "input_schema": {"type": "object", "properties": {}},
+}
+
+MACOS_LIST_WINDOWS_TOOL = {
+    "name": "macos_list_windows",
+    "description": (
+        "List the open windows of a macOS application (by app name) or of the currently "
+        "frontmost app (if no app name given). Returns one line per window with its index "
+        "and title. Use this to find which window to read with macos_read_active_window. "
+        "Requires Accessibility permission (see macos_ax_status)."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "app_name": {
+                "type": "string",
+                "description": "Application name (e.g. 'Safari', 'Google Chrome', 'Mail', 'Notes'). If omitted, lists windows of the frontmost app.",
+            },
+        },
+    },
+}
+
+MACOS_READ_ACTIVE_WINDOW_TOOL = {
+    "name": "macos_read_active_window",
+    "description": (
+        "Read the visible text content of a macOS application's window — the frontmost window "
+        "by default, or a specific window by 1-based index. Has per-app extractors for Safari, "
+        "Chrome, Mail, Notes, TextEdit, and Pages; falls back to a System Events AX walk for "
+        "other apps; last resort is a screenshot. Use this for 'summarize the email I have "
+        "open' or 'what's in my Notes window' style requests. Requires Accessibility "
+        "permission (see macos_ax_status)."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "app_name": {
+                "type": "string",
+                "description": "Application name (e.g. 'Safari', 'Mail'). If omitted, reads the frontmost app's window.",
+            },
+            "window_index": {
+                "type": "integer",
+                "description": "1-based window index to read (default 1 = frontmost window). Use macos_list_windows to find the right index.",
+            },
+        },
+    },
+}
+
+MACOS_READ_SELECTION_TOOL = {
+    "name": "macos_read_selection",
+    "description": (
+        "Read the currently selected text in whatever macOS application is frontmost, by "
+        "simulating Cmd+C into the clipboard and reading it back (the prior clipboard is "
+        "restored). Works in any app that supports standard copy — NO Accessibility "
+        "permission required. This is the cheapest 'what am I looking at' path; prefer it "
+        "over macos_read_active_window when the user just has text selected."
+    ),
+    "input_schema": {"type": "object", "properties": {}},
+}
+
+# ── Long-Term Memory Tools (Phase 3) ──────────────────────────────────────────
+
+MEMORY_REMEMBER_TOOL = {
+    "name": "memory_remember",
+    "description": (
+        "Store a piece of information in Terminus's long-term memory so it can be recalled "
+        "in future sessions without re-prompting. Use this for user preferences ('Dan prefers "
+        "plain-language explanations'), decisions ('we settled on FastAPI not Flask'), "
+        "completed tasks, code snippets, or anything the user explicitly asks you to remember. "
+        "Collections: 'preferences', 'tasks', 'snippets', 'sessions', or a custom name. "
+        "Memory is local (ChromaDB) and persists across restarts."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "collection": {
+                "type": "string",
+                "description": "Memory collection: 'preferences', 'tasks', 'snippets', 'sessions', or a custom name.",
+            },
+            "content": {"type": "string", "description": "The text to remember."},
+            "metadata": {
+                "type": "object",
+                "description": "Optional metadata (e.g. {'topic': 'coding-style', 'source': 'user'}).",
+            },
+            "doc_id": {"type": "string", "description": "Optional explicit ID (auto-generated if omitted)."},
+        },
+        "required": ["collection", "content"],
+    },
+}
+
+MEMORY_RECALL_TOOL = {
+    "name": "memory_recall",
+    "description": (
+        "Semantic search of Terminus's long-term memory. Returns the top matches ranked by "
+        "relevance to the query. Use this when the user asks 'do you remember...', 'what did "
+        "we decide about...', or when you want to apply a previously-stored preference. "
+        "Collections: 'preferences', 'tasks', 'snippets', 'sessions', or a custom name."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "The search query."},
+            "collection": {
+                "type": "string",
+                "description": "Collection to search. If omitted, searches 'sessions' (general memory).",
+            },
+            "n_results": {"type": "integer", "description": "Max results to return (default 5, max 20)."},
+        },
+        "required": ["query"],
+    },
+}
+
+MEMORY_FORGET_TOOL = {
+    "name": "memory_forget",
+    "description": (
+        "Remove entries from long-term memory by doc_id or metadata filter. To wipe an entire "
+        "collection, pass where={'__force_all__': true}. Use sparingly — forgetting is "
+        "permanent."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "collection": {"type": "string", "description": "Collection to forget from."},
+            "doc_id": {"type": "string", "description": "Specific entry ID to remove."},
+            "where": {"type": "object", "description": "Metadata filter to match entries for removal."},
+        },
+        "required": ["collection"],
+    },
+}
+
+MEMORY_LIST_TOOL = {
+    "name": "memory_list",
+    "description": (
+        "Peek at recent entries in a memory collection. Use this to see what's stored before "
+        "deciding what to recall or forget. Also call with collection='__collections__' to "
+        "list all collections."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "collection": {"type": "string", "description": "Collection to peek at, or '__collections__' to list all."},
+            "limit": {"type": "integer", "description": "Max entries to show (default 20)."},
+        },
+        "required": ["collection"],
+    },
+}
+
 
 # ── Code Interpreter Tools (OpenClaw Pillar 2) ───────────────────────────────
 
@@ -803,6 +991,7 @@ def get_tools(include_trace_tools: bool = True) -> list:
         BROWSER_GET_TABS_TOOL,
         BROWSER_SWITCH_TAB_TOOL,
         BROWSER_CLOSE_TOOL,
+        BROWSER_STATUS_TOOL,
         BITWARDEN_GET_LOGIN_TOOL,
         BITWARDEN_STATUS_TOOL,
         SCHEDULE_TASK_TOOL,
@@ -828,6 +1017,16 @@ def get_tools(include_trace_tools: bool = True) -> list:
         CLIPBOARD_READ_TOOL,
         CLIPBOARD_WRITE_TOOL,
         SYSTEM_NOTIFY_TOOL,
+        # macOS Active-Window Context Tools (Pillar 1 extension)
+        MACOS_AX_STATUS_TOOL,
+        MACOS_LIST_WINDOWS_TOOL,
+        MACOS_READ_ACTIVE_WINDOW_TOOL,
+        MACOS_READ_SELECTION_TOOL,
+        # Long-Term Memory Tools (Phase 3)
+        MEMORY_REMEMBER_TOOL,
+        MEMORY_RECALL_TOOL,
+        MEMORY_FORGET_TOOL,
+        MEMORY_LIST_TOOL,
         # Code Interpreter Tools (Pillar 2)
         PYTHON_EXECUTE_TOOL,
         BASH_EXECUTE_TOOL,
@@ -863,6 +1062,7 @@ def execute_tool(name: str, inputs: dict) -> Any:
         "browser_get_tabs": _browser_get_tabs,
         "browser_switch_tab": _browser_switch_tab,
         "browser_close": _browser_close,
+        "browser_status": _browser_status,
         # Bitwarden Scoped Credential tools
         "bitwarden_get_login": _bitwarden_get_login,
         "bitwarden_status": _bitwarden_status,
@@ -891,6 +1091,16 @@ def execute_tool(name: str, inputs: dict) -> Any:
         "clipboard_read": _clipboard_read,
         "clipboard_write": _clipboard_write,
         "system_notify": _system_notify,
+        # macOS Active-Window Context Tools
+        "macos_ax_status": _macos_ax_status,
+        "macos_list_windows": _macos_list_windows,
+        "macos_read_active_window": _macos_read_active_window,
+        "macos_read_selection": _macos_read_selection,
+        # Long-Term Memory Tools
+        "memory_remember": _memory_remember,
+        "memory_recall": _memory_recall,
+        "memory_forget": _memory_forget,
+        "memory_list": _memory_list,
         # Code Interpreter tools (Pillar 2)
         "python_execute": _python_execute,
         "bash_execute": _bash_execute,
@@ -1184,7 +1394,13 @@ def _browser_switch_tab(inputs: dict) -> str:
 
 def _browser_close(inputs: dict) -> str:
     from core.browser_engine import browser_engine
-    return browser_engine.close()
+    kill_chrome = bool(inputs.get("kill_chrome", False))
+    return browser_engine.close(kill_chrome=kill_chrome)
+
+
+def _browser_status(inputs: dict) -> str:
+    from core.browser_engine import browser_engine
+    return browser_engine.status()
 
 
 # ── Bitwarden Tool Handlers ───────────────────────────────────────────────────
@@ -1231,6 +1447,8 @@ def _schedule_task(inputs: dict) -> str:
         except Exception:
             cron_minute = 0
 
+    watchdog = bool(inputs.get("watchdog", True))
+
     scheduler = get_scheduler()
     return scheduler.add_custom_task(
         name=name,
@@ -1238,6 +1456,7 @@ def _schedule_task(inputs: dict) -> str:
         interval_minutes=interval_minutes,
         cron_hour=cron_hour,
         cron_minute=cron_minute,
+        watchdog=watchdog,
     )
 
 
@@ -1403,6 +1622,70 @@ def _system_notify(inputs: dict) -> str:
     title = inputs.get("title", "Terminus").strip() or "Terminus"
     message = inputs.get("message", "").strip()
     return macos_controller.system_notify(title=title, message=message)
+
+
+# ── macOS Active-Window Context Handlers (Pillar 1 extension) ─────────────────
+
+def _macos_ax_status(inputs: dict) -> str:
+    import json
+    from core.macos_controller import macos_controller
+    return json.dumps(macos_controller.ax_status(), indent=2)
+
+
+def _macos_list_windows(inputs: dict) -> str:
+    from core.macos_controller import macos_controller
+    app_name = inputs.get("app_name")
+    return macos_controller.list_windows(app_name=app_name)
+
+
+def _macos_read_active_window(inputs: dict) -> str:
+    from core.macos_controller import macos_controller
+    app_name = inputs.get("app_name")
+    window_index = int(inputs.get("window_index", 1))
+    return macos_controller.read_active_window(app_name=app_name, window_index=window_index)
+
+
+def _macos_read_selection(inputs: dict) -> str:
+    from core.macos_controller import macos_controller
+    return macos_controller.read_selection()
+
+
+# ── Long-Term Memory Handlers (Phase 3) ───────────────────────────────────────
+
+def _memory_remember(inputs: dict) -> str:
+    from core.memory import get_memory
+    return get_memory().add(
+        collection=inputs.get("collection", "sessions"),
+        content=inputs.get("content", ""),
+        metadata=inputs.get("metadata"),
+        doc_id=inputs.get("doc_id"),
+    )
+
+
+def _memory_recall(inputs: dict) -> str:
+    from core.memory import get_memory
+    return get_memory().query(
+        collection=inputs.get("collection", "sessions"),
+        query_text=inputs.get("query", ""),
+        n_results=int(inputs.get("n_results", 5)),
+    )
+
+
+def _memory_forget(inputs: dict) -> str:
+    from core.memory import get_memory
+    return get_memory().forget(
+        collection=inputs.get("collection", "sessions"),
+        doc_id=inputs.get("doc_id"),
+        where=inputs.get("where"),
+    )
+
+
+def _memory_list(inputs: dict) -> str:
+    from core.memory import get_memory
+    collection = inputs.get("collection", "__collections__")
+    if collection == "__collections__":
+        return get_memory().list_collections()
+    return get_memory().list_entries(collection=collection, limit=int(inputs.get("limit", 20)))
 
 
 # ── Code Interpreter Tool Handlers (Pillar 2) ────────────────────────────────

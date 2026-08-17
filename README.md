@@ -131,3 +131,60 @@ Edit [.env](.env) before starting:
 
 - [Upstream Sapphire repository](https://github.com/ddxfish/sapphire)
 - [Attribution Notice](NOTICE)
+
+## Browser Automation (FastAPI backend)
+
+Terminus's `backend/` FastAPI app includes a Playwright-based browser engine with two connection modes. The mode is chosen automatically at every `browser_open` / `browser_read_page` call — you don't have to configure anything upfront.
+
+### Mode 1 — Attach to your daily Chrome (recommended for personal automation)
+
+Launch your real Chrome with remote debugging once, and Terminus reuses your existing logins, Bitwarden, tabs, and cookies:
+
+```bash
+./scripts/launch_chrome_cdp.sh
+```
+
+This starts Chrome with `--remote-debugging-port=9222` using your default profile (`~/Library/Application Support/Google/Chrome`). Terminus's `browser_open` detects the port and attaches via CDP — no separate logged-out profile, no re-logins. Quit Chrome normally when you're done.
+
+### Mode 2 — Dedicated persistent Chrome (automatic fallback)
+
+If port 9222 isn't listening, Terminus launches its own dedicated Chrome at `~/.terminus/chrome-profile` with `--remote-debugging-port=9223`. You log in once *inside that Chrome*, and the session persists across:
+
+- Multiple `browser_open` / `browser_read_page` calls in the same chat
+- Different agent turns and different conversations
+- **FastAPI / uvicorn restarts** (the dedicated Chrome keeps running; Terminus re-attaches via port 9223 instead of relaunching — this is the fix for the old "no active session" bug)
+
+`browser_close` (default) only disconnects Playwright — the dedicated Chrome keeps running so the next call reuses the session. Pass `kill_chrome: true` to `browser_close` if you genuinely want to tear it down. To stop the dedicated Chrome manually:
+
+```bash
+lsof -ti tcp:9223 -sTCP:LISTEN | xargs kill
+```
+
+### Diagnostics
+
+Call the `browser_status` tool (or have Terminus call it) to see which CDP port is listening, whether the dedicated Chrome PID is alive, the current attach mode, and the active page URL. This is the fastest way to diagnose "no active session" errors.
+
+## macOS Active-Window Context (FastAPI backend)
+
+Terminus can read the text of your active macOS application windows — "summarize the email I have open", "what's in my Notes window", "read the Safari tab I'm looking at". This uses AppleScript + System Events Accessibility (AX) queries.
+
+### One-time Accessibility permission grant
+
+Reading other apps' window contents requires the host app that runs the Terminus backend (Terminal, iTerm, VS Code, or whatever launched `uvicorn`) to be granted Accessibility permission:
+
+1. Open **System Settings → Privacy & Security → Accessibility**
+2. Add and enable the app that launches the Terminus backend (e.g. Terminal, iTerm2, VS Code, or `Python` if you launch via `python main.py` directly)
+3. Restart the Terminus backend so the new permission takes effect
+
+You can verify the permission at any time via the `macos_ax_status` tool or the `/api/health` endpoint (`macos_ax.granted`). If `granted` is false, the `macos_read_active_window` and `macos_list_windows` tools will return a clear permission error (not a silent failure).
+
+### Tools
+
+| Tool | What it does | Needs AX? |
+|------|--------------|-----------|
+| `macos_ax_status` | Reports whether AX permission is granted | No |
+| `macos_list_windows` | Lists open windows of an app (or frontmost app) | Yes |
+| `macos_read_active_window` | Reads visible text of an app's window (per-app extractors for Safari, Chrome, Mail, Notes, TextEdit, Pages) | Yes |
+| `macos_read_selection` | Reads the currently selected text in the frontmost app via Cmd+C (clipboard restored) | **No** — works in any copy-capable app |
+
+`macos_read_selection` is the cheapest "what am I looking at" path and needs no permission — prefer it when the user just has text selected.
