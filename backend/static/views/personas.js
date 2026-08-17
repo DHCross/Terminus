@@ -30,6 +30,7 @@ let llmProviders = [];
 let llmMetadata = {};
 let scopeData = { memory: [], goals: [], knowledge: [], people: [] };
 let voicesData = null;
+let healthData = null;
 
 export default {
     init(el) {
@@ -75,7 +76,7 @@ export default {
 
 async function loadData() {
     try {
-        const [pRes, init, llmResp, memS, goalS, knowS, pplS, ttsResp] = await Promise.allSettled([
+        const [pRes, init, llmResp, memS, goalS, knowS, pplS, ttsResp, healthResp] = await Promise.allSettled([
             listPersonas(),
             getInitData(),
             fetch('/api/llm/providers').then(r => r.ok ? r.json() : null),
@@ -83,7 +84,8 @@ async function loadData() {
             fetch('/api/goals/scopes').then(r => r.ok ? r.json() : null),
             fetch('/api/knowledge/scopes').then(r => r.ok ? r.json() : null),
             fetch('/api/knowledge/people/scopes').then(r => r.ok ? r.json() : null),
-            fetch('/api/tts/voices').then(r => r.ok ? r.json() : null)
+            fetch('/api/tts/voices').then(r => r.ok ? r.json() : null),
+            fetch('/health').then(r => r.ok ? r.json() : null)
         ]);
 
         personas = pRes.status === 'fulfilled' ? (pRes.value?.personas || []) : [];
@@ -102,6 +104,7 @@ async function loadData() {
             people: pplS.status === 'fulfilled' ? (pplS.value?.scopes || []) : []
         };
         voicesData = ttsResp.status === 'fulfilled' ? ttsResp.value : null;
+        healthData = healthResp.status === 'fulfilled' ? healthResp.value : null;
 
         if (!selectedName && personas.length) selectedName = personas[0].name;
         if (selectedName) {
@@ -127,7 +130,7 @@ function render() {
             ${singleIdentityMode ? '' : `
             <div class="panel-left panel-list">
                 <div class="panel-list-header">
-                    <span class="panel-list-title">Identity Profiles</span>
+                    <span class="panel-list-title">Entities</span>
                     <button class="btn-sm" id="pa-new" title="New from current chat">+</button>
                 </div>
                 <div class="panel-list-items" id="pa-list">
@@ -162,7 +165,12 @@ function getCurrentPersona() {
 
 function renderDetail(p, isActive, singleIdentityMode = false) {
     const s = p.settings || {};
-    const trim = s.trim_color || '#0f766e';
+    const trim = s.trim_color || '#e8892f';
+    const hd = healthData || {};
+    const provider = hd.provider || '—';
+    const tools = hd.tools != null ? hd.tools : '—';
+    const voice = (hd.voice && hd.voice !== 'none') ? hd.voice : 'offline';
+    const memScope = s.memory_scope || 'default';
     return `
         <div class="view-body view-scroll pa-scroll">
 
@@ -178,12 +186,12 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
                     <div class="pa-header-top">
                         <div class="pa-header-text">
                             <input class="pa-name-input" id="pa-name" value="${esc(p.name)}" placeholder="Name" spellcheck="false">
-                            <input class="pa-tagline-input" id="pa-tagline" value="${esc(p.tagline || '')}" placeholder="Tagline...">
+                            <input class="pa-tagline-input" id="pa-tagline" value="${esc(p.tagline || '')}" placeholder="Designation">
                         </div>
                         <input type="color" id="pa-s-trim_color" class="pa-trim-swatch" value="${trim}" data-key="trim_color" title="Trim color">
                     </div>
                     <div class="pa-header-actions">
-                        <button class="btn-primary" id="pa-load">Use Identity</button>
+                        <button class="btn-primary" id="pa-load">Activate</button>
                         ${singleIdentityMode ? '' : (p.name === defaultPersona
                             ? '<button class="btn-sm" id="pa-clear-default" title="Remove as default">&#x2B50; Default</button>'
                             : '<button class="btn-sm" id="pa-set-default" title="Set as default for new chats">Set Default</button>')}
@@ -193,11 +201,19 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
                 </div>
             </div>
 
+            <div class="pa-status-strip">
+                <span class="pa-status-node"><span class="pa-status-label">Mode</span><span class="pa-status-value">LOCAL</span></span>
+                <span class="pa-status-node"><span class="pa-status-label">Model</span><span class="pa-status-value">${esc(String(provider))}</span></span>
+                <span class="pa-status-node"><span class="pa-status-label">Tools</span><span class="pa-status-value">${esc(String(tools))}</span></span>
+                <span class="pa-status-node"><span class="pa-status-label">Voice</span><span class="pa-status-value">${esc(String(voice))}</span></span>
+                <span class="pa-status-node"><span class="pa-status-label">Memory</span><span class="pa-status-value">${esc(String(memScope))}</span></span>
+            </div>
+
             <div class="pa-fences">
 
                 <div class="pa-fence-group">
                     <div class="pa-fence-heading">
-                        <span>Prompt & Tools</span>
+                        <span>Execution Layer</span>
                         <span class="pa-fence-heading-right">
                             <span class="pa-fence-toggle-label">Date/Time <span class="help-tip" data-tip="Inject current date & time into prompt">?</span></span>
                             <label class="pa-fence-toggle"><input type="checkbox" id="pa-s-inject_datetime" data-key="inject_datetime" ${s.inject_datetime ? 'checked' : ''}><span class="toggle-slider"></span></label>
@@ -213,7 +229,7 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
 
                 <div class="pa-fence-group">
                     <div class="pa-fence-heading">
-                        <span>Style</span>
+                        <span>Response Shaping</span>
                         <span class="pa-fence-heading-right">
                             <label class="pa-fence-toggle">
                                 <input type="checkbox" id="pa-s-spice_enabled" data-key="spice_enabled" ${s.spice_enabled !== false ? 'checked' : ''}>
@@ -234,7 +250,7 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
 
                 <div class="pa-fence-group">
                     <div class="pa-fence-heading">
-                        <span>TTS</span>
+                        <span>Voice</span>
                         <span class="pa-fence-heading-right">
                             <button class="btn-sm" id="pa-tts-test" title="Preview voice">&#x25B6; Test</button>
                         </span>
@@ -255,7 +271,7 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
                 </div>
 
                 <div class="pa-fence-group">
-                    <div class="pa-fence-heading"><span>Model</span></div>
+                    <div class="pa-fence-heading"><span>Cognition</span></div>
                     <div class="pa-fence">
                         <div class="pa-fence-body">
                             ${renderSettingField('llm_primary', 'Provider', s, renderProviderOptions(s.llm_primary), { tip: 'LLM API provider' })}
@@ -272,7 +288,7 @@ function renderDetail(p, isActive, singleIdentityMode = false) {
                 </div>
 
                 <div class="pa-fence-group pa-fence-group-wide">
-                    <div class="pa-fence-heading"><span>Mind Scopes</span></div>
+                    <div class="pa-fence-heading"><span>Memory Domains</span></div>
                     <div class="pa-fence">
                         <div class="pa-fence-body pa-fence-body-grid">
                             ${renderScopeField('memory_scope', 'Memory', s, scopeData.memory)}
@@ -672,7 +688,7 @@ function collectSettings() {
         custom_context: get('custom_context'),
         llm_primary: get('llm_primary') || 'auto',
         llm_model: getSelectedModel(),
-        trim_color: get('trim_color') || '#0f766e',
+        trim_color: get('trim_color') || '#e8892f',
         memory_scope: get('memory_scope') || 'default',
         goal_scope: get('goal_scope') || 'default',
         knowledge_scope: get('knowledge_scope') || 'default',

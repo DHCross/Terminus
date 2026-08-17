@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="terminus">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -14,7 +14,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#0f766e">
+    <meta name="theme-color" content="#e8892f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +24,7 @@
     <script>
         // Load saved theme before CSS renders to prevent flash
         (function() {
-            const saved = localStorage.getItem('terminus-theme') || 'dark';
+            const saved = localStorage.getItem('terminus-theme') || 'terminus';
             document.documentElement.setAttribute('data-theme', saved);
             // Load theme CSS file
             const link = document.createElement('link');
@@ -65,9 +65,9 @@
             <span class="nav-icon nav-icon-system" aria-hidden="true"></span>
             <span class="nav-label">System</span>
             <div class="nav-flyout">
-                <div class="nav-flyout-item" data-view="prompts" role="button" tabindex="0">Prompt Stack</div>
-                <div class="nav-flyout-item" data-view="toolsets" role="button" tabindex="0">Tool Matrix</div>
-                <div class="nav-flyout-item" data-view="spices" role="button" tabindex="0">Response Modes</div>
+                <div class="nav-flyout-item" data-view="prompts" role="button" tabindex="0">Instruction Stack</div>
+                <div class="nav-flyout-item" data-view="toolsets" role="button" tabindex="0">Instruments</div>
+                <div class="nav-flyout-item" data-view="spices" role="button" tabindex="0">Voice Modes</div>
             </div>
         </div>
         <button class="nav-item" data-view="schedule">
@@ -248,7 +248,7 @@
                                 <div class="sb-header-title">Session & Engine</div>
                             </div>
                             <div class="sb-header-controls">
-                                <input type="color" id="sb-trim-color" value="#0f766e" class="sb-accent-circle" title="Accent color (double-click to reset)">
+                                <input type="color" id="sb-trim-color" value="#e8892f" class="sb-accent-circle" title="Accent color (double-click to reset)">
                                 <button type="button" id="chat-sidebar-toggle" class="sb-close-btn" title="Close sidebar">✕</button>
                             </div>
                         </div>

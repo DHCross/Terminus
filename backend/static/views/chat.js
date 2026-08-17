@@ -880,7 +880,7 @@ export default {
         const accentCircle = container.querySelector('#sb-trim-color');
         if (accentCircle) {
             accentCircle.addEventListener('dblclick', () => {
-                const globalTrim = localStorage.getItem('terminus-trim') || '#0f766e';
+                const globalTrim = localStorage.getItem('terminus-trim') || '#e8892f';
                 accentCircle.value = globalTrim;
                 accentCircle.dataset.cleared = 'true';
                 applyTrimColor('');
@@ -1548,7 +1548,7 @@ async function loadSidebar() {
                 trimInput.value = settings.trim_color;
                 trimInput.dataset.cleared = 'false';
             } else {
-                trimInput.value = localStorage.getItem('terminus-trim') || '#0f766e';
+                trimInput.value = localStorage.getItem('terminus-trim') || '#e8892f';
                 trimInput.dataset.cleared = 'true';
             }
             applyTrimColor(settings.trim_color || '');
