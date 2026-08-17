@@ -580,10 +580,15 @@
     </template>
 
     <template id="status-template">
-        <div class="message status" id="status-message">
-            <div class="message-content">
-                <div class="spinner"></div>
-                <span class="status-text">Thinking...</span>
+        <div class="message status active-status-card" id="status-message">
+            <div class="message-content status-indicator-container">
+                <div class="status-indicator-header">
+                    <div class="status-pulse-dot"></div>
+                    <span class="status-text">Thinking & Executing...</span>
+                </div>
+                <div class="status-progress-bar-wrap">
+                    <div class="status-progress-bar-fill"></div>
+                </div>
             </div>
         </div>
     </template>

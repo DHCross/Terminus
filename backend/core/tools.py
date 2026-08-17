@@ -335,6 +335,67 @@ BITWARDEN_STATUS_TOOL = {
     },
 }
 
+# ── Autonomous Background Scheduler Tools (Pillar 6) ──────────────────────────
+
+SCHEDULE_TASK_TOOL = {
+    "name": "schedule_task",
+    "description": (
+        "Schedule an autonomous recurring background watchdog task or reminder. "
+        "Terminus will execute the task instruction in the background on the specified interval or daily schedule, "
+        "and post a native macOS banner notification when new results or findings are discovered."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": "Short title for the scheduled task (e.g. 'Indeed Panama City Security Jobs', 'Morning Digest').",
+            },
+            "instruction": {
+                "type": "string",
+                "description": "The exact instruction or search to execute on each run.",
+            },
+            "interval_minutes": {
+                "type": "integer",
+                "description": "Run every N minutes (e.g. 60, 120, 240). Use this OR cron_hour.",
+            },
+            "cron_hour": {
+                "type": "integer",
+                "description": "Run daily at this UTC hour (0-23).",
+            },
+            "cron_minute": {
+                "type": "integer",
+                "description": "Minute of the hour (0-59, defaults to 0).",
+            },
+        },
+        "required": ["name", "instruction"],
+    },
+}
+
+SCHEDULE_LIST_TOOL = {
+    "name": "schedule_list_tasks",
+    "description": "List all active scheduled background tasks and watchdogs with their next run times.",
+    "input_schema": {
+        "type": "object",
+        "properties": {},
+    },
+}
+
+SCHEDULE_CANCEL_TOOL = {
+    "name": "schedule_cancel_task",
+    "description": "Cancel and remove a scheduled background task by its task ID.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "task_id": {
+                "type": "string",
+                "description": "The task ID to cancel (from schedule_list_tasks).",
+            },
+        },
+        "required": ["task_id"],
+    },
+}
+
 
 # ── Google Drive Tool Definitions ─────────────────────────────────────────────
 
@@ -744,6 +805,9 @@ def get_tools(include_trace_tools: bool = True) -> list:
         BROWSER_CLOSE_TOOL,
         BITWARDEN_GET_LOGIN_TOOL,
         BITWARDEN_STATUS_TOOL,
+        SCHEDULE_TASK_TOOL,
+        SCHEDULE_LIST_TOOL,
+        SCHEDULE_CANCEL_TOOL,
         GDRIVE_SEARCH_TOOL,
         GDRIVE_LIST_TOOL,
         GDRIVE_READ_TOOL,
@@ -802,6 +866,10 @@ def execute_tool(name: str, inputs: dict) -> Any:
         # Bitwarden Scoped Credential tools
         "bitwarden_get_login": _bitwarden_get_login,
         "bitwarden_status": _bitwarden_status,
+        # Autonomous Scheduler tools (Pillar 6)
+        "schedule_task": _schedule_task,
+        "schedule_list_tasks": _schedule_list_tasks,
+        "schedule_cancel_task": _schedule_cancel_task,
         # Google Drive tools
         "gdrive_search": _gdrive_search,
         "gdrive_list": _gdrive_list,
@@ -1131,6 +1199,78 @@ def _bitwarden_status(inputs: dict) -> str:
     from core.bitwarden_vault import bitwarden_vault
     import json
     return json.dumps(bitwarden_vault.get_status(), indent=2)
+
+
+# ── Autonomous Background Scheduler Handlers (Pillar 6) ───────────────────────
+
+def _schedule_task(inputs: dict) -> str:
+    from core.scheduler import get_scheduler
+    name = (inputs.get("name") or "").strip()
+    instruction = (inputs.get("instruction") or "").strip()
+    if not name or not instruction:
+        return "Both 'name' and 'instruction' are required to schedule a task."
+
+    interval_minutes = inputs.get("interval_minutes")
+    if interval_minutes is not None:
+        try:
+            interval_minutes = int(interval_minutes)
+        except Exception:
+            interval_minutes = None
+
+    cron_hour = inputs.get("cron_hour")
+    if cron_hour is not None:
+        try:
+            cron_hour = int(cron_hour)
+        except Exception:
+            cron_hour = None
+
+    cron_minute = inputs.get("cron_minute")
+    if cron_minute is not None:
+        try:
+            cron_minute = int(cron_minute)
+        except Exception:
+            cron_minute = 0
+
+    scheduler = get_scheduler()
+    return scheduler.add_custom_task(
+        name=name,
+        instruction=instruction,
+        interval_minutes=interval_minutes,
+        cron_hour=cron_hour,
+        cron_minute=cron_minute,
+    )
+
+
+def _schedule_list_tasks(inputs: dict) -> str:
+    from core.scheduler import get_scheduler
+    import json
+    scheduler = get_scheduler()
+    jobs = scheduler.list_jobs()
+    custom_tasks = scheduler._load_custom_tasks()
+    
+    if not jobs and not custom_tasks:
+        return "No scheduled background tasks currently active."
+
+    lines = ["**Active Background Scheduled Tasks & Heartbeats**:"]
+    for j in jobs:
+        next_r = j.get("next_run") or "N/A"
+        lines.append(f"- **{j.get('name')}** (`{j.get('id')}`) — Next run: {next_r}")
+
+    if custom_tasks:
+        lines.append("\n**Registered Custom Watchdogs**:")
+        for tid, t in custom_tasks.items():
+            lines.append(f"- **{t.get('name')}** (`{tid}`): {t.get('schedule')} — *\"{t.get('instruction')}\"*")
+
+    return "\n".join(lines)
+
+
+def _schedule_cancel_task(inputs: dict) -> str:
+    from core.scheduler import get_scheduler
+    task_id = (inputs.get("task_id") or "").strip()
+    if not task_id:
+        return "No task_id provided to schedule_cancel_task."
+    scheduler = get_scheduler()
+    return scheduler.cancel_task(task_id)
 
 
 # ── Google Drive Tool Handlers ────────────────────────────────────────────────
