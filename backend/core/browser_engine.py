@@ -102,6 +102,11 @@ class BrowserEngine:
             pages = self._context.pages
             self._page = pages[0] if pages else self._context.new_page()
 
+        if self._page is None or self._page.is_closed():
+            self._page = self._context.new_page()
+
+        return self._page
+
     def _get_active_page(self, auto_ensure: bool = True) -> Any:
         """Get the active page, auto-recovering if closed or if user opened new tabs."""
         if self._page is not None and not self._page.is_closed():

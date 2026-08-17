@@ -844,33 +844,87 @@ def execute_tool(name: str, inputs: dict) -> Any:
 
 
 def _web_search(inputs: dict) -> str:
-    if not SEARCH_AVAILABLE:
-        return "Web search unavailable — install duckduckgo-search"
-
-    query = inputs.get("query", "")
+    query = (inputs.get("query") or "").strip()
     max_results = min(int(inputs.get("max_results", 5)), 10)
 
     if not query:
         return "No query provided"
 
-    try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=max_results))
+    results = []
 
-        if not results:
-            return f"No results found for: {query}"
+    # Tier 1: Try DDGS package if available
+    if SEARCH_AVAILABLE:
+        try:
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=max_results))
+        except Exception as e:
+            logger.debug(f"[tool] DDGS library query failed ({e}), falling back to direct DDG search")
 
-        formatted = [f"**Search results for: {query}**\n"]
-        for i, r in enumerate(results, 1):
-            title = r.get("title", "No title")
-            url = r.get("href", "")
-            body = r.get("body", "")[:300]
-            formatted.append(f"{i}. **{title}**\n   {url}\n   {body}\n")
+    # Tier 2: Direct HTTP Fallback to DuckDuckGo HTML endpoint
+    if not results:
+        try:
+            import urllib.request
+            import urllib.parse
+            import re
+            import html as html_lib
 
-        return "\n".join(formatted)
-    except Exception as e:
-        logger.error(f"[tool] web_search failed: {e}")
-        return f"Search failed: {e}"
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                ),
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            }
+            data = urllib.parse.urlencode({"q": query}).encode("utf-8")
+            req = urllib.request.Request("https://html.duckduckgo.com/html/", data=data, headers=headers)
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                raw_html = resp.read().decode("utf-8", errors="ignore")
+
+                # Parse result blocks
+                blocks = re.findall(
+                    r'<a class="result__snippet[^>]*href="([^"]+)"[^>]*>(.*?)</a>.*?(?:<a class="result__url"[^>]*>(.*?)</a>)?',
+                    raw_html,
+                    re.DOTALL
+                ) or re.findall(
+                    r'<a class="result__snippet[^"]*"[^>]*>(.*?)</a>',
+                    raw_html,
+                    re.DOTALL
+                )
+
+                # Alternative regex matching standard results
+                raw_links = re.findall(
+                    r'<h2 class="result__title">\s*<a class="result__url"[^>]*href="([^"]+)"[^>]*>(.*?)</a>',
+                    raw_html,
+                    re.DOTALL
+                )
+                raw_snippets = re.findall(r'<a class="result__snippet[^\"]*\"[^>]*>(.*?)</a>', raw_html, re.DOTALL)
+
+                for idx in range(min(len(raw_snippets), max_results)):
+                    snippet_clean = html_lib.unescape(re.sub(r'<[^<]+?>', '', raw_snippets[idx])).strip()
+                    title = "Web Result"
+                    href = ""
+                    if idx < len(raw_links):
+                        href = raw_links[idx][0].strip()
+                        title = html_lib.unescape(re.sub(r'<[^<]+?>', '', raw_links[idx][1])).strip()
+                    results.append({
+                        "title": title or f"Result {idx + 1}",
+                        "href": href,
+                        "body": snippet_clean
+                    })
+        except Exception as ex:
+            logger.error(f"[tool] Direct HTML fallback failed: {ex}")
+
+    if not results:
+        return f"No results found for: {query}"
+
+    formatted = [f"**Search results for: {query}**\n"]
+    for i, r in enumerate(results[:max_results], 1):
+        title = r.get("title", "No title")
+        url = r.get("href", "")
+        body = r.get("body", "")[:350]
+        formatted.append(f"{i}. **{title}**\n   {url}\n   {body}\n")
+
+    return "\n".join(formatted)
 
 
 def _read_file(inputs: dict) -> str:
