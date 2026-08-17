@@ -18,6 +18,10 @@ function parseArgs(argv) {
     trace: false,
     fast: true,
     json: false,
+    strict: false,
+    warnOnly: false,
+    declare: false,
+    assert: false,
     help: false,
   };
 
@@ -33,6 +37,10 @@ function parseArgs(argv) {
     else if (arg === '--trace' || arg === 'trace' || arg === 'start') out.trace = true;
     else if (arg === '--no-fast') out.fast = false;
     else if (arg === '--json') out.json = true;
+    else if (arg === '--strict' || arg === '-s') out.strict = true;
+    else if (arg === '--warn-only') out.warnOnly = true;
+    else if (arg === '--declare') out.declare = true;
+    else if (arg === '--assert') out.assert = true;
     else if (arg === '--help' || arg === '-h') out.help = true;
   }
 
@@ -51,6 +59,10 @@ function printHelp() {
   console.log('  --trace                Run verify, doctor, gaps, and prompt as one fast trace packet');
   console.log('  --no-fast              In trace mode, allow slower full checks instead of fast defaults');
   console.log('  --threshold <n>        Consumer count threshold for blast warnings (default: 5)');
+  console.log('  --strict, -s           Exit with non-zero status if any caution, block, or gap is detected');
+  console.log('  --warn-only            Suppress strict exit on cautions (warnings still printed)');
+  console.log('  --declare              Run lint-plan on --plan-file, write .sherlog/preflight.json on accept');
+  console.log('  --assert               Check staged paths against .sherlog/preflight.json allowlist');
   console.log('  --json                 Emit JSON output');
   console.log('  --help, -h             Show this message');
   console.log('');
@@ -59,6 +71,8 @@ function printHelp() {
   console.log('  npm run sherlog:preflight -- --plan-file plan.json --json');
   console.log('  npm run sherlog:preflight -- --feature "Add user authentication" --json');
   console.log('  npm run sherlog:preflight -- --trace --feature "Add user authentication"');
+  console.log('  npm run sherlog:preflight -- --declare --plan-file plan.json --json');
+  console.log('  npm run sherlog:preflight -- --assert');
 }
 
 function runCliJson(script, args = [], options = {}) {
@@ -400,11 +414,200 @@ function runPreflight(args, config) {
   return result;
 }
 
+// ─── declare / assert modes ──────────────────────────────────────────────────
+
+const DECLARATION_PATH = '.sherlog/preflight.json';
+const LEDGER_PATH = 'sherlog-velocity/data/sherlog-unverified.jsonl';
+
+function getCurrentSha() {
+  const result = spawnSync('git', ['rev-parse', 'HEAD'], {
+    cwd: process.cwd(), encoding: 'utf8', timeout: 5000,
+  });
+  return result.status === 0 ? result.stdout.trim() : '';
+}
+
+function getStagedFiles() {
+  const result = spawnSync('git', ['diff', '--cached', '--name-only'], {
+    cwd: process.cwd(), encoding: 'utf8', timeout: 5000,
+  });
+  return result.status === 0
+    ? result.stdout.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+}
+
+function appendLedger(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) return;
+  const dir = path.dirname(LEDGER_PATH);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.appendFileSync(LEDGER_PATH, entries.map(e => JSON.stringify(e)).join('\n') + '\n', 'utf8');
+}
+
+function summarizeProvenance(provenance) {
+  const counts = { verified: 0, assumed: 0, unknown: 0 };
+  if (!provenance || typeof provenance !== 'object') return counts;
+  for (const key of Object.keys(provenance)) {
+    const state = String(provenance[key]?.state || 'unknown').trim().toLowerCase();
+    if (counts.hasOwnProperty(state)) counts[state]++;
+  }
+  return counts;
+}
+
+function checkDoNotTouch(planFiles, config) {
+  const violations = [];
+  const checked = new Set();
+  for (const file of planFiles) {
+    const key = file.replace(/^\.\/+/, '');
+    if (checked.has(key)) continue;
+    checked.add(key);
+    try {
+      const blast = analyzeBlastRadius(config, key, 5);
+      if (blast.do_not_touch && blast.do_not_touch.length > 0) {
+        violations.push({ file: key, do_not_touch_consumers: blast.do_not_touch });
+      }
+    } catch { /* skip */ }
+  }
+  return violations;
+}
+
+function runDeclare(args, config) {
+  if (!args.planFile) {
+    console.error('Error: --declare requires --plan-file.');
+    process.exit(1);
+  }
+  const planPath = path.resolve(process.cwd(), args.planFile);
+  let plan;
+  try { plan = readJson(planPath, null); } catch { /* handled below */ }
+  if (!plan) {
+    console.error(`Error: Cannot read or parse plan file: ${args.planFile}`);
+    process.exit(1);
+  }
+  const sha = getCurrentSha();
+  plan._sha = sha;
+  const lintResult = lintPlan(plan, config, args.blastThreshold);
+  const planFiles = [];
+  for (const step of (plan.steps || [])) {
+    for (const file of (step.files || [])) {
+      const normalized = file.replace(/^\.\/+/, '');
+      if (!planFiles.includes(normalized)) planFiles.push(normalized);
+    }
+  }
+  const doNotTouchViolations = checkDoNotTouch(planFiles, config);
+  for (const v of doNotTouchViolations) {
+    lintResult.issues.push({
+      step_index: -1, rule: 'scope_violation',
+      message: `File "${v.file}" appears in blast-radius do_not_touch[]: ${v.do_not_touch_consumers.join(', ')}`,
+    });
+  }
+  if (doNotTouchViolations.length > 0) lintResult.verdict = 'rejected';
+  appendLedger(lintResult.provenance_ledger || []);
+  if (lintResult.verdict === 'rejected') {
+    if (args.json) {
+      process.stdout.write(`${JSON.stringify({ mode: 'declare', verdict: 'rejected', feature: lintResult.feature, issues: lintResult.issues }, null, 2)}\n`);
+    } else {
+      console.error('SHERLOG DECLARE: REJECTED');
+      console.error(`Feature: ${lintResult.feature}`);
+      lintResult.issues.forEach(i => console.error(`  [${i.rule}] ${i.message}`));
+    }
+    process.exit(1);
+  }
+  const testFiles = new Set();
+  for (const file of planFiles) {
+    try {
+      const blast = analyzeBlastRadius(config, file, 5);
+      for (const tf of (blast.test_files || [])) testFiles.add(tf);
+    } catch { /* skip */ }
+  }
+  const allowedPaths = [...new Set([...planFiles, ...testFiles])].sort();
+  const redFirstTest = plan.provenance?.red_first_test?.value || null;
+  const declaration = {
+    version: 1, declared_at: new Date().toISOString(), base_sha: sha,
+    feature: lintResult.feature, allowed_paths: allowedPaths,
+    red_first_test: redFirstTest, provenance_summary: summarizeProvenance(plan.provenance),
+  };
+  const declDir = path.dirname(DECLARATION_PATH);
+  if (!fs.existsSync(declDir)) fs.mkdirSync(declDir, { recursive: true });
+  fs.writeFileSync(DECLARATION_PATH, JSON.stringify(declaration, null, 2) + '\n', 'utf8');
+  if (args.json) {
+    process.stdout.write(`${JSON.stringify({ mode: 'declare', verdict: lintResult.verdict, feature: lintResult.feature, declaration_path: DECLARATION_PATH, allowed_paths: allowedPaths, base_sha: sha, provenance_summary: declaration.provenance_summary, issues: lintResult.issues }, null, 2)}\n`);
+  } else {
+    console.log('SHERLOG DECLARE: ACCEPTED');
+    console.log(`Feature: ${lintResult.feature}`);
+    console.log(`Base SHA: ${sha}`);
+    console.log(`Allowed paths (${allowedPaths.length}):`);
+    allowedPaths.forEach(p => console.log(`  - ${p}`));
+    if (redFirstTest) console.log(`Red-first test: ${redFirstTest}`);
+    console.log(`Provenance: ${declaration.provenance_summary.verified} verified, ${declaration.provenance_summary.assumed} assumed, ${declaration.provenance_summary.unknown} unknown`);
+    if (lintResult.issues.length > 0) {
+      console.log(`Warnings (${lintResult.issues.length}):`);
+      lintResult.issues.forEach(i => console.log(`  [${i.rule}] ${i.message}`));
+    }
+    console.log(`Declaration written to ${DECLARATION_PATH}`);
+  }
+}
+
+function runAssert() {
+  if (process.env.SKIP_SHERLOG === '1') {
+    appendLedger([{ ts: new Date().toISOString(), sha: getCurrentSha(), feature: null, field: 'scope_allowlist', state: 'unknown', source: 'SKIP_SHERLOG=1 bypass' }]);
+    console.log('[SHERLOG ASSERT] SKIP_SHERLOG=1 active. Scope allowlist bypassed (logged).');
+    process.exit(0);
+  }
+  const declPath = path.resolve(process.cwd(), DECLARATION_PATH);
+  if (!fs.existsSync(declPath)) {
+    console.error('[SHERLOG ASSERT] No declaration found. Run `sherlog:preflight -- --declare --plan-file <path>` first.');
+    process.exit(1);
+  }
+  let declaration;
+  try { declaration = JSON.parse(fs.readFileSync(declPath, 'utf8')); }
+  catch { console.error(`[SHERLOG ASSERT] Cannot parse ${DECLARATION_PATH}. Delete it and re-declare.`); process.exit(1); }
+  const currentSha = getCurrentSha();
+  if (!currentSha) { console.error('[SHERLOG ASSERT] Cannot resolve HEAD.'); process.exit(1); }
+  if (declaration.base_sha !== currentSha) {
+    console.error('[SHERLOG ASSERT] STALE DECLARATION');
+    console.error(`  Declaration base_sha: ${declaration.base_sha}`);
+    console.error(`  Current HEAD:         ${currentSha}`);
+    console.error('HEAD has moved since declaration. Re-declare before committing.');
+    process.exit(1);
+  }
+  const stagedFiles = getStagedFiles();
+  if (stagedFiles.length === 0) {
+    console.log('[SHERLOG ASSERT] No staged files. Declaration is current.');
+    process.exit(0);
+  }
+  const allowed = new Set((declaration.allowed_paths || []).map(p => p.replace(/^\.\/+/, '')));
+  const outOfScope = stagedFiles.filter(f => !allowed.has(f.replace(/^\.\/+/, '')));
+  if (outOfScope.length > 0) {
+    console.error('[SHERLOG ASSERT] OUT-OF-SCOPE FILES STAGED');
+    console.error('The following staged files are not in the declared allowlist:');
+    outOfScope.forEach(f => console.error(`  - ${f}`));
+    console.error('');
+    console.error('Allowed paths:');
+    [...allowed].sort().forEach(p => console.error(`  - ${p}`));
+    console.error('');
+    console.error('Re-declare with these files in your plan, or unstage them.');
+    process.exit(1);
+  }
+  console.log(`[SHERLOG ASSERT] OK — ${stagedFiles.length} staged file(s) within declared allowlist.`);
+  console.log(`  Base SHA: ${currentSha}`);
+  console.log(`  Feature:  ${declaration.feature || '(unnamed)'}`);
+  process.exit(0);
+}
+
 function main() {
   const args = parseArgs(process.argv);
 
   if (args.help) {
     printHelp();
+    return;
+  }
+
+  if (args.assert) {
+    runAssert();
+    return;
+  }
+
+  if (args.declare) {
+    let config;
+    try { config = loadConfig(); } catch (err) { console.error(err.message); process.exit(1); }
+    runDeclare(args, config);
     return;
   }
 
@@ -525,5 +728,7 @@ module.exports = {
   runPreflight,
   runTracePreflight,
   summarizeTracePacket,
+  runDeclare,
+  runAssert,
   parseArgs,
 };

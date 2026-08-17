@@ -50,7 +50,7 @@ If you want a Desktop icon that skips the IDE and opens Terminus in your browser
 make install-desktop-launcher
 ```
 
-That creates `~/Desktop/Launch Terminus.command`. Double-clicking it starts the backend if needed and opens [https://localhost:8073](https://localhost:8073) in your default browser.
+That creates `~/Desktop/Launch Terminus.command`. Double-clicking it starts the backend if needed and opens [http://127.0.0.1:8000](http://127.0.0.1:8000) in your default browser.
 
 ## Coherence Lab Seed
 

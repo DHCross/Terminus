@@ -341,41 +341,27 @@ export async function handleSaveTopic(idx) {
             return;
         }
 
-        const kindInput = prompt('Save to topics as: quote or summary', 'quote');
-        if (kindInput === null) return;
-        const kind = String(kindInput).trim().toLowerCase().startsWith('s') ? 'summary' : 'quote';
-
         const baseText = getMessageText(msg);
         const activeTopic = getActiveTopicFolder();
         const defaultTopic = activeTopic || inferTopic(baseText, 'General');
-        const topicInput = prompt('Topic folder:', defaultTopic);
-        if (topicInput === null) return;
-        const topic = topicInput.trim() || defaultTopic;
-        if (!topic) {
-            ui.showToast('Topic folder is required', 'error');
-            return;
-        }
-
-        const defaultTitle = kind === 'summary'
-            ? inferTopic(baseText, 'Thread Summary')
-            : inferTopic(baseText, 'Saved Quote');
-        const titleInput = prompt('Entry title (optional):', defaultTitle);
-        if (titleInput === null) return;
-
-        const content = kind === 'summary'
-            ? buildThreadSummary(hist, idx)
-            : toQuotedMarkdown(baseText);
+        
+        const topicInput = prompt('Save quote to Topic Folder:', defaultTopic);
+        if (topicInput === null) return; // User pressed Cancel
+        
+        const topic = topicInput.trim() || defaultTopic || 'General';
+        const defaultTitle = inferTopic(baseText, 'Saved Quote');
+        const content = toQuotedMarkdown(baseText);
 
         if (!content.trim()) {
-            ui.showToast('Nothing to save for this entry', 'error');
+            ui.showToast('Nothing to save for this message', 'error');
             return;
         }
 
         const chatName = document.getElementById('chat-select')?.value || '';
         await api.saveTopicEntry({
             topic,
-            kind,
-            title: titleInput.trim() || defaultTitle,
+            kind: 'quote',
+            title: defaultTitle,
             source_chat: chatName,
             source_message_timestamp: msg.timestamp || null,
             content
@@ -388,7 +374,7 @@ export async function handleSaveTopic(idx) {
         }
 
         window.dispatchEvent(new CustomEvent('terminus-topic-saved', { detail: { topic } }));
-        ui.showToast(`Saved ${kind} to ${topic}`, 'success');
+        ui.showToast(`Saved quote to "${topic}"`, 'success');
     } catch (e) {
         console.error('Save topic failed:', e);
         ui.showToast(`Save failed: ${e.message || 'unknown error'}`, 'error');

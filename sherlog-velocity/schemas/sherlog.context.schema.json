@@ -18,6 +18,11 @@
             "items": { "type": "string", "minLength": 1 }
           },
           "belief": { "type": "string" },
+          "touch_policy": {
+            "type": "string",
+            "enum": ["safe_touch", "risky_touch", "do_not_touch"],
+            "description": "Mutation policy for this zone. 'do_not_touch' triggers the scope_violation rule in lint-plan.js. Used by boundary-mapper.js, lint-plan.js, and blast-radius.js."
+          },
           "last_updated": {
             "type": "string",
             "description": "ISO date or date-time string (e.g. 2026-02-06)"

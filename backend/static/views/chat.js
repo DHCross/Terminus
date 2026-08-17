@@ -24,6 +24,7 @@ let _selectedTopic = '';
 let _topicEntryCache = new Map();
 let _topicChatSearch = '';
 let _topicChatView = 'all';
+let _shelfActiveTab = 'chats';
 let _topicFolderCollapse = {};
 let _topicFolderSeenAt = {};
 
@@ -38,11 +39,13 @@ function loadTopicShelfUiState() {
         const parsed = JSON.parse(raw);
         _topicChatSearch = String(parsed.search || '');
         _topicChatView = parsed.view === 'recent' ? 'recent' : 'all';
+        _shelfActiveTab = parsed.tab === 'quotes' ? 'quotes' : 'chats';
         _topicFolderCollapse = parsed.collapse && typeof parsed.collapse === 'object' ? parsed.collapse : {};
         _topicFolderSeenAt = parsed.seen && typeof parsed.seen === 'object' ? parsed.seen : {};
     } catch {
         _topicChatSearch = '';
         _topicChatView = 'all';
+        _shelfActiveTab = 'chats';
         _topicFolderCollapse = {};
         _topicFolderSeenAt = {};
     }
@@ -53,6 +56,7 @@ function saveTopicShelfUiState() {
         localStorage.setItem(TOPIC_SHELF_UI_STATE_KEY, JSON.stringify({
             search: _topicChatSearch,
             view: _topicChatView,
+            tab: _shelfActiveTab,
             collapse: _topicFolderCollapse,
             seen: _topicFolderSeenAt,
         }));
@@ -178,6 +182,98 @@ function currentRecentCutoff() {
 }
 
 loadTopicShelfUiState();
+
+let _folderContextMenuEl = null;
+
+function hideFolderContextMenu() {
+    if (_folderContextMenuEl) {
+        _folderContextMenuEl.classList.remove('open');
+        _folderContextMenuEl.remove();
+        _folderContextMenuEl = null;
+    }
+}
+
+function showFolderContextMenu(e, folderName, container) {
+    if (!folderName) return;
+    e.preventDefault();
+    e.stopPropagation();
+    hideFolderContextMenu();
+
+    const menu = document.createElement('div');
+    menu.className = 'folder-context-menu open';
+    menu.innerHTML = `
+        <div class="folder-context-header">📁 ${escapeHtml(folderName)}</div>
+        <button type="button" class="folder-context-item" data-action="rename">
+            <span>✏️</span>
+            <span>Rename Folder</span>
+        </button>
+        <button type="button" class="folder-context-item" data-action="focus">
+            <span>📂</span>
+            <span>Focus Folder</span>
+        </button>
+        <button type="button" class="folder-context-item danger" data-action="delete">
+            <span>🗑️</span>
+            <span>Delete Folder</span>
+        </button>
+    `;
+
+    const x = Math.min(e.clientX, window.innerWidth - 190);
+    const y = Math.min(e.clientY, window.innerHeight - 160);
+    menu.style.left = `${Math.max(10, x)}px`;
+    menu.style.top = `${Math.max(10, y)}px`;
+
+    menu.addEventListener('click', async (evt) => {
+        const item = evt.target.closest('.folder-context-item');
+        if (!item) return;
+        const action = item.dataset.action;
+        hideFolderContextMenu();
+
+        if (action === 'rename') {
+            const newName = prompt(`Rename folder "${folderName}" to:`, folderName);
+            if (newName === null) return;
+            const clean = newName.trim();
+            if (!clean || clean === folderName) return;
+
+            try {
+                await api.renameTopicFolder(folderName, clean);
+                _selectedTopic = clean;
+                ui.showToast(`Folder renamed to "${clean}"`, 'success');
+                await loadTopicShelf(container, { topic: _selectedTopic });
+            } catch (err) {
+                ui.showToast(err?.message || 'Failed to rename folder', 'error');
+            }
+        } else if (action === 'focus') {
+            _selectedTopic = folderName;
+            const input = container.querySelector('#topic-folder-input');
+            if (input) input.value = folderName;
+            await loadTopicShelf(container, { topic: folderName });
+        } else if (action === 'delete') {
+            if (!confirm(`Delete folder "${folderName}"? Chats will be unfiled and quotes in this folder will be removed.`)) return;
+            try {
+                await api.deleteTopicFolder(folderName);
+                if (_selectedTopic === folderName) _selectedTopic = '';
+                ui.showToast(`Folder "${folderName}" deleted`, 'success');
+                await loadTopicShelf(container, { topic: _selectedTopic });
+            } catch (err) {
+                ui.showToast(err?.message || 'Failed to delete folder', 'error');
+            }
+        }
+    });
+
+    document.body.appendChild(menu);
+    _folderContextMenuEl = menu;
+}
+
+// Global dismiss listeners for context menu
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.folder-context-menu')) {
+        hideFolderContextMenu();
+    }
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideFolderContextMenu();
+});
+window.addEventListener('scroll', hideFolderContextMenu, true);
 
 function injectTopicIntoComposer(entry) {
     const input = document.getElementById('prompt-input');
@@ -408,15 +504,36 @@ export default {
         container.querySelector('#topic-export-markdown')?.addEventListener('click', async () => {
             await handleExportMarkdown();
         });
+
+        // Tab Switching: Chats vs Quotes
+        const tabBtnChats = container.querySelector('#tab-btn-chats');
+        const tabBtnQuotes = container.querySelector('#tab-btn-quotes');
+        const panelChats = container.querySelector('#panel-topic-chats');
+        const panelQuotes = container.querySelector('#panel-topic-quotes');
+
+        const applyShelfTab = (tab) => {
+            _shelfActiveTab = tab;
+            saveTopicShelfUiState();
+            tabBtnChats?.classList.toggle('active', tab === 'chats');
+            tabBtnQuotes?.classList.toggle('active', tab === 'quotes');
+            panelChats?.classList.toggle('active', tab === 'chats');
+            panelQuotes?.classList.toggle('active', tab === 'quotes');
+        };
+
+        tabBtnChats?.addEventListener('click', () => applyShelfTab('chats'));
+        tabBtnQuotes?.addEventListener('click', () => applyShelfTab('quotes'));
+        applyShelfTab(_shelfActiveTab);
+
         const topicSearchInput = container.querySelector('#topic-chat-search');
         if (topicSearchInput) {
             topicSearchInput.value = _topicChatSearch;
             topicSearchInput.addEventListener('input', async e => {
                 _topicChatSearch = String(e.target.value || '').trim();
                 saveTopicShelfUiState();
-                await loadTopicChatList(container, { topic: _selectedTopic });
+                await loadTopicShelf(container, { topic: _selectedTopic });
             });
         }
+
         const topicViewAllBtn = container.querySelector('#topic-chat-view-all');
         const topicViewRecentBtn = container.querySelector('#topic-chat-view-recent');
         const applyTopicViewButtons = () => {
@@ -436,28 +553,57 @@ export default {
             applyTopicViewButtons();
             await loadTopicChatList(container, { topic: _selectedTopic });
         });
+
         container.querySelector('#topic-folder-input')?.addEventListener('keydown', async e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 await saveTopicFolder(container);
             }
         });
-        container.querySelector('#topic-new-folder')?.addEventListener('click', () => {
+
+        container.querySelector('#topic-new-folder')?.addEventListener('click', async () => {
+            const folderName = prompt('Enter new folder name:');
+            if (folderName === null) return;
+            const clean = folderName.trim();
+            if (!clean) return;
+            _selectedTopic = clean;
             const input = container.querySelector('#topic-folder-input');
-            if (!input) return;
-            input.value = '';
-            input.focus();
-            input.scrollIntoView({ block: 'nearest' });
-        });
-        container.querySelector('#topic-folder-list')?.addEventListener('click', async e => {
-            const btn = e.target.closest('.topic-folder-chip');
-            if (!btn) return;
-            _selectedTopic = btn.dataset.topic || '';
-            const input = container.querySelector('#topic-folder-input');
-            if (input && _selectedTopic) input.value = _selectedTopic;
-            markFolderSeen(_selectedTopic);
+            if (input) input.value = clean;
             await loadTopicShelf(container, { topic: _selectedTopic });
         });
+
+        container.querySelector('#topic-folder-list')?.addEventListener('click', async e => {
+            const btn = e.target.closest('.topic-folder-pill');
+            if (!btn) return;
+            _selectedTopic = btn.dataset.topic ?? '';
+            const input = container.querySelector('#topic-folder-input');
+            if (input) input.value = _selectedTopic;
+            if (_selectedTopic) markFolderSeen(_selectedTopic);
+            await loadTopicShelf(container, { topic: _selectedTopic });
+        });
+
+        // Right-click context menu on folder pills
+        container.querySelector('#topic-folder-list')?.addEventListener('contextmenu', e => {
+            const btn = e.target.closest('.topic-folder-pill');
+            if (!btn) return;
+            const folderName = (btn.dataset.topic || '').trim();
+            if (folderName) {
+                showFolderContextMenu(e, folderName, container);
+            }
+        });
+
+        // Right-click context menu on folder group headers
+        container.querySelector('#topic-chat-list')?.addEventListener('contextmenu', e => {
+            const header = e.target.closest('.topic-folder-group-header');
+            if (!header) return;
+            const folderName = normalizeTopicFolder(header.dataset.topicFolder || '');
+            if (folderName && folderName !== 'General' && folderName !== 'Unfiled') {
+                showFolderContextMenu(e, folderName, container);
+            } else if (folderName) {
+                showFolderContextMenu(e, folderName, container);
+            }
+        });
+
         container.querySelector('#topic-chat-list')?.addEventListener('click', async e => {
             const toggleBtn = e.target.closest('.topic-folder-group-header');
             if (toggleBtn) {
@@ -657,12 +803,17 @@ export default {
             }
         };
 
-        // Toggle buttons (Style, Date/Time)
+        // Toggle buttons (Style, Date/Time, Reasoning)
         container.querySelectorAll('.sb-toggle').forEach(btn => {
             btn.addEventListener('click', () => {
                 const active = btn.dataset.active !== 'true';
                 btn.dataset.active = active;
                 btn.classList.toggle('active', active);
+                if (btn.id === 'sb-reasoning-toggle') {
+                    localStorage.setItem('terminus-show-reasoning', String(active));
+                    document.body.classList.toggle('hide-reasoning', !active);
+                    return;
+                }
                 debouncedSave(container);
             });
         });
@@ -682,16 +833,32 @@ export default {
                     if (label) label.textContent = el.value;
                     updateSliderFill(el);
                 }
+                if (el.id === 'quick-model-select') {
+                    const val = el.value;
+                    const primarySel = container.querySelector('#sb-llm-primary');
+                    const modelSel = container.querySelector('#sb-llm-model');
+                    if (val === 'auto') {
+                        if (primarySel) primarySel.value = 'auto';
+                        updateModelSelector(container, 'auto', '');
+                    } else if (val.includes(':')) {
+                        const [pKey, mKey] = val.split(':');
+                        if (primarySel) primarySel.value = pKey;
+                        updateModelSelector(container, pKey, mKey);
+                        if (modelSel) modelSel.value = mKey;
+                    }
+                    updateSendButtonLLM(getVal(container, '#sb-llm-primary'), getSelectedModel(container));
+                }
                 if (el.id === 'sb-llm-primary') {
                     updateModelSelector(container, el.value, '');
+                    updateSendButtonLLM(el.value, getSelectedModel(container));
                 }
-                if (el.id === 'sb-llm-model' || el.id === 'quick-model-select') {
-                    // Sync the two model selects
-                    const otherId = el.id === 'sb-llm-model' ? '#quick-model-select' : '#sb-llm-model';
-                    const other = container.querySelector(otherId);
-                    if (other && other.value !== el.value) {
-                        other.value = el.value;
+                if (el.id === 'sb-llm-model') {
+                    const quick = container.querySelector('#quick-model-select');
+                    const pKey = getVal(container, '#sb-llm-primary');
+                    if (quick && pKey && el.value) {
+                        quick.value = `${pKey}:${el.value}`;
                     }
+                    updateSendButtonLLM(pKey, el.value);
                 }
                 if (el.id === 'sb-trim-color') {
                     el.dataset.cleared = 'false';
@@ -907,11 +1074,12 @@ async function loadTopicChatList(container, { topic = null } = {}) {
         const search = _topicChatSearch.toLowerCase();
 
         let working = [...chats];
+        if (visibleTopic) {
+            working = working.filter(chat => normalizeTopicFolder(chat?.settings?.topic_folder) === visibleTopic);
+        }
+
         if (_topicChatView === 'recent') {
-            const recentBase = visibleTopic
-                ? working.filter(chat => normalizeTopicFolder(chat?.settings?.topic_folder) === visibleTopic)
-                : working;
-            const sortedBase = recentBase.sort((a, b) => parseChatModified(b) - parseChatModified(a));
+            const sortedBase = working.sort((a, b) => parseChatModified(b) - parseChatModified(a));
             const cutoff = currentRecentCutoff();
             const inWindow = sortedBase.filter(chat => parseChatModified(chat) >= cutoff);
             working = inWindow.length ? inWindow : sortedBase.slice(0, 12);
@@ -925,73 +1093,102 @@ async function loadTopicChatList(container, { topic = null } = {}) {
             });
         }
 
-        const groups = new Map();
-        for (const chat of working) {
-            const folder = normalizeTopicFolder(chat?.settings?.topic_folder);
-            const key = topicFolderKey(folder);
-            if (!groups.has(key)) {
-                groups.set(key, { topic: folder, chats: [] });
-            }
-            groups.get(key).chats.push(chat);
-        }
+        const tabChatsCount = container.querySelector('#tab-chats-count');
+        if (tabChatsCount) tabChatsCount.textContent = working.length;
 
-        const sortedGroups = [...groups.values()].sort((left, right) => {
-            const leftTop = Math.max(...left.chats.map(parseChatModified), 0);
-            const rightTop = Math.max(...right.chats.map(parseChatModified), 0);
-            return rightTop - leftTop;
-        });
-
-        if (!sortedGroups.length) {
+        if (!working.length) {
             listEl.innerHTML = `<div class="topic-shelf-empty">${
-                _topicChatView === 'recent' && visibleTopic
-                    ? `No recent chats in ${escapeHtml(visibleTopic)}.`
-                    : 'No chats match this view yet.'
+                visibleTopic
+                    ? `No chats in folder "${escapeHtml(visibleTopic)}".`
+                    : 'No chats match this search.'
             }</div>`;
             return;
         }
 
-        const recentCutoff = currentRecentCutoff();
-        listEl.innerHTML = sortedGroups.map(group => {
-            const topicName = group.topic;
-            const folderKey = topicFolderKey(topicName);
-            const title = topicName || 'Unfiled';
-            const chatsInGroup = [...group.chats].sort((a, b) => parseChatModified(b) - parseChatModified(a));
-            const seenAt = Number(_topicFolderSeenAt[folderKey] || 0);
-            const unreadCount = chatsInGroup.filter(chat => {
-                const modified = parseChatModified(chat);
-                return modified > seenAt && String(chat?.name || '') !== activeChat;
-            }).length;
-            const recentCount = chatsInGroup.filter(chat => parseChatModified(chat) >= recentCutoff).length;
-            const collapsed = !!_topicFolderCollapse[folderKey] && !(visibleTopic && topicName === visibleTopic);
+        // If viewing All folders and no specific folder is selected, group by folder
+        if (!visibleTopic) {
+            const groups = new Map();
+            for (const chat of working) {
+                const folder = normalizeTopicFolder(chat?.settings?.topic_folder);
+                const key = topicFolderKey(folder);
+                if (!groups.has(key)) {
+                    groups.set(key, { topic: folder, chats: [] });
+                }
+                groups.get(key).chats.push(chat);
+            }
 
-            return `
-                <div class="topic-folder-group${collapsed ? ' collapsed' : ''}" data-topic-folder="${escapeHtml(topicName)}">
-                    <button type="button" class="topic-folder-group-header" data-topic-folder="${escapeHtml(topicName)}">
-                        <div>
-                            <div class="topic-folder-group-title">${escapeHtml(title)}</div>
-                            <div class="topic-folder-group-meta">${chatsInGroup.length} chats • ${unreadCount} unread • ${recentCount} recent</div>
+            const sortedGroups = [...groups.values()].sort((left, right) => {
+                const leftTop = Math.max(...left.chats.map(parseChatModified), 0);
+                const rightTop = Math.max(...right.chats.map(parseChatModified), 0);
+                return rightTop - leftTop;
+            });
+
+            const recentCutoff = currentRecentCutoff();
+            listEl.innerHTML = sortedGroups.map(group => {
+                const topicName = group.topic;
+                const folderKey = topicFolderKey(topicName);
+                const title = topicName || 'Unfiled';
+                const chatsInGroup = [...group.chats].sort((a, b) => parseChatModified(b) - parseChatModified(a));
+                const seenAt = Number(_topicFolderSeenAt[folderKey] || 0);
+                const unreadCount = chatsInGroup.filter(chat => {
+                    const modified = parseChatModified(chat);
+                    return modified > seenAt && String(chat?.name || '') !== activeChat;
+                }).length;
+                const collapsed = !!_topicFolderCollapse[folderKey];
+
+                return `
+                    <div class="topic-folder-group${collapsed ? ' collapsed' : ''}" data-topic-folder="${escapeHtml(topicName)}">
+                        <button type="button" class="topic-folder-group-header" data-topic-folder="${escapeHtml(topicName)}">
+                            <div class="topic-folder-group-title">
+                                <span>📁</span>
+                                <span>${escapeHtml(title)}</span>
+                            </div>
+                            <div>
+                                <span class="topic-folder-group-meta">${chatsInGroup.length} ${chatsInGroup.length === 1 ? 'chat' : 'chats'}${unreadCount ? ` • ${unreadCount} new` : ''}</span>
+                                <span class="topic-folder-group-arrow">${collapsed ? '▶' : '▼'}</span>
+                            </div>
+                        </button>
+                        <div class="topic-folder-group-body">
+                            ${chatsInGroup.map(chat => {
+                                const chatName = String(chat.name || '').trim();
+                                const active = chatName === activeChat;
+                                const metaBits = [formatChatMeta(chat)];
+                                if (chat.message_count) metaBits.push(`${chat.message_count} msg`);
+                                const stamp = formatChatTimestamp(chat.modified);
+                                if (stamp) metaBits.push(stamp);
+                                return `
+                                    <button type="button" class="topic-chat-item${active ? ' active' : ''}" draggable="true" data-topic-chat="${escapeHtml(chatName)}" data-topic-folder="${escapeHtml(topicName)}">
+                                        <div class="topic-chat-top">
+                                            <span class="topic-chat-name">${escapeHtml(chat.label || chat.display_name || chatName)}</span>
+                                        </div>
+                                        <div class="topic-chat-meta">${escapeHtml(metaBits.join(' • '))}</div>
+                                    </button>
+                                `;
+                            }).join('')}
                         </div>
-                        <span class="topic-folder-group-arrow">${collapsed ? '▶' : '▼'}</span>
-                    </button>
-                    <div class="topic-folder-group-body">
-                        ${chatsInGroup.map(chat => {
-                            const chatName = String(chat.name || '').trim();
-                            const active = chatName === activeChat;
-                            const metaBits = [formatChatMeta(chat)];
-                            if (chat.message_count) metaBits.push(`${chat.message_count} msg`);
-                            const stamp = formatChatTimestamp(chat.modified);
-                            if (stamp) metaBits.push(stamp);
-                            return `
-                                <button type="button" class="topic-chat-item${active ? ' active' : ''}" draggable="true" data-topic-chat="${escapeHtml(chatName)}" data-topic-folder="${escapeHtml(topicName)}">
-                                    <div class="topic-chat-name">${escapeHtml(chat.label || chat.display_name || chatName)}</div>
-                                    <div class="topic-chat-meta">${escapeHtml(metaBits.join(' • '))}</div>
-                                </button>
-                            `;
-                        }).join('')}
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        } else {
+            // Viewing single selected folder — render flat list of chats
+            const sortedChats = working.sort((a, b) => parseChatModified(b) - parseChatModified(a));
+            listEl.innerHTML = sortedChats.map(chat => {
+                const chatName = String(chat.name || '').trim();
+                const active = chatName === activeChat;
+                const metaBits = [formatChatMeta(chat)];
+                if (chat.message_count) metaBits.push(`${chat.message_count} msg`);
+                const stamp = formatChatTimestamp(chat.modified);
+                if (stamp) metaBits.push(stamp);
+                return `
+                    <button type="button" class="topic-chat-item${active ? ' active' : ''}" draggable="true" data-topic-chat="${escapeHtml(chatName)}" data-topic-folder="${escapeHtml(visibleTopic)}">
+                        <div class="topic-chat-top">
+                            <span class="topic-chat-name">${escapeHtml(chat.label || chat.display_name || chatName)}</span>
+                        </div>
+                        <div class="topic-chat-meta">${escapeHtml(metaBits.join(' • '))}</div>
+                    </button>
+                `;
+            }).join('');
+        }
     } catch (error) {
         console.warn('Failed to load chat history shelf:', error);
         listEl.innerHTML = '<div class="topic-shelf-empty">Chat history is unavailable right now.</div>';
@@ -1004,41 +1201,68 @@ async function loadTopicShelf(container, { topic = null } = {}) {
     const folderList = container.querySelector('#topic-folder-list');
     const entryList = container.querySelector('#topic-entry-list');
     const topicInput = container.querySelector('#topic-folder-input');
+    const activeLabel = container.querySelector('#topic-active-folder-label');
     if (!folderList || !entryList || !topicInput) return;
 
     try {
         const data = await api.fetchTopics(topic ?? _selectedTopic, 100);
         const activeTopic = String(topic ?? data.active_topic ?? _selectedTopic ?? '').trim();
-        if (activeTopic) {
+        if (activeTopic !== undefined) {
             _selectedTopic = activeTopic;
         }
 
-        const visibleTopic = _selectedTopic || String(data.active_topic || '').trim();
+        const visibleTopic = _selectedTopic || '';
         if (topicInput && !topicInput.matches(':focus')) {
             topicInput.value = visibleTopic;
+        }
+        if (activeLabel) {
+            activeLabel.textContent = visibleTopic || 'All';
         }
 
         await loadTopicChatList(container, { topic: visibleTopic });
 
         const folders = Array.isArray(data.folders) ? data.folders : [];
-        folderList.innerHTML = folders.length
-            ? folders.map(folder => `
-                <button type="button" class="topic-folder-chip${folder.topic === visibleTopic ? ' active' : ''}" data-topic="${escapeHtml(folder.topic)}">
-                    <div class="topic-folder-name">${escapeHtml(folder.topic)}</div>
-                    <div class="topic-folder-meta">${folder.entry_count || 0} saved • ${folder.chat_count || 0} chats</div>
-                </button>
-            `).join('')
-            : '<div class="topic-shelf-empty">No topic folders yet. Save a quote or summary from a message to start a shelf.</div>';
+        const totalAllChats = folders.reduce((sum, f) => sum + (f.chat_count || 0), 0);
+        const totalAllQuotes = folders.reduce((sum, f) => sum + (f.entry_count || 0), 0);
 
-        const entries = Array.isArray(data.entries) ? data.entries : [];
+        // Render Folder Pills
+        let pillsHtml = `
+            <button type="button" class="topic-folder-pill${!visibleTopic ? ' active' : ''}" data-topic="">
+                <span>🌐 All</span>
+                <span class="topic-pill-count">${totalAllChats + totalAllQuotes}</span>
+            </button>
+        `;
+        pillsHtml += folders.map(f => `
+            <button type="button" class="topic-folder-pill${f.topic === visibleTopic ? ' active' : ''}" data-topic="${escapeHtml(f.topic)}">
+                <span>📁 ${escapeHtml(f.topic)}</span>
+                <span class="topic-pill-count">${(f.chat_count || 0) + (f.entry_count || 0)}</span>
+            </button>
+        `).join('');
+        folderList.innerHTML = pillsHtml;
+
+        // Filter and Render Saved Quotes / Entries
+        let entries = Array.isArray(data.entries) ? data.entries : [];
+        if (_topicChatSearch) {
+            const s = _topicChatSearch.toLowerCase();
+            entries = entries.filter(e => 
+                (e.title || '').toLowerCase().includes(s) ||
+                (e.topic || '').toLowerCase().includes(s) ||
+                (e.content || '').toLowerCase().includes(s)
+            );
+        }
+
         _topicEntryCache = new Map(entries.map(entry => [String(entry.id), entry]));
+
+        const tabQuotesCount = container.querySelector('#tab-quotes-count');
+        if (tabQuotesCount) tabQuotesCount.textContent = entries.length;
+
         entryList.innerHTML = entries.length
             ? entries.map(entry => `
                 <div class="topic-entry-card">
                     <div class="topic-entry-head">
                         <div>
                             <div class="topic-entry-title">${escapeHtml(entry.title || entry.topic || 'Saved Entry')}</div>
-                            <div class="topic-entry-meta">${escapeHtml(entry.topic || '')}${entry.created_at ? ` • ${escapeHtml(formatTopicDate(entry.created_at))}` : ''}</div>
+                            <div class="topic-entry-meta">📁 ${escapeHtml(entry.topic || 'General')}${entry.created_at ? ` • ${escapeHtml(formatTopicDate(entry.created_at))}` : ''}</div>
                         </div>
                         <span class="topic-entry-kind">${escapeHtml(entry.kind || 'quote')}</span>
                     </div>
@@ -1052,8 +1276,8 @@ async function loadTopicShelf(container, { topic = null } = {}) {
             `).join('')
             : `<div class="topic-shelf-empty">${
                 visibleTopic
-                    ? `No saved entries in ${escapeHtml(visibleTopic)} yet.`
-                    : 'No saved entries yet.'
+                    ? `No saved quotes in "${escapeHtml(visibleTopic)}" yet.`
+                    : 'No saved quotes yet. Click 🗂️ on any message to save a quote!'
             }</div>`;
     } catch (error) {
         console.warn('Failed to load topic shelf:', error);
@@ -1305,6 +1529,9 @@ async function loadSidebar() {
         setToggle(container, '#sb-spice-toggle', settings.spice_enabled !== false,
             `Style \u00b7 ${settings.spice_turns || 3}`);
         setToggle(container, '#sb-datetime-toggle', settings.inject_datetime === true);
+        const showReasoning = localStorage.getItem('terminus-show-reasoning') !== 'false';
+        setToggle(container, '#sb-reasoning-toggle', showReasoning);
+        document.body.classList.toggle('hide-reasoning', !showReasoning);
         const storyEnabled = settings.story_engine_enabled === true;
         const storyPreset = settings.story_preset;
         setChecked(container, '#sb-story-enabled', storyEnabled);
@@ -1444,7 +1671,37 @@ function updateModelSelector(container, providerKey, currentModel) {
 
     if (group) group.style.display = 'none';
     if (customGroup) customGroup.style.display = 'none';
-    if (quickSelect) quickSelect.style.display = 'none';
+
+    // Populate quick-model-select with all enabled models
+    if (quickSelect) {
+        const enabledProviders = llmProviders.filter(p => p.enabled);
+        if (enabledProviders.length > 0) {
+            let quickHtml = '<option value="auto">Auto (Default)</option>';
+            enabledProviders.forEach(p => {
+                const pMeta = llmMetadata[p.key];
+                if (pMeta?.model_options && Object.keys(pMeta.model_options).length > 0) {
+                    quickHtml += `<optgroup label="${p.display_name || p.key}">`;
+                    Object.entries(pMeta.model_options).forEach(([mKey, mLabel]) => {
+                        const val = `${p.key}:${mKey}`;
+                        const isSel = (providerKey === p.key && currentModel === mKey) || (providerKey === p.key && !currentModel && p.model === mKey);
+                        quickHtml += `<option value="${val}" ${isSel ? 'selected' : ''}>${mLabel}</option>`;
+                    });
+                    quickHtml += `</optgroup>`;
+                }
+            });
+            quickSelect.innerHTML = quickHtml;
+            quickSelect.style.display = '';
+
+            if (providerKey && providerKey !== 'auto' && providerKey !== 'none') {
+                const targetVal = `${providerKey}:${currentModel || llmProviders.find(p => p.key === providerKey)?.model || ''}`;
+                if (quickSelect.querySelector(`option[value="${targetVal}"]`)) {
+                    quickSelect.value = targetVal;
+                }
+            } else {
+                quickSelect.value = 'auto';
+            }
+        }
+    }
 
     if (providerKey === 'auto' || providerKey === 'none' || !providerKey) return;
 
@@ -1462,15 +1719,12 @@ function updateModelSelector(container, providerKey, currentModel) {
             ).join('');
 
         select.innerHTML = optionsHTML;
-        if (quickSelect) quickSelect.innerHTML = optionsHTML;
 
         if (currentModel && !meta.model_options[currentModel]) {
             const customOpt = `<option value="${currentModel}" selected>${currentModel}</option>`;
             select.innerHTML += customOpt;
-            if (quickSelect) quickSelect.innerHTML += customOpt;
         }
         if (group) group.style.display = '';
-        if (quickSelect) quickSelect.style.display = '';
     } else if (providerKey === 'other') {
         if (custom) custom.value = currentModel || '';
         if (customGroup) customGroup.style.display = '';

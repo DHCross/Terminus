@@ -146,7 +146,6 @@ const createToolbar = (idx, total, role = 'user') => {
     const tb = createElem('div', { class: 'toolbar' });
     const buttons = [
         ['trash-btn', 'trash', '\u{1F5D1}\uFE0F', 'Delete'],
-        ['continue-btn', 'continue', '\u{25B6}\uFE0F', 'Continue'],
         ['edit-btn', 'edit', '\u{270F}\uFE0F', 'Edit'],
         ['replay-btn', 'replay', '\u{1F50A}', 'Replay TTS']
     ];

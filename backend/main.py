@@ -19,13 +19,15 @@ from datetime import datetime
 from io import StringIO
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from config import settings
 from core.claude_client import ClaudeClient
+from core.deepseek_client import DeepSeekClient
 from core.continuity_db import ContinuityDB
 from core.stt import get_stt_engine
 from core.voice import get_voice_engine
@@ -40,16 +42,29 @@ logger = logging.getLogger(__name__)
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Terminus",
-    description="M1-optimized self-hosted Claude with voice, tools, and scheduler",
+    description="M1-optimized self-hosted Claude & DeepSeek with voice, tools, and scheduler",
     version="2.1.0",
 )
 
 # ── Core services ─────────────────────────────────────────────────────────────
 claude_client = ClaudeClient(tools=all_tools())
+deepseek_client = DeepSeekClient(tools=all_tools())
 continuity_db = ContinuityDB(settings.DATA_DIR / "continuity.db")
 continuity_db.init_schema()
 voice_engine = get_voice_engine()
-scheduler = get_scheduler(generate_fn=claude_client.send_message, db=continuity_db)
+
+def _scheduler_generate(prompt: str) -> str:
+    candidates = _get_provider_candidates()
+    last_err = None
+    for name, client in candidates:
+        try:
+            return client.send_message(prompt)
+        except Exception as e:
+            last_err = e
+            continue
+    raise RuntimeError(f"Scheduler generate failed: {last_err}")
+
+scheduler = get_scheduler(generate_fn=_scheduler_generate, db=continuity_db)
 
 current_conversation_id: str = None
 current_toolset_name: str = "all"
@@ -58,6 +73,28 @@ enabled_functions_override: list[str] | None = None
 TOOLSETS_PATH = Path(__file__).parent.parent / "sapphire-data" / "toolsets" / "toolsets.json"
 KNOWLEDGE_DB_PATH = Path(__file__).parent.parent / "sapphire-data" / "knowledge.db"
 MIND_DB_PATH = settings.DATA_DIR / "mind.db"
+
+
+def _clear_clients_history() -> None:
+    """Clear conversation history on all LLM clients."""
+    claude_client.clear_history()
+    deepseek_client.clear_history()
+
+
+def _sync_history_to_clients(messages: list) -> None:
+    """Populate conversation history on all LLM clients from continuity messages."""
+    _clear_clients_history()
+    for msg in messages:
+        claude_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+        deepseek_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+
+
+def _sync_after_turn(source_client) -> None:
+    """Mirror conversation history between Claude and DeepSeek after a completed turn."""
+    if source_client is claude_client:
+        deepseek_client.conversation_history = list(claude_client.conversation_history)
+    elif source_client is deepseek_client:
+        claude_client.conversation_history = list(deepseek_client.conversation_history)
 
 
 def _ensure_active_conversation() -> str | None:
@@ -70,9 +107,7 @@ def _ensure_active_conversation() -> str | None:
         return None
     current_conversation_id = conversations[0]["id"]
     messages = continuity_db.get_conversation_messages(current_conversation_id)
-    claude_client.clear_history()
-    for msg in messages:
-        claude_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+    _sync_history_to_clients(messages)
     return current_conversation_id
 
 
@@ -102,8 +137,16 @@ def _chat_payloads() -> list[dict]:
     finally:
         conn.close()
 
-    return [
-        {
+    payloads = []
+    for c in conversations:
+        meta = {}
+        if c.get("metadata"):
+            try:
+                meta = json.loads(c["metadata"]) if isinstance(c["metadata"], str) else c["metadata"]
+            except Exception:
+                meta = {}
+        topic_folder = meta.get("topic_folder") or meta.get("settings", {}).get("topic_folder") or ""
+        payloads.append({
             "name": c["id"],
             "display_name": _format_chat_display_name(c.get("name") or c["id"], c.get("updated_at", ""), counts.get(c["id"], 0)),
             "title": c.get("name") or c["id"],
@@ -113,10 +156,9 @@ def _chat_payloads() -> list[dict]:
             "message_count": counts.get(c["id"], 0),
             "story_chat": False,
             "private_chat": False,
-            "settings": {"topic_folder": ""},
-        }
-        for c in conversations
-    ]
+            "settings": {"topic_folder": topic_folder, **meta.get("settings", {})},
+        })
+    return payloads
 
 
 def _tool_name_from_schema(tool: object) -> str | None:
@@ -468,23 +510,181 @@ class JournalSaveRequest(BaseModel):
     source_timestamp: str | None = None
 
 
+# ── Jinja2 Templates ──────────────────────────────────────────────────────────
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.get("/")
-async def serve_index():
+async def serve_index(request: Request):
     index_path = Path(__file__).parent / "templates" / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path, media_type="text/html")
-    return HTMLResponse("<html><body><h1>Terminus v2.1.0 Ready</h1></body></html>")
+    if not index_path.exists():
+        return HTMLResponse("<html><body><h1>Terminus v2.1.0 Ready</h1></body></html>")
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "v": "2.1.0",
+            "app_version": "2.1.0",
+            "managed": False,
+            "csrf_token": lambda: "terminus_csrf_token",
+            "import_map": json.dumps({"imports": {}}),
+        },
+    )
+
+
+# ── UI Support Endpoints (Avatars, Personas, Spice-sets, Plugins) ─────────────
+
+@app.get("/api/avatars")
+async def get_avatars():
+    return {
+        "user": "/static/users/user.webp",
+        "assistant": "/static/users/assistant.webp",
+    }
+
+
+@app.get("/api/spice-sets")
+async def get_spice_sets():
+    return {
+        "spice_sets": [
+            {"name": "default", "emoji": "🌶️", "category_count": 3, "is_default": True},
+            {"name": "concise", "emoji": "⚡", "category_count": 2, "is_default": False},
+            {"name": "creative", "emoji": "🎨", "category_count": 3, "is_default": False},
+        ],
+        "current": _chat_settings.get("spice_set", "default"),
+    }
+
+
+@app.get("/api/spice-sets/current")
+async def get_current_spice_set():
+    return {"name": _chat_settings.get("spice_set", "default")}
+
+
+@app.post("/api/spice-sets/{name}/activate")
+async def activate_spice_set(name: str):
+    _chat_settings["spice_set"] = name
+    return {"status": "activated", "name": name}
+
+
+@app.get("/api/personas")
+async def get_personas():
+    return {
+        "personas": [
+            {
+                "name": "Terminus",
+                "description": "Terminus AI Assistant — M1-optimized with tools & memory",
+                "prompt": "terminus_lab",
+                "is_default": True,
+            }
+        ],
+        "default": "Terminus",
+    }
+
+
+@app.get("/api/personas/{name}")
+async def get_persona(name: str):
+    return {
+        "name": name,
+        "description": f"{name} persona",
+        "prompt": "terminus_lab",
+        "toolset": "all",
+        "voice": settings.VOICE_ID,
+    }
+
+
+@app.get("/api/personas/{name}/avatar")
+async def get_persona_avatar(name: str):
+    avatar_path = Path(__file__).parent / "static" / "users" / "assistant.webp"
+    if avatar_path.exists():
+        return FileResponse(avatar_path, media_type="image/webp")
+    return Response(status_code=404)
+
+
+@app.get("/api/story/presets")
+async def get_story_presets(source: str = ""):
+    return {"presets": []}
+
+
+@app.get("/api/chats/{chat_name}/documents")
+async def get_chat_documents(chat_name: str):
+    return {"documents": [], "chat_name": chat_name}
+
+
+@app.get("/api/email/accounts")
+async def get_email_accounts():
+    return {"accounts": []}
+
+
+@app.get("/api/bitcoin/wallets")
+async def get_bitcoin_wallets():
+    return {"wallets": []}
+
+
+@app.get("/api/gcal/accounts")
+async def get_gcal_accounts():
+    return {"accounts": []}
+
+
+@app.post("/api/upload/image")
+async def upload_image(image: UploadFile = File(...)):
+    uploads_dir = Path(__file__).parent / "static" / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    ext = Path(image.filename or "image.png").suffix or ".png"
+    out_filename = f"upload_{int(time.time())}_{uuid.uuid4().hex[:6]}{ext}"
+    out_path = uploads_dir / out_filename
+    with open(out_path, "wb") as f:
+        content = await image.read()
+        f.write(content)
+    return {"url": f"/static/uploads/{out_filename}", "filename": out_filename}
+
+
+def _get_provider_candidates(primary_override: str = None) -> list:
+    """Return list of (provider_key, client_instance) in order of preference."""
+    pref = (primary_override or _chat_settings.get("llm_primary") or "auto").strip().lower()
+    has_claude = bool(settings.ANTHROPIC_API_KEY)
+    has_deepseek = bool(settings.DEEPSEEK_API_KEY)
+
+    fb_order = _get_fallback_order()
+
+    all_clients = {
+        "claude": (claude_client, has_claude),
+        "deepseek": (deepseek_client, has_deepseek),
+    }
+
+    candidates = []
+    if pref == "claude":
+        candidates.append(("claude", claude_client))
+        if has_deepseek:
+            candidates.append(("deepseek", deepseek_client))
+    elif pref == "deepseek":
+        candidates.append(("deepseek", deepseek_client))
+        if has_claude:
+            candidates.append(("claude", claude_client))
+    else:  # 'auto' or unspecified
+        for p in fb_order:
+            if p in all_clients and all_clients[p][1]:
+                candidates.append((p, all_clients[p][0]))
+        # If no enabled keys found, still provide clients in fallback order
+        if not candidates:
+            for p in fb_order:
+                if p in all_clients:
+                    candidates.append((p, all_clients[p][0]))
+            if not candidates:
+                candidates = [("claude", claude_client), ("deepseek", deepseek_client)]
+
+    return candidates
 
 
 @app.get("/health")
 async def health_check():
+    active_primary = _chat_settings.get("llm_primary", "claude")
+    active_model = deepseek_client.model if active_primary == "deepseek" else claude_client.model
     return {
         "status": "ok",
         "service": "terminus-backend",
         "version": "2.1.0",
-        "model": claude_client.model,
+        "provider": active_primary,
+        "model": active_model,
         "voice": voice_engine.backend,
         "tools": len(claude_client.tools or []),
     }
@@ -492,11 +692,14 @@ async def health_check():
 
 @app.get("/api/config", response_model=ConfigResponse)
 async def get_config():
+    active_primary = _chat_settings.get("llm_primary", "claude")
+    active_model = deepseek_client.model if active_primary == "deepseek" else claude_client.model
+    ready = bool(settings.ANTHROPIC_API_KEY or settings.DEEPSEEK_API_KEY)
     return ConfigResponse(
-        model=claude_client.model,
+        model=active_model,
         host=settings.HOST,
         port=settings.PORT,
-        ready=bool(settings.ANTHROPIC_API_KEY),
+        ready=ready,
         voice_backend=voice_engine.backend,
         tools_enabled=bool(claude_client.tools),
         scheduler_running=bool(scheduler._scheduler and scheduler._scheduler.running),
@@ -505,13 +708,15 @@ async def get_config():
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Send a message to Claude with tool use. Saves to DB and trace files."""
+    """Send a message to primary LLM with tool use, falling back to backup provider if needed."""
     global current_conversation_id
 
-    if not settings.ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not set")
     if not request.message or not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
+
+    candidates = _get_provider_candidates()
+    if not candidates:
+        raise HTTPException(status_code=500, detail="No LLM provider configured")
 
     if current_conversation_id is None:
         current_conversation_id = str(uuid.uuid4())
@@ -520,20 +725,33 @@ async def chat(request: ChatRequest):
             f"session_{datetime.utcnow().isoformat()[:10]}",
         )
 
-    try:
-        response_text = claude_client.send_message(request.message)
-        continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "user", request.message)
-        continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "assistant", response_text, metadata={"provider": "claude", "model": claude_client.model})
-        record_turn(request.message, response_text)
-        return ChatResponse(response=response_text, model=claude_client.model)
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=500, detail=f"Claude API error: {e}")
+    last_error = None
+    for provider_name, client in candidates:
+        try:
+            logger.info(f"Chat turn with {provider_name} ({client.model})...")
+            response_text = client.send_message(request.message)
+            _sync_after_turn(client)
+            continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "user", request.message)
+            continuity_db.add_message(
+                str(uuid.uuid4()),
+                current_conversation_id,
+                "assistant",
+                response_text,
+                metadata={"provider": provider_name, "model": client.model}
+            )
+            record_turn(request.message, response_text)
+            return ChatResponse(response=response_text, model=client.model)
+        except Exception as e:
+            logger.warning(f"Provider {provider_name} failed: {e}. Trying fallback...")
+            last_error = e
+
+    logger.error(f"All LLM providers failed: {last_error}")
+    raise HTTPException(status_code=500, detail=f"LLM API error: {last_error}")
 
 
 @app.post("/api/chat/stream")
 async def chat_stream(body: dict):
-    """SSE streaming chat endpoint used by the browser frontend."""
+    """SSE streaming chat endpoint with automatic provider fallback."""
     global current_conversation_id
 
     text = (body.get("text") or body.get("message") or "").strip()
@@ -542,9 +760,10 @@ async def chat_stream(body: dict):
             yield 'data: {"error":"Message cannot be empty"}\n\n'
         return StreamingResponse(_err(), media_type="text/event-stream")
 
-    if not settings.ANTHROPIC_API_KEY:
+    candidates = _get_provider_candidates()
+    if not candidates:
         async def _err():
-            yield 'data: {"error":"ANTHROPIC_API_KEY not set"}\n\n'
+            yield 'data: {"error":"No LLM API keys configured"}\n\n'
         return StreamingResponse(_err(), media_type="text/event-stream")
 
     if current_conversation_id is None:
@@ -559,39 +778,67 @@ async def chat_stream(body: dict):
         try:
             yield 'data: {"type":"stream_started"}\n\n'
 
-            # Run stream_with_thinking in a thread; collect chunks and yield SSE events
             loop = asyncio.get_event_loop()
             queue: asyncio.Queue = asyncio.Queue()
 
             def _run_thinking():
-                try:
-                    for chunk in claude_client.stream_with_thinking(
-                        text if text else "" ,
-                        thinking_budget=8000
-                    ):
-                        queue.put_nowait(chunk)
-                except Exception as exc:
-                    queue.put_nowait({"type": "error", "content": str(exc)})
-                finally:
-                    queue.put_nowait(None)  # sentinel
+                last_exc = None
+                successful = False
+                for provider_name, client in candidates:
+                    try:
+                        logger.info(f"Streaming chat turn with {provider_name} ({client.model})...")
+                        for chunk in client.stream_with_thinking(
+                            text if text else "",
+                            thinking_budget=8000
+                        ):
+                            chunk["_provider"] = provider_name
+                            chunk["_model"] = client.model
+                            queue.put_nowait(chunk)
+                        _sync_after_turn(client)
+                        successful = True
+                        break
+                    except Exception as exc:
+                        logger.warning(f"Provider {provider_name} streaming failed: {exc}. Trying fallback...")
+                        last_exc = exc
+
+                if not successful:
+                    queue.put_nowait({"type": "error", "content": str(last_exc or "LLM stream failed")})
+                queue.put_nowait(None)  # sentinel
 
             loop.run_in_executor(None, _run_thinking)
 
             response_text = ""
             reasoning_text = ""
+            in_thinking = False
+            used_provider = candidates[0][0]
+            used_model = candidates[0][1].model
+
             while True:
                 chunk = await queue.get()
                 if chunk is None:
                     break
+                if chunk.get("_provider"):
+                    used_provider = chunk["_provider"]
+                if chunk.get("_model"):
+                    used_model = chunk["_model"]
+
                 if chunk["type"] == "error":
+                    if in_thinking:
+                        yield f'data: {json.dumps({"type": "content", "text": "</think>"})}\n\n'
+                        in_thinking = False
                     yield f'data: {json.dumps({"error": chunk["content"]})}\n\n'
                     return
                 elif chunk["type"] == "thinking":
-                    # Wrap in <think> tags so the UI accordion renders it
                     reasoning_text += chunk["content"]
-                    tagged = f"<think>{chunk['content']}</think>"
-                    yield f'data: {json.dumps({"type": "content", "text": tagged})}\n\n'
+                    if not in_thinking:
+                        in_thinking = True
+                        yield f'data: {json.dumps({"type": "content", "text": "<think>" + chunk["content"]})}\n\n'
+                    else:
+                        yield f'data: {json.dumps({"type": "content", "text": chunk["content"]})}\n\n'
                 elif chunk["type"] == "text":
+                    if in_thinking:
+                        in_thinking = False
+                        yield f'data: {json.dumps({"type": "content", "text": "</think>"})}\n\n'
                     response_text += chunk["content"]
                     # Stream text in smallish pieces so the UI feels live
                     words = chunk["content"].split(" ")
@@ -603,6 +850,10 @@ async def chat_stream(body: dict):
                             buf = ""
                             await asyncio.sleep(0)
 
+            if in_thinking:
+                in_thinking = False
+                yield f'data: {json.dumps({"type": "content", "text": "</think>"})}\n\n'
+
             if not body.get("skip_user_message") and text:
                 continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "user", text)
             stored_content = f"<think>{reasoning_text}</think>\n\n{response_text}" if reasoning_text else response_text
@@ -612,8 +863,8 @@ async def chat_stream(body: dict):
                 "assistant",
                 stored_content,
                 metadata={
-                    "provider": "claude",
-                    "model": claude_client.model,
+                    "provider": used_provider,
+                    "model": used_model,
                     "reasoning": reasoning_text,
                 },
             )
@@ -641,7 +892,7 @@ async def chat_stream(body: dict):
 @app.post("/api/voice/chat")
 async def voice_chat(request: VoiceChatRequest):
     """
-    Voice loop: text-in → Claude (streaming) → ElevenLabs audio-out.
+    Voice loop: text-in → LLM (streaming) → ElevenLabs audio-out.
     Returns streaming MP3. Latency target: ~1.5s to first audio byte.
     """
     global current_conversation_id
@@ -656,14 +907,43 @@ async def voice_chat(request: VoiceChatRequest):
             f"voice_{datetime.utcnow().isoformat()[:10]}",
         )
 
-    try:
-        # Get full response (streaming internally), then pass to voice engine
-        full_response = ""
-        for chunk in claude_client.stream_message(request.text):
-            full_response += chunk
+    candidates = _get_provider_candidates()
+    if not candidates:
+        raise HTTPException(status_code=500, detail="No LLM providers available")
 
+    full_response = ""
+    used_provider = candidates[0][0]
+    used_model = candidates[0][1].model
+    success = False
+    last_err = None
+
+    for provider_name, client in candidates:
+        try:
+            full_response = ""
+            for chunk in client.stream_message(request.text):
+                full_response += chunk
+            used_provider = provider_name
+            used_model = client.model
+            _sync_after_turn(client)
+            success = True
+            break
+        except Exception as exc:
+            logger.warning(f"Voice chat error on {provider_name}: {exc}. Trying fallback...")
+            last_err = exc
+
+    if not success:
+        logger.error(f"Voice chat failed across all providers: {last_err}")
+        raise HTTPException(status_code=500, detail=f"Voice chat error: {last_err}")
+
+    try:
         continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "user", request.text)
-        continuity_db.add_message(str(uuid.uuid4()), current_conversation_id, "assistant", full_response, metadata={"provider": "claude", "model": claude_client.model})
+        continuity_db.add_message(
+            str(uuid.uuid4()),
+            current_conversation_id,
+            "assistant",
+            full_response,
+            metadata={"provider": used_provider, "model": used_model}
+        )
         record_turn(request.text, full_response)
 
         def audio_generator():
@@ -679,7 +959,7 @@ async def voice_chat(request: VoiceChatRequest):
             },
         )
     except Exception as e:
-        logger.error(f"Voice chat error: {e}")
+        logger.error(f"Voice synthesis error: {e}")
         raise HTTPException(status_code=500, detail=f"Voice chat error: {e}")
 
 
@@ -715,7 +995,7 @@ async def tts(request: TTSRequest):
         for chunk in voice_engine.stream(request.text):
             yield chunk
 
-    content_type = "audio/mpeg" if voice_engine.available else "audio/aiff"
+    content_type = "audio/mpeg"
     return StreamingResponse(
         audio_generator(),
         media_type=content_type,
@@ -810,16 +1090,14 @@ async def load_conversation(conv_id: str):
     global current_conversation_id
     current_conversation_id = conv_id
     messages = continuity_db.get_conversation_messages(conv_id)
-    claude_client.clear_history()
-    for msg in messages:
-        claude_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+    _sync_history_to_clients(messages)
     return {"status": "loaded", "conversation_id": conv_id, "message_count": len(messages)}
 
 
 @app.post("/api/history/clear")
 async def clear_history():
     global current_conversation_id
-    claude_client.clear_history()
+    _clear_clients_history()
     current_conversation_id = None
     return {"status": "cleared"}
 
@@ -1003,14 +1281,192 @@ async def list_chats():
     }
 
 
+_TOPICS_JSON_PATH = Path(__file__).parent.parent / "sapphire-data" / "topics.json"
+
+
+def _load_topics() -> list[dict]:
+    try:
+        if _TOPICS_JSON_PATH.exists():
+            data = json.loads(_TOPICS_JSON_PATH.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                return data
+            if isinstance(data, dict):
+                return data.get("entries", [])
+    except Exception as e:
+        logger.warning(f"Failed to load topics: {e}")
+    return []
+
+
+def _save_topics(entries: list[dict]) -> None:
+    try:
+        _TOPICS_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _TOPICS_JSON_PATH.write_text(json.dumps({"entries": entries}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    except Exception as e:
+        logger.error(f"Failed to save topics: {e}")
+
+
 @app.get("/api/topics")
 async def get_topics(topic: str = "", limit: int = 100):
     """Topic shelf data — folders and saved entries."""
+    entries = _load_topics()
+    chats = _chat_payloads()
+
+    folder_entry_counts: dict[str, int] = {}
+    folder_chat_counts: dict[str, int] = {}
+
+    for e in entries:
+        f = (e.get("topic") or "").strip()
+        if f:
+            folder_entry_counts[f] = folder_entry_counts.get(f, 0) + 1
+
+    for c in chats:
+        f = (c.get("settings", {}).get("topic_folder") or "").strip()
+        if f:
+            folder_chat_counts[f] = folder_chat_counts.get(f, 0) + 1
+
+    all_folder_names = sorted(set(list(folder_entry_counts.keys()) + list(folder_chat_counts.keys())))
+    folders = [
+        {
+            "topic": name,
+            "entry_count": folder_entry_counts.get(name, 0),
+            "chat_count": folder_chat_counts.get(name, 0),
+        }
+        for name in all_folder_names
+    ]
+
+    selected_topic = topic.strip()
+    if selected_topic:
+        filtered_entries = [e for e in entries if (e.get("topic") or "").strip().lower() == selected_topic.lower()]
+    else:
+        filtered_entries = entries
+
+    filtered_entries.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+
     return {
-        "active_topic": topic or "",
-        "folders": [],
-        "entries": [],
+        "active_topic": selected_topic,
+        "folders": folders,
+        "entries": filtered_entries[:limit],
     }
+
+
+@app.post("/api/topics/entries")
+async def save_topic_entry(payload: dict):
+    """Save a quote or thread summary into a topic folder."""
+    content = (payload.get("content") or "").strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="content is required")
+
+    raw_topic = (payload.get("topic") or "").strip()
+    topic = raw_topic if raw_topic else "General"
+    kind = (payload.get("kind") or "quote").strip().lower()
+    title = (payload.get("title") or "").strip() or (f"Saved {kind.capitalize()}" if kind else "Saved Entry")
+    source_chat = (payload.get("source_chat") or "").strip()
+    source_msg_ts = payload.get("source_message_timestamp")
+
+    entries = _load_topics()
+    new_entry = {
+        "id": f"top_{uuid.uuid4().hex[:8]}",
+        "topic": topic,
+        "kind": kind,
+        "title": title,
+        "source_chat": source_chat,
+        "source_message_timestamp": source_msg_ts,
+        "content": content,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    entries.insert(0, new_entry)
+    _save_topics(entries)
+
+    return {"ok": True, "entry": new_entry}
+
+
+@app.delete("/api/topics/entries/{entry_id}")
+async def delete_topic_entry(entry_id: str):
+    """Delete a topic entry by ID."""
+    entries = _load_topics()
+    orig_len = len(entries)
+    entries = [e for e in entries if str(e.get("id")) != str(entry_id)]
+    if len(entries) != orig_len:
+        _save_topics(entries)
+    return {"ok": True, "deleted": entry_id}
+
+
+@app.post("/api/chats/{chat_name}/topic-folder")
+async def set_chat_topic_folder(chat_name: str, body: dict):
+    """Assign or move a chat to a topic folder."""
+    folder = (body or {}).get("topic_folder", "").strip()
+    continuity_db.update_conversation_metadata(chat_name, {"topic_folder": folder})
+    return {"ok": True, "chat_name": chat_name, "topic_folder": folder}
+
+
+@app.post("/api/topics/rename")
+async def rename_topic_folder(body: dict):
+    """Rename a topic folder across all saved quotes and categorized chats."""
+    old_name = (body.get("old_name") or "").strip()
+    new_name = (body.get("new_name") or "").strip()
+    if not old_name or not new_name:
+        raise HTTPException(status_code=400, detail="old_name and new_name are required")
+
+    # 1. Update topics.json
+    entries = _load_topics()
+    modified = False
+    for e in entries:
+        if (e.get("topic") or "").strip().lower() == old_name.lower():
+            e["topic"] = new_name
+            modified = True
+    if modified:
+        _save_topics(entries)
+
+    # 2. Update conversations in continuity_db
+    convs = continuity_db.get_all_conversations()
+    for c in convs:
+        meta = {}
+        if c.get("metadata"):
+            try:
+                meta = json.loads(c["metadata"]) if isinstance(c["metadata"], str) else c["metadata"]
+            except Exception:
+                meta = {}
+        tf = meta.get("topic_folder") or meta.get("settings", {}).get("topic_folder") or ""
+        if tf.strip().lower() == old_name.lower():
+            meta["topic_folder"] = new_name
+            if "settings" in meta and isinstance(meta["settings"], dict):
+                meta["settings"]["topic_folder"] = new_name
+            continuity_db.update_conversation_metadata(c["id"], meta)
+
+    return {"ok": True, "old_name": old_name, "new_name": new_name}
+
+
+@app.post("/api/topics/delete")
+async def delete_topic_folder(body: dict):
+    """Delete a topic folder, clearing its tag on chats and removing its quotes."""
+    folder_name = (body.get("topic") or "").strip()
+    if not folder_name:
+        raise HTTPException(status_code=400, detail="topic is required")
+
+    # 1. Delete quotes with this topic
+    entries = _load_topics()
+    orig_len = len(entries)
+    entries = [e for e in entries if (e.get("topic") or "").strip().lower() != folder_name.lower()]
+    if len(entries) != orig_len:
+        _save_topics(entries)
+
+    # 2. Clear topic_folder for conversations in continuity_db
+    convs = continuity_db.get_all_conversations()
+    for c in convs:
+        meta = {}
+        if c.get("metadata"):
+            try:
+                meta = json.loads(c["metadata"]) if isinstance(c["metadata"], str) else c["metadata"]
+            except Exception:
+                meta = {}
+        tf = meta.get("topic_folder") or meta.get("settings", {}).get("topic_folder") or ""
+        if tf.strip().lower() == folder_name.lower():
+            meta["topic_folder"] = ""
+            if "settings" in meta and isinstance(meta["settings"], dict):
+                meta["settings"]["topic_folder"] = ""
+            continuity_db.update_conversation_metadata(c["id"], meta)
+
+    return {"ok": True, "deleted": folder_name}
 
 
 @app.post("/api/chats")
@@ -1018,10 +1474,23 @@ async def create_chat(body: dict = None):
     """Create a new chat session (alias for new conversation)."""
     new_id = str(uuid.uuid4())
     name = (body or {}).get("name", f"Chat {new_id[:8]}")
-    claude_client.clear_history()
+    _clear_clients_history()
     global current_conversation_id
-    current_conversation_id = continuity_db.add_conversation(name)
+    current_conversation_id = new_id
+    continuity_db.add_conversation(new_id, name)
     return {"name": current_conversation_id, "title": name}
+
+
+@app.delete("/api/chats/{chat_name}")
+async def delete_chat(chat_name: str):
+    """Delete a chat session by ID."""
+    global current_conversation_id
+    continuity_db.delete_conversation(chat_name)
+    if current_conversation_id == chat_name:
+        _clear_clients_history()
+        convs = continuity_db.get_all_conversations()
+        current_conversation_id = convs[0]["id"] if convs else None
+    return {"ok": True, "deleted": chat_name}
 
 
 @app.get("/api/chats/{chat_name}/activate")
@@ -1031,9 +1500,7 @@ async def activate_chat(chat_name: str):
     global current_conversation_id
     current_conversation_id = chat_name
     messages = continuity_db.get_conversation_messages(chat_name)
-    claude_client.clear_history()
-    for msg in messages:
-        claude_client.conversation_history.append({"role": msg["role"], "content": msg["content"]})
+    _sync_history_to_clients(messages)
     return {"status": "activated", "name": chat_name, "settings": {}}
 
 
@@ -1067,8 +1534,8 @@ _runtime_settings: dict = {}
 _chat_settings: dict = {
     "prompt": "terminus_lab",
     "persona": "Terminus",
-    "llm_primary": "claude",
-    "llm_model": claude_client.model,
+    "llm_primary": "deepseek",
+    "llm_model": deepseek_client.model,
 }
 
 CLAUDE_MODEL_OPTIONS = {
@@ -1080,11 +1547,52 @@ CLAUDE_MODEL_OPTIONS = {
     "claude-opus-5": "Claude Opus 5",
 }
 
+DEEPSEEK_MODEL_OPTIONS = {
+    "deepseek-v4-flash": "DeepSeek V4 Flash",
+    "deepseek-v4-pro": "DeepSeek V4 Pro",
+}
+
+
+_SETTINGS_JSON_PATH = Path(__file__).parent.parent / "sapphire-data" / "settings.json"
+
+def _load_settings_json() -> dict:
+    try:
+        return json.loads(_SETTINGS_JSON_PATH.read_text())
+    except Exception:
+        return {}
+
+def _load_settings_json_key(section: str, key: str, default):
+    """Read a value from settings.json[section][key]."""
+    d = _load_settings_json()
+    return d.get(section, {}).get(key, default)
+
+def _save_settings_json_section(section: str, updates: dict) -> None:
+    data = _load_settings_json()
+    section_data = data.setdefault(section, {})
+    section_data.update(updates)
+    _SETTINGS_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _SETTINGS_JSON_PATH.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def _get_fallback_order() -> list:
+    order = _load_settings_json_key("llm", "LLM_FALLBACK_ORDER", None)
+    if not order or not isinstance(order, list):
+        order = _runtime_settings.get("LLM_FALLBACK_ORDER", ["deepseek", "claude"])
+    return order
+
+
+def _save_fallback_order(order: list) -> None:
+    _runtime_settings["LLM_FALLBACK_ORDER"] = order
+    _save_settings_json_section("llm", {"LLM_FALLBACK_ORDER": order})
+
 
 def _current_chat_settings() -> dict:
     settings_payload = dict(_chat_settings)
-    settings_payload["llm_primary"] = "claude"
-    settings_payload["llm_model"] = claude_client.model
+    primary = _chat_settings.get("llm_primary", "claude")
+    if primary == "deepseek":
+        settings_payload["llm_model"] = deepseek_client.model
+    else:
+        settings_payload["llm_model"] = claude_client.model
     return settings_payload
 
 
@@ -1092,12 +1600,51 @@ def _apply_chat_settings(updates: dict) -> dict:
     if not isinstance(updates, dict):
         return _current_chat_settings()
     _chat_settings.update(updates)
-    model = str(updates.get("llm_model") or claude_client.model).strip()
-    if model and model in CLAUDE_MODEL_OPTIONS:
-        claude_client.set_model(model)
-    _chat_settings["llm_primary"] = "claude"
-    _chat_settings["llm_model"] = claude_client.model
+
+    primary = str(updates.get("llm_primary") or _chat_settings.get("llm_primary") or "claude").strip().lower()
+    _chat_settings["llm_primary"] = primary
+
+    model = str(updates.get("llm_model") or "").strip()
+    if model:
+        if model in DEEPSEEK_MODEL_OPTIONS or primary == "deepseek":
+            deepseek_client.set_model(model)
+            _chat_settings["llm_model"] = deepseek_client.model
+            _save_settings_json_section("llm", {"DEEPSEEK_MODEL": deepseek_client.model, "LLM_PRIMARY": primary})
+        elif model in CLAUDE_MODEL_OPTIONS or primary == "claude":
+            claude_client.set_model(model)
+            _chat_settings["llm_model"] = claude_client.model
+            _save_settings_json_section("llm", {"LLM_MODEL": claude_client.model, "LLM_PRIMARY": primary})
+        else:
+            if primary == "deepseek":
+                deepseek_client.set_model(model)
+            else:
+                claude_client.set_model(model)
+            _chat_settings["llm_model"] = model
+            _save_settings_json_section("llm", {"LLM_MODEL": model, "LLM_PRIMARY": primary})
+    else:
+        if primary == "deepseek":
+            _chat_settings["llm_model"] = deepseek_client.model
+        else:
+            _chat_settings["llm_model"] = claude_client.model
+        _save_settings_json_section("llm", {"LLM_PRIMARY": primary})
+
     return _current_chat_settings()
+
+
+def _load_persisted_llm_settings() -> None:
+    llm = _load_settings_json().get("llm", {})
+    deepseek_model = str(llm.get("DEEPSEEK_MODEL") or "").strip()
+    claude_model = str(llm.get("LLM_MODEL") or "").strip()
+    primary = str(llm.get("LLM_PRIMARY") or "").strip().lower()
+    if deepseek_model:
+        deepseek_client.set_model(deepseek_model)
+    if claude_model:
+        claude_client.set_model(claude_model)
+    if primary:
+        _chat_settings["llm_primary"] = primary
+    _chat_settings["llm_model"] = deepseek_client.model if _chat_settings.get("llm_primary") == "deepseek" else claude_client.model
+
+_load_persisted_llm_settings()
 
 
 def _apply_voice_settings(updates: dict) -> None:
@@ -1120,25 +1667,6 @@ def _apply_voice_settings(updates: dict) -> None:
             persisted["TTS_PROVIDER"] = "elevenlabs"
         _save_settings_json_section("tts", persisted)
 
-_SETTINGS_JSON_PATH = Path(__file__).parent.parent / "sapphire-data" / "settings.json"
-
-def _load_settings_json() -> dict:
-    try:
-        return json.loads(_SETTINGS_JSON_PATH.read_text())
-    except Exception:
-        return {}
-
-def _load_settings_json_key(section: str, key: str, default):
-    """Read a value from settings.json[section][key]."""
-    d = _load_settings_json()
-    return d.get(section, {}).get(key, default)
-
-def _save_settings_json_section(section: str, updates: dict) -> None:
-    data = _load_settings_json()
-    section_data = data.setdefault(section, {})
-    section_data.update(updates)
-    _SETTINGS_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _SETTINGS_JSON_PATH.write_text(json.dumps(data, indent=2) + "\n")
 
 def _load_persisted_voice_settings() -> None:
     tts = _load_settings_json().get("tts", {})
@@ -1219,6 +1747,30 @@ def _all_settings() -> dict:
         "BACKUPS_KEEP_WEEKLY": 4,
         "BACKUPS_KEEP_MONTHLY": 3,
         "BACKUPS_KEEP_MANUAL": 10,
+        # LLM Settings
+        "LLM_PROVIDERS": {
+            "claude": {
+                "display_name": "Claude",
+                "enabled": bool(settings.ANTHROPIC_API_KEY),
+                "model": claude_client.model,
+                "api_key": settings.ANTHROPIC_API_KEY,
+                "api_key_env": "ANTHROPIC_API_KEY",
+                "use_as_fallback": True,
+                "thinking_enabled": True,
+                "thinking_budget": 8000,
+            },
+            "deepseek": {
+                "display_name": "DeepSeek",
+                "enabled": bool(settings.DEEPSEEK_API_KEY),
+                "model": deepseek_client.model,
+                "api_key": settings.DEEPSEEK_API_KEY,
+                "api_key_env": "DEEPSEEK_API_KEY",
+                "base_url": settings.DEEPSEEK_BASE_URL,
+                "use_as_fallback": True,
+            },
+        },
+        "LLM_FALLBACK_ORDER": _get_fallback_order(),
+        "MODEL_GENERATION_PROFILES": _load_settings_json_key("llm", "MODEL_GENERATION_PROFILES", {}),
         # Wakeword tab
         "WAKE_WORD_ENABLED": False,
         "WAKEWORD_MODEL": "hey_jarvis",
@@ -1302,25 +1854,101 @@ async def reload_settings():
 
 @app.get("/api/llm/providers")
 async def get_llm_providers():
+    has_claude = bool(settings.ANTHROPIC_API_KEY)
+    has_deepseek = bool(settings.DEEPSEEK_API_KEY)
     return {
         "providers": [
             {
                 "key": "claude",
                 "display_name": "Claude",
-                "enabled": True,
+                "enabled": has_claude,
                 "is_local": False,
                 "model": claude_client.model,
-            }
+                "has_env_key": bool(os.getenv("ANTHROPIC_API_KEY")),
+                "env_var": "ANTHROPIC_API_KEY",
+                "use_as_fallback": True,
+            },
+            {
+                "key": "deepseek",
+                "display_name": "DeepSeek",
+                "enabled": has_deepseek,
+                "is_local": False,
+                "model": deepseek_client.model,
+                "has_env_key": bool(os.getenv("DEEPSEEK_API_KEY")),
+                "env_var": "DEEPSEEK_API_KEY",
+                "use_as_fallback": True,
+            },
         ],
         "metadata": {
             "claude": {
+                "display_name": "Claude",
                 "model_options": CLAUDE_MODEL_OPTIONS,
                 "supports_thinking": True,
                 "thinking_enabled": True,
                 "thinking_budget": 8000,
-            }
+                "api_key_env": "ANTHROPIC_API_KEY",
+            },
+            "deepseek": {
+                "display_name": "DeepSeek",
+                "model_options": DEEPSEEK_MODEL_OPTIONS,
+                "supports_thinking": True,
+                "thinking_enabled": True,
+                "api_key_env": "DEEPSEEK_API_KEY",
+            },
         },
+        "fallback_order": _get_fallback_order(),
     }
+
+
+@app.post("/api/llm/test/{key}")
+async def test_llm_provider(key: str, body: dict = None):
+    body = body or {}
+    if key == "deepseek":
+        if body.get("model"):
+            deepseek_client.set_model(body["model"])
+        return deepseek_client.test_connection()
+    elif key == "claude":
+        if not settings.ANTHROPIC_API_KEY:
+            return {"status": "error", "error": "ANTHROPIC_API_KEY not configured"}
+        try:
+            m = body.get("model") or claude_client.model
+            resp = claude_client.client.messages.create(
+                model=m,
+                max_tokens=5,
+                messages=[{"role": "user", "content": "ping"}],
+            )
+            txt = "".join(b.text for b in resp.content if b.type == "text")
+            return {"status": "success", "response": txt or "OK"}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+    return {"status": "error", "error": f"Unknown provider: {key}"}
+
+
+@app.put("/api/llm/providers/{key}")
+async def update_llm_provider(key: str, body: dict):
+    updates = body or {}
+    if key == "deepseek":
+        if "model" in updates and updates["model"]:
+            deepseek_client.set_model(updates["model"])
+        if "api_key" in updates and updates["api_key"]:
+            settings.DEEPSEEK_API_KEY = updates["api_key"]
+            deepseek_client.api_key = updates["api_key"]
+        _save_settings_json_section("llm", {"DEEPSEEK_MODEL": deepseek_client.model})
+    elif key == "claude":
+        if "model" in updates and updates["model"]:
+            claude_client.set_model(updates["model"])
+        if "api_key" in updates and updates["api_key"]:
+            settings.ANTHROPIC_API_KEY = updates["api_key"]
+        _save_settings_json_section("llm", {"LLM_MODEL": claude_client.model})
+    return {"ok": True, "provider": key}
+
+
+@app.put("/api/llm/fallback-order")
+async def update_fallback_order(body: dict):
+    order = (body or {}).get("order", [])
+    if isinstance(order, list) and order:
+        _save_fallback_order(order)
+    return {"ok": True, "fallback_order": _get_fallback_order()}
 
 
 @app.get("/api/chats/{chat_name}/settings")

@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     # API Keys
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
+    DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
     ELEVENLABS_API_KEY: str = os.getenv("ELEVENLABS_API_KEY", "")
 
     # Server
@@ -21,6 +23,7 @@ class Settings(BaseSettings):
     # LLM Model
     # Current Anthropic lineup: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5
     LLM_MODEL: str = "claude-sonnet-4-6"
+    DEEPSEEK_MODEL: str = "deepseek-v4-flash"
     LLM_MAX_TOKENS: int = 4096
 
     # Voice (ElevenLabs)

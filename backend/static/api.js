@@ -172,6 +172,18 @@ export const deleteTopicEntry = (entryId) => fetchWithTimeout(`/api/topics/entri
     method: 'DELETE'
 }, 10000);
 
+export const renameTopicFolder = (oldName, newName) => fetchWithTimeout('/api/topics/rename', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ old_name: oldName, new_name: newName })
+}, 10000);
+
+export const deleteTopicFolder = (topic) => fetchWithTimeout('/api/topics/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic })
+}, 10000);
+
 // Shared SSE event processor
 const processSSEData = (data, handlers) => {
     const { onChunk, onToolStart, onToolEnd, onReload, onDone, onLegacyChunk, onStreamStarted, onIterationStart } = handlers;

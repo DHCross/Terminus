@@ -31,6 +31,18 @@ DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"  # Adam — clean, warm, versatile
 DEFAULT_MODEL = "eleven_turbo_v2_5"  # Lowest latency model (~300ms first chunk)
 
 
+def clean_tts_text(text: str) -> str:
+    """Strip reasoning/think tags, tool output, and formatting before speaking."""
+    if not text:
+        return ""
+    # Strip <think>...</think> and <seed:think>...</seed:think> blocks
+    clean = re.sub(r"<(?:seed:)?think>.*?</(?:seed:think|seed:cot_budget_reflect|think)>\s*", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # Strip orphaned/unclosed think tags
+    clean = re.sub(r"<\/?(?:seed:)?think>", "", clean, flags=re.IGNORECASE)
+    clean = re.sub(r"<\/?(?:seed:)?cot_budget_reflect>", "", clean, flags=re.IGNORECASE)
+    return clean.strip()
+
+
 class VoiceEngine:
     """
     Text-to-speech engine with ElevenLabs streaming + macOS fallback.
@@ -85,7 +97,8 @@ class VoiceEngine:
         Yields:
             bytes: MP3 audio chunks
         """
-        if not text or not text.strip():
+        text = clean_tts_text(text)
+        if not text:
             return
 
         if self.available and self.client:
@@ -124,6 +137,9 @@ class VoiceEngine:
         Returns:
             bytes: Full MP3 audio data (or AIFF if macOS fallback)
         """
+        text = clean_tts_text(text)
+        if not text:
+            return b""
         chunks = list(self.stream(text))
         return b"".join(chunks)
 
@@ -139,6 +155,9 @@ class VoiceEngine:
         Returns:
             bool: True if successful
         """
+        text = clean_tts_text(text)
+        if not text:
+            return True
         try:
             subprocess.run(
                 ["say", "-r", str(rate), text],
@@ -154,27 +173,46 @@ class VoiceEngine:
             return False
 
     def _macos_synthesize(self, text: str) -> Optional[bytes]:
-        """Generate audio via macOS say, return as bytes."""
+        """Generate audio via macOS say, convert to MP3, return as bytes."""
+        tmp_aiff = None
+        tmp_mp3 = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
-                tmp_path = tmp.name
+                tmp_aiff = tmp.name
 
             subprocess.run(
-                ["say", "-o", tmp_path, text],
+                ["say", "-o", tmp_aiff, text],
                 check=True,
                 timeout=30,
             )
 
-            with open(tmp_path, "rb") as f:
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_out:
+                tmp_mp3 = tmp_out.name
+
+            # Convert to MP3 using ffmpeg so HTML5 Audio can play it in browser
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", tmp_aiff, "-codec:a", "libmp3lame", "-qscale:a", "2", tmp_mp3],
+                check=True,
+                timeout=15,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            with open(tmp_mp3, "rb") as f:
                 return f.read()
         except Exception as e:
-            logger.error(f"macOS synthesize failed: {e}")
+            logger.warning(f"macOS synthesize/convert failed: {e}")
+            if tmp_aiff and Path(tmp_aiff).exists():
+                try:
+                    with open(tmp_aiff, "rb") as f:
+                        return f.read()
+                except Exception:
+                    pass
             return None
         finally:
-            try:
-                Path(tmp_path).unlink(missing_ok=True)
-            except Exception:
-                pass
+            if tmp_aiff:
+                Path(tmp_aiff).unlink(missing_ok=True)
+            if tmp_mp3:
+                Path(tmp_mp3).unlink(missing_ok=True)
 
     @property
     def backend(self) -> str:

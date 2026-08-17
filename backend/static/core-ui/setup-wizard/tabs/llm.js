@@ -27,6 +27,14 @@ const PROVIDER_INFO = {
     difficulty: 'Easy',
     requirements: 'API key from Anthropic'
   },
+  deepseek: {
+    icon: '🐳',
+    name: 'DeepSeek',
+    tagline: 'By DeepSeek AI',
+    description: 'High performance reasoning and chat models (DeepSeek-V3 / R1).',
+    difficulty: 'Easy',
+    requirements: 'API key from DeepSeek'
+  },
   openai: {
     icon: '🤖',
     name: 'OpenAI',
