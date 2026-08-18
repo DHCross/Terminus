@@ -67,9 +67,13 @@ export async function handleChatChange(chatName = null) {
     }
 }
 
-export async function handleNewChat() {
+export async function handleNewChat(topicFolder = '') {
     closeAllKebabs();
-    const name = await ui.showPrompt('Enter name for new chat:');
+    const folder = String(topicFolder || '').trim();
+    const destination = folder ? `📁 ${folder}` : '📁 Unfiled';
+    const name = await ui.showPrompt(
+        `New chat will be routed to:\n${destination}\n\nEnter a name for the new chat:`
+    );
     if (!name || !name.trim()) return;
     
     const { chatSelect } = getElements();
@@ -78,6 +82,16 @@ export async function handleNewChat() {
         const created = await api.createChat(name);
         // Backend returns the actual sanitized name — use it directly
         const chatName = created?.name || name.toLowerCase().replace(/[^a-z0-9_-]/g, '').replace(/\s+/g, '_');
+
+        // Route the new chat into the selected topic folder so it files where expected.
+        if (folder) {
+            try {
+                await api.moveChatToTopicFolder(chatName, folder);
+            } catch (routeErr) {
+                console.warn('Failed to route new chat to folder:', routeErr);
+            }
+        }
+
         await populateChatDropdown();
 
         chatSelect.value = chatName;
