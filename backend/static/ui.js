@@ -148,7 +148,6 @@ const createToolbar = (idx, total, role = 'user') => {
     // Primary always-visible buttons
     const primaryButtons = [
         ['trash-btn', 'trash', '\u{1F5D1}\uFE0F', 'Delete'],
-        ['continue-btn', 'continue', '\u{25B6}\uFE0F', 'Continue'],
         ['edit-btn', 'edit', '\u{270F}\uFE0F', 'Edit'],
     ];
 
@@ -383,11 +382,26 @@ export const hideStatus = () => {
     if (st) st.remove();
 };
 
-export const updateStatus = (txt) => {
+export const updateStatus = (txt, isDone = false) => {
     const st = document.getElementById('status-message');
     if (st) {
         const span = st.querySelector('.status-text');
         if (span) span.textContent = txt;
+        const fill = st.querySelector('.status-progress-bar-fill');
+        const dot = st.querySelector('.status-pulse-dot');
+        if (isDone) {
+            if (fill) {
+                fill.style.animation = 'none';
+                fill.style.left = '0';
+                fill.style.width = '100%';
+                fill.style.background = 'var(--trim, #14b8a6)';
+            }
+            if (dot) {
+                dot.style.animation = 'none';
+                dot.style.background = '#10b981';
+                dot.style.boxShadow = '0 0 10px #10b981';
+            }
+        }
     }
 };
 

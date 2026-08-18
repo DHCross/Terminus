@@ -163,10 +163,48 @@ class ContinuityDB:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, name, created_at, updated_at FROM conversations
+            SELECT id, name, created_at, updated_at, metadata FROM conversations
             ORDER BY updated_at DESC
         ''')
         
         conversations = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return conversations
+
+    def update_conversation_metadata(self, conv_id: str, updates: dict) -> bool:
+        """Update JSON metadata for a conversation"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('SELECT metadata FROM conversations WHERE id = ?', (conv_id,))
+            row = cursor.fetchone()
+            meta = {}
+            if row and row[0]:
+                try:
+                    meta = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+                except Exception:
+                    meta = {}
+            meta.update(updates)
+            cursor.execute('UPDATE conversations SET metadata = ? WHERE id = ?', (json.dumps(meta), conv_id))
+            conn.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            conn.close()
+
+    def delete_conversation(self, conv_id: str) -> bool:
+        """Delete a conversation and its messages"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('DELETE FROM messages WHERE conversation_id = ?', (conv_id,))
+            cursor.execute('DELETE FROM activity_log WHERE conversation_id = ?', (conv_id,))
+            cursor.execute('DELETE FROM traces WHERE conversation_id = ?', (conv_id,))
+            cursor.execute('DELETE FROM conversations WHERE id = ?', (conv_id,))
+            conn.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            conn.close()

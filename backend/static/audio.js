@@ -105,10 +105,12 @@ export const playText = async (txt, cacheKey = null) => {
     ttsCtrl = new AbortController();
 
     // Remove think blocks (both formats + orphaned)
-    let clean = txt;
-    clean = clean.replace(/<(?:seed:)?think>.*?<\/(?:seed:think|seed:cot_budget_reflect|think)>\s*/gs, '');
+    let clean = txt || '';
+    clean = clean.replace(/<(?:seed:)?think>.*?<\/(?:seed:think|seed:cot_budget_reflect|think)>\s*/gis, '');
+    clean = clean.replace(/<\/?(?:seed:)?think>/gi, '');
+    clean = clean.replace(/<\/?(?:seed:)?cot_budget_reflect>/gi, '');
 
-    const orphans = [...clean.matchAll(/<\/(?:seed:think|seed:cot_budget_reflect|think)>/g)];
+    const orphans = [...clean.matchAll(/<\/(?:seed:think|seed:cot_budget_reflect|think)>/gi)];
     if (orphans.length > 0) {
         const last = orphans[orphans.length - 1];
         clean = clean.substring(last.index + last[0].length);
@@ -122,7 +124,7 @@ export const playText = async (txt, cacheKey = null) => {
 
     clean = paras.join('\n\n').trim().replace(/^---\s*$/gm, '').trim();
 
-    if (!clean) {
+    if (!clean || muted || volume === 0 || localStorage.getItem('terminus-muted') === 'true') {
         isStreaming = false;
         ttsCtrl = null;
         return;

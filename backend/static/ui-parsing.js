@@ -108,6 +108,7 @@ export const extractProseText = (el) => {
     
     // Remove elements that shouldn't be spoken (order: larger containers first)
     clone.querySelectorAll('details').forEach(d => d.remove());       // Accordions/details
+    clone.querySelectorAll('.accordion-think').forEach(t => t.remove()); // Reasoning/think accordions
     clone.querySelectorAll('pre').forEach(pre => pre.remove());       // Code blocks (includes header)
     clone.querySelectorAll('code').forEach(c => c.remove());          // Inline code
     clone.querySelectorAll('table').forEach(t => t.remove());         // Tables

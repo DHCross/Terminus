@@ -174,6 +174,103 @@ function loadContextZones(config) {
   return [];
 }
 
+// ─── provenance ──────────────────────────────────────────────────────────────
+
+const REQUIRED_VERIFIED_FIELDS = ['base_sha', 'zone', 'reused_symbols', 'red_first_test'];
+const WARN_OK_ASSUMED_FIELDS = ['failure_layer'];
+
+function checkProvenance(plan) {
+  const issues = [];
+  const ledgerEntries = [];
+  const provenance = plan?.provenance;
+
+  if (!provenance || typeof provenance !== 'object') {
+    issues.push({
+      step_index: -1,
+      rule: 'unverified_declaration',
+      message: 'Plan is missing provenance object. Every plan must declare what it knows with provenance tags (verified/assumed/unknown).',
+    });
+    return { issues, ledgerEntries };
+  }
+
+  const sha = String(plan?._sha || '');
+  const feature = String(plan?.feature || '');
+  const ts = new Date().toISOString();
+
+  function ledger(field, state, source) {
+    ledgerEntries.push({ ts, sha, feature, field, state, source: source || null });
+  }
+
+  const allFields = [...new Set([
+    ...REQUIRED_VERIFIED_FIELDS,
+    ...WARN_OK_ASSUMED_FIELDS,
+    'new_symbols',
+    ...Object.keys(provenance),
+  ])];
+
+  for (const field of allFields) {
+    const entry = provenance[field];
+    if (!entry) continue;
+    const state = String(entry.state || 'unknown').trim().toLowerCase();
+    const source = String(entry.source || '').trim();
+    if (state === 'verified' && !source) {
+      issues.push({
+        step_index: -1,
+        rule: 'unverified_declaration',
+        message: `Provenance field "${field}" is marked "verified" but has no source. Verified fields require a non-empty source describing how they were checked.`,
+      });
+    }
+    if (state === 'assumed' || state === 'unknown') {
+      ledger(field, state, source);
+    }
+  }
+
+  for (const field of REQUIRED_VERIFIED_FIELDS) {
+    const entry = provenance[field];
+    const state = entry ? String(entry.state || 'unknown').trim().toLowerCase() : 'unknown';
+    if (state !== 'verified') {
+      const reason = state === 'unknown'
+        ? 'The agent could not fill this field.'
+        : 'The agent stated this but Sherlog could not verify it.';
+      issues.push({
+        step_index: -1,
+        rule: 'unverified_declaration',
+        message: `Provenance field "${field}" is "${state}" but must be "verified". ${reason}`,
+      });
+    }
+  }
+
+  const newSymbols = provenance.new_symbols;
+  const newSymbolsValue = Array.isArray(newSymbols?.value) ? newSymbols.value : [];
+  if (newSymbolsValue.length > 0) {
+    const missingJustification = newSymbolsValue.filter(
+      entry => !entry?.justification || !String(entry.justification).trim()
+    );
+    if (missingJustification.length > 0) {
+      const names = missingJustification.map(e => e?.name || '(unnamed)').join(', ');
+      issues.push({
+        step_index: -1,
+        rule: 'unverified_declaration',
+        message: `new_symbols entries [${names}] are missing justification. Each new symbol must explain why no existing contract fits.`,
+      });
+    }
+  }
+
+  const failureLayer = provenance.failure_layer;
+  const failureLayerState = failureLayer
+    ? String(failureLayer.state || 'unknown').trim().toLowerCase()
+    : 'unknown';
+  if (failureLayerState === 'assumed' || failureLayerState === 'unknown') {
+    issues.push({
+      step_index: -1,
+      rule: 'unverified_declaration_warn',
+      message: `Provenance field "failure_layer" is "${failureLayerState}". This is a diagnosis, not a fact — accepted with a warning.`,
+    });
+  }
+
+  return { issues, ledgerEntries };
+}
+
 // ─── rules ───────────────────────────────────────────────────────────────────
 
 /**
@@ -329,12 +426,17 @@ function checkGapCoverage(steps) {
 
 function computeVerdict(allIssues) {
   const hasRejection = allIssues.some(
-    issue => issue.rule === 'scope_violation' || issue.rule === 'missing_test_coverage'
+    issue => issue.rule === 'scope_violation'
+      || issue.rule === 'missing_test_coverage'
+      || issue.rule === 'unverified_declaration'
   );
   if (hasRejection) return 'rejected';
 
   const hasWarning = allIssues.some(
-    issue => issue.rule === 'high_blast_radius' || issue.rule === 'belief_contradiction' || issue.rule === 'obligation_conflict'
+    issue => issue.rule === 'high_blast_radius'
+      || issue.rule === 'belief_contradiction'
+      || issue.rule === 'obligation_conflict'
+      || issue.rule === 'unverified_declaration_warn'
   );
   if (hasWarning) return 'warned';
 
@@ -354,12 +456,14 @@ function lintPlan(plan, config, blastThreshold) {
   const blastIssues = checkBlastRadius(steps, graph, blastThreshold);
   const contradictionIssues = checkContradictions(steps, zones);
   const gapCoverageIssues = checkGapCoverage(steps);
+  const provenanceResult = checkProvenance(plan);
 
   const allIssues = [
     ...scopeIssues,
     ...blastIssues,
     ...contradictionIssues,
     ...gapCoverageIssues,
+    ...provenanceResult.issues,
   ];
 
   const verdict = computeVerdict(allIssues);
@@ -369,6 +473,7 @@ function lintPlan(plan, config, blastThreshold) {
     verdict,
     step_count: steps.length,
     issues: allIssues,
+    provenance_ledger: provenanceResult.ledgerEntries,
   };
 }
 
@@ -438,4 +543,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { lintPlan, parseArgs };
+module.exports = { lintPlan, parseArgs, checkProvenance };

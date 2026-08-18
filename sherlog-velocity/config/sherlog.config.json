@@ -28,14 +28,15 @@
     "gap_weights": "sherlog-velocity/config/gap-weights.json",
     "docs_dir": "docs",
     "source_roots": [
+      "backend",
       "scripts",
       "sherlog-velocity/src",
       "sherlog-velocity/config",
-      "sherlog-velocity/schemas",
-      "sherlog-vscode"
+      "sherlog-velocity/schemas"
     ],
     "test_roots": [
-      "sherlog-velocity/test"
+      "sherlog-velocity/test",
+      "backend/tests"
     ],
     "context_map": "sherlog.context.json",
     "generated_context_map": "sherlog.generated.context.json",
@@ -52,7 +53,14 @@
     },
     "gap_scan_ignore_dirs": [
       "velocity-artifacts",
-      ".logs"
+      ".logs",
+      "archive",
+      "legacy",
+      "old",
+      "backend/venv",
+      "backend/data",
+      "continuity-data",
+      "node_modules"
     ],
     "path_lanes_default": "core",
     "path_lanes": [

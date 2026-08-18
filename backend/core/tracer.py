@@ -165,8 +165,9 @@ TRACE_TOOLS = [
     {
         "name": "write_journal",
         "description": (
-            "Write a journal entry to the journal directory. "
-            "Use this to record reflections, commitments, or summaries that should persist. "
+            "Write a journal entry in Terminus's own voice to the journal directory. "
+            "Write in first person, honest and structurally precise — a genuine reflection, "
+            "not a report, not a summary list, and not a transcript. "
             "Entries are stored in ~/.terminus/data/journal/{date}.md."
         ),
         "input_schema": {

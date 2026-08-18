@@ -130,6 +130,17 @@ describe('analyzeBlastRadius', () => {
 
 // ─── lint-plan tests ──────────────────────────────────────────────────────────
 
+function makeVerifiedProvenance() {
+  return {
+    base_sha: { value: 'abc123', state: 'verified', source: 'git rev-parse HEAD' },
+    zone: { value: 'src', state: 'verified', source: 'sherlog.context.json' },
+    reused_symbols: { value: ['feature'], state: 'verified', source: 'grep src' },
+    new_symbols: { value: [], state: 'verified', source: 'n/a' },
+    failure_layer: { value: 'render', state: 'verified', source: 'observed' },
+    red_first_test: { value: 'test/feature.test.js:1', state: 'verified', source: 'observed failing' },
+  };
+}
+
 describe('lintPlan', () => {
   test('approves a well-formed plan with test step', () => {
     const repoRoot = makeRepoRoot('lint-approve');
@@ -138,6 +149,7 @@ describe('lintPlan', () => {
 
     const plan = {
       feature: 'My Feature',
+      provenance: makeVerifiedProvenance(),
       steps: [
         { action: 'implement feature handler', files: ['src/feature.ts'], type: 'implementation' },
         { action: 'add unit tests', files: ['src/__tests__/feature.test.ts'], type: 'test' },
@@ -202,6 +214,7 @@ describe('lintPlan', () => {
 
     const plan = {
       feature: 'Edit Hub',
+      provenance: makeVerifiedProvenance(),
       steps: [
         { action: 'refactor hub', files: ['src/hub.ts'], type: 'implementation' },
         { action: 'update tests', files: ['test/hub.test.ts'], type: 'test' },

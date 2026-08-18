@@ -29,7 +29,7 @@ let help = {};
 let overrides = [];
 let pendingChanges = {};
 let wakewordModels = [];
-let availableThemes = ['dark'];
+let availableThemes = ['terminus'];
 let avatarPaths = { user: null, assistant: null }; // kept for plugin compat
 let providerMeta = {};
 let dynamicTabs = [];
@@ -161,7 +161,7 @@ function getAllTabs() {
 async function loadThemes() {
     try {
         const res = await fetch('/static/themes/themes.json');
-        if (res.ok) { const d = await res.json(); availableThemes = d.themes || ['dark']; }
+        if (res.ok) { const d = await res.json(); availableThemes = d.themes || ['terminus']; }
     } catch {}
 }
 

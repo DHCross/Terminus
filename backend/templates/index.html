@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="terminus">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -14,7 +14,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#0f766e">
+    <meta name="theme-color" content="#e8892f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +24,7 @@
     <script>
         // Load saved theme before CSS renders to prevent flash
         (function() {
-            const saved = localStorage.getItem('terminus-theme') || 'dark';
+            const saved = localStorage.getItem('terminus-theme') || 'terminus';
             document.documentElement.setAttribute('data-theme', saved);
             // Load theme CSS file
             const link = document.createElement('link');
@@ -65,14 +65,18 @@
             <span class="nav-icon nav-icon-system" aria-hidden="true"></span>
             <span class="nav-label">System</span>
             <div class="nav-flyout">
-                <div class="nav-flyout-item" data-view="prompts" role="button" tabindex="0">Prompt Stack</div>
-                <div class="nav-flyout-item" data-view="toolsets" role="button" tabindex="0">Tool Matrix</div>
-                <div class="nav-flyout-item" data-view="spices" role="button" tabindex="0">Response Modes</div>
+                <div class="nav-flyout-item" data-view="prompts" role="button" tabindex="0">Instruction Stack</div>
+                <div class="nav-flyout-item" data-view="toolsets" role="button" tabindex="0">Instruments</div>
+                <div class="nav-flyout-item" data-view="spices" role="button" tabindex="0">Voice Modes</div>
             </div>
         </div>
         <button class="nav-item" data-view="schedule">
             <span class="nav-icon nav-icon-schedule" aria-hidden="true"></span>
             <span class="nav-label">Schedule</span>
+        </button>
+        <button class="nav-item" data-view="watchdogs">
+            <span class="nav-icon" aria-hidden="true">🛰️</span>
+            <span class="nav-label">Watchdogs</span>
         </button>
         <button class="nav-item" data-view="mind">
             <span class="nav-icon nav-icon-memory" aria-hidden="true"></span>
@@ -117,41 +121,68 @@
             <div class="chat-body">
                 <aside class="topic-shelf" id="topic-shelf">
                     <div class="topic-shelf-inner">
+                        <!-- Top Header & New Actions -->
                         <div class="topic-shelf-header">
                             <div>
-                                <div class="topic-shelf-kicker">Topic Shelf</div>
-                                <div class="topic-shelf-title">Quotes & Summaries</div>
+                                <div class="topic-shelf-kicker">Workspace</div>
+                                <div class="topic-shelf-title">Topic Folders</div>
                             </div>
-                            <button type="button" id="topic-new-folder" class="topic-shelf-icon" title="Set topic folder">+</button>
-                        </div>
-                        <div class="topic-shelf-current">
-                            <label for="topic-folder-input">Current folder</label>
-                            <div class="topic-folder-row">
-                                <input type="text" id="topic-folder-input" placeholder="Assign this chat to a topic">
-                                <button type="button" id="topic-folder-save" class="topic-shelf-btn">Save</button>
+                            <div class="topic-shelf-hdr-actions">
+                                <button type="button" id="topic-new-chat" class="topic-action-pill" title="New Chat">+ Chat</button>
+                                <button type="button" id="topic-new-folder" class="topic-action-pill secondary" title="New Folder">+ Folder</button>
                             </div>
                         </div>
-                        <div class="topic-shelf-section">
-                            <div class="topic-shelf-section-label">Chat History</div>
-                            <div class="topic-chat-actions">
-                                <button type="button" id="topic-new-chat" class="topic-shelf-btn">New Chat</button>
-                                <button type="button" id="topic-export-markdown" class="topic-shelf-btn">Export MD</button>
+
+                        <!-- Instant Search Bar -->
+                        <div class="topic-search-wrap">
+                            <span class="topic-search-icon">🔍</span>
+                            <input type="text" id="topic-chat-search" placeholder="Search chats or quotes...">
+                        </div>
+
+                        <!-- Horizontal Visual Folder Tags Carousel -->
+                        <div class="topic-folders-nav">
+                            <div class="topic-folders-nav-header">
+                                <span class="topic-folders-nav-label">Folders</span>
+                                <span class="topic-active-folder-name" id="topic-active-folder-label">All</span>
                             </div>
-                            <div class="topic-chat-tools">
-                                <input type="text" id="topic-chat-search" placeholder="Search chats or folders">
-                                <div class="topic-chat-view-toggle" role="group" aria-label="Chat history view">
-                                    <button type="button" id="topic-chat-view-all" class="topic-shelf-btn active">All</button>
-                                    <button type="button" id="topic-chat-view-recent" class="topic-shelf-btn">Recent in Folder</button>
+                            <div id="topic-folder-list" class="topic-folder-pills"></div>
+                        </div>
+
+                        <!-- Current Chat Folder Selector Row -->
+                        <div class="topic-current-chat-folder">
+                            <span class="topic-folder-badge-icon">📁</span>
+                            <input type="text" id="topic-folder-input" placeholder="Move this chat to a folder...">
+                            <button type="button" id="topic-folder-save" class="topic-save-btn" title="Save folder assignment">Save</button>
+                        </div>
+
+                        <!-- Segmented View Tabs (Chats vs Quotes) -->
+                        <div class="topic-shelf-tabs" role="tablist">
+                            <button type="button" class="topic-shelf-tab active" id="tab-btn-chats" data-tab="chats">
+                                <span class="tab-icon">💬</span>
+                                <span class="tab-text">Chats</span>
+                                <span class="tab-count" id="tab-chats-count">0</span>
+                            </button>
+                            <button type="button" class="topic-shelf-tab" id="tab-btn-quotes" data-tab="quotes">
+                                <span class="tab-icon">🔖</span>
+                                <span class="tab-text">Saved Quotes</span>
+                                <span class="tab-count" id="tab-quotes-count">0</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content: Chats List -->
+                        <div class="topic-tab-panel active" id="panel-topic-chats">
+                            <div class="topic-chat-subtools">
+                                <div class="topic-chat-view-toggle" role="group">
+                                    <button type="button" id="topic-chat-view-all" class="topic-filter-btn active">All</button>
+                                    <button type="button" id="topic-chat-view-recent" class="topic-filter-btn">Recent</button>
                                 </div>
+                                <button type="button" id="topic-export-markdown" class="topic-filter-btn" title="Export Current Chat">Export MD</button>
                             </div>
                             <div id="topic-chat-list" class="topic-chat-list"></div>
                         </div>
-                        <div class="topic-shelf-section">
-                            <div class="topic-shelf-section-label">Folders</div>
-                            <div id="topic-folder-list" class="topic-folder-list"></div>
-                        </div>
-                        <div class="topic-shelf-section topic-entry-section">
-                            <div class="topic-shelf-section-label">Entries</div>
+
+                        <!-- Tab Content: Quotes / Saved Entries -->
+                        <div class="topic-tab-panel" id="panel-topic-quotes">
                             <div id="topic-entry-list" class="topic-entry-list"></div>
                         </div>
                     </div>
@@ -212,42 +243,73 @@
                 <!-- Chat Settings Sidebar (right) -->
                 <aside class="chat-sidebar collapsed">
                     <div class="chat-sidebar-inner">
-                        <!-- Row 1: accent circle + chat name + collapse (always visible) -->
-                        <div class="sb-chat-header">
-                            <input type="color" id="sb-trim-color" value="#0f766e" class="sb-accent-circle" title="Accent color (double-click to reset)">
-                            <div class="sb-chat-picker" id="sb-chat-picker">
-                                <button class="sb-chat-picker-btn" id="sb-chat-picker-btn">
-                                    <span id="sb-chat-name">Chat</span>
-                                    <span class="sb-chat-arrow">&#x25BE;</span>
-                                </button>
-                                <div class="sb-chat-picker-dropdown" id="sb-chat-picker-dropdown"></div>
+                        <!-- Top Header: Title + Accent Picker + Collapse Button -->
+                        <div class="sb-header-bar">
+                            <div class="sb-header-title-group">
+                                <span class="sb-header-kicker">Controls</span>
+                                <div class="sb-header-title">Session & Engine</div>
                             </div>
-                            <button type="button" id="chat-sidebar-toggle" class="sb-icon-btn sb-collapse-btn" title="Hide sidebar">&#x25B6;</button>
+                            <div class="sb-header-controls">
+                                <input type="color" id="sb-trim-color" value="#e8892f" class="sb-accent-circle" title="Accent color (double-click to reset)">
+                                <button type="button" id="chat-sidebar-toggle" class="sb-close-btn" title="Close sidebar">✕</button>
+                            </div>
                         </div>
-                        <!-- Row 2: chat actions (always visible) -->
-                        <div class="sb-chat-actions">
-                            <button type="button" id="sb-new-chat" class="sb-icon-btn" title="New Chat">+</button>
-                            <button type="button" id="sb-delete-chat" class="sb-icon-btn sb-icon-danger" title="Delete Chat">&#x1F5D1;</button>
-                            <button type="button" id="clear-chat-btn" class="sb-icon-btn" title="Clear Chat">&#x2715;</button>
-                            <div class="sb-kebab kebab-menu" id="chat-menu">
-                                <button type="button" class="sb-icon-btn kebab-btn" title="More">&#x22EE;</button>
-                                <div class="kebab-dropdown">
-                                    <button id="import-chat-btn">Import</button>
-                                    <button id="export-chat-btn">Export (JSON)</button>
-                                    <button id="export-markdown-btn">Download Markdown</button>
+
+                        <!-- Hero Action: New Chat Button -->
+                        <div class="sb-hero-action">
+                            <button type="button" id="sb-new-chat" class="sb-new-chat-hero-btn" title="Start a fresh chat">
+                                <span class="hero-icon">✨</span>
+                                <span class="hero-text">New Chat Session</span>
+                            </button>
+                        </div>
+
+                        <!-- Current Session Card -->
+                        <div class="sb-session-card">
+                            <div class="sb-session-card-header">
+                                <span class="sb-session-label">Active Chat</span>
+                                <div class="sb-chat-picker" id="sb-chat-picker">
+                                    <button class="sb-chat-picker-btn" id="sb-chat-picker-btn">
+                                        <span id="sb-chat-name">Chat</span>
+                                        <span class="sb-chat-arrow">&#x25BE;</span>
+                                    </button>
+                                    <div class="sb-chat-picker-dropdown" id="sb-chat-picker-dropdown"></div>
                                 </div>
                             </div>
-                            <button type="button" id="sb-restart-btn" class="sb-icon-btn sb-restart-btn" title="Restart Terminus">&#x21BB;</button>
+
+                            <!-- Chat Actions Toolbar -->
+                            <div class="sb-chat-actions">
+                                <button type="button" id="sb-delete-chat" class="sb-action-btn sb-action-danger" title="Delete Chat">
+                                    <span>🗑️</span>
+                                    <span>Delete</span>
+                                </button>
+                                <button type="button" id="clear-chat-btn" class="sb-action-btn" title="Clear Messages">
+                                    <span>🧹</span>
+                                    <span>Clear</span>
+                                </button>
+                                <div class="sb-kebab kebab-menu" id="chat-menu">
+                                    <button type="button" class="sb-action-btn kebab-btn" title="More Options">
+                                        <span>⋮</span>
+                                        <span>More</span>
+                                    </button>
+                                    <div class="kebab-dropdown">
+                                        <button id="import-chat-btn">Import Chat</button>
+                                        <button id="export-chat-btn">Export (JSON)</button>
+                                        <button id="export-markdown-btn">Download Markdown</button>
+                                    </div>
+                                </div>
+                                <button type="button" id="sb-restart-btn" class="sb-action-btn sb-restart-btn" title="Restart Terminus">
+                                    <span>🔄</span>
+                                    <span>Restart</span>
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Reflections Feature Strip -->
                         <div class="sb-chat-strip">
                             <button type="button" id="sb-reflections-btn" class="sb-strip-btn" title="Open Terminus Reflections">
                                 <span class="sb-strip-btn-icon">&#x1F4D6;</span>
                                 <span class="sb-strip-btn-label">Terminus Reflections</span>
                             </button>
-                        </div>
-
-                        <div class="sb-brand-mark" aria-label="Terminus">
-                            <div class="sb-brand-mark-img terminus-mark">T</div>
                         </div>
 
                         <!-- Terminus settings -->
@@ -292,6 +354,7 @@
                         <div class="sb-toggles">
                             <button type="button" class="sb-toggle active" id="sb-spice-toggle" data-active="true">Style &middot; 3</button>
                             <button type="button" class="sb-toggle" id="sb-datetime-toggle" data-active="false">Date/Time</button>
+                            <button type="button" class="sb-toggle active" id="sb-reasoning-toggle" data-active="true" title="Show or hide reasoning blocks">Reasoning</button>
                         </div>
 
                         <!-- Continuity Scopes Accordion -->
@@ -487,6 +550,12 @@
                 <p>Continuity manager - coming next</p>
             </div>
         </div>
+        <div id="view-watchdogs" class="view" style="display:none">
+            <div class="view-placeholder">
+                <h2>Watchdogs</h2>
+                <p>Autonomous background agents - loading...</p>
+            </div>
+        </div>
         <div id="view-mind" class="view" style="display:none">
             <div class="view-placeholder">
                 <h2>Memory</h2>
@@ -523,10 +592,15 @@
     </template>
 
     <template id="status-template">
-        <div class="message status" id="status-message">
-            <div class="message-content">
-                <div class="spinner"></div>
-                <span class="status-text">Thinking...</span>
+        <div class="message status active-status-card" id="status-message">
+            <div class="message-content status-indicator-container">
+                <div class="status-indicator-header">
+                    <div class="status-pulse-dot"></div>
+                    <span class="status-text">Thinking & Executing...</span>
+                </div>
+                <div class="status-progress-bar-wrap">
+                    <div class="status-progress-bar-fill"></div>
+                </div>
             </div>
         </div>
     </template>

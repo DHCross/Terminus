@@ -62,7 +62,8 @@ export function avatarUrl(name) {
 export function avatarFallback(name, color) {
     const initial = (name || '?')[0].toUpperCase();
     const c = color || '#888';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${c}18" stroke="${c}" stroke-width="3"/><text x="50" y="54" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="44" font-weight="600" fill="${c}">${initial}</text></svg>`;
+    // Stamped plate + monogram (not a glowing orb): rect with signal stroke and rail seams.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="3" y="3" width="94" height="94" rx="6" fill="${c}14" stroke="${c}" stroke-width="3"/><path d="M3 22 h94" stroke="${c}" stroke-width="1.5" opacity="0.45"/><path d="M3 78 h94" stroke="${c}" stroke-width="1.5" opacity="0.45"/><text x="50" y="57" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace,SF Mono,Menlo,monospace" font-size="46" font-weight="600" fill="${c}">${initial}</text></svg>`;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 

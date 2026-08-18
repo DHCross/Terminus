@@ -5,6 +5,8 @@
     "DEFAULT_USERNAME": "Dan"
   },
   "llm": {
+    "LLM_PRIMARY": "deepseek",
+    "DEEPSEEK_MODEL": "deepseek-v4-pro",
     "LLM_PROVIDERS": {
       "claude": {
         "model": "claude-3-7-sonnet-20250219"
@@ -19,7 +21,7 @@
     "FASTER_WHISPER_NUM_WORKERS": 4
   },
   "tts": {
-    "TTS_PROVIDER": "elevenlabs",
+    "TTS_PROVIDER": "none",
     "TTS_ELEVENLABS_MODEL": "eleven_turbo_v2_5",
     "TTS_ELEVENLABS_VOICE_ID": "tiaXqVIuY2DO1xhPFLkT"
   },

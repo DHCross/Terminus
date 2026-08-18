@@ -32,6 +32,13 @@ PRICING = {
     "claude-opus-5": {"input": 15.00, "output": 75.00, "cache_read": 1.50, "cache_write": 18.75},
     "claude-opus-4-6": {"input": 15.00, "output": 75.00, "cache_read": 1.50, "cache_write": 18.75},
     "claude-opus-4-7": {"input": 15.00, "output": 75.00, "cache_read": 1.50, "cache_write": 18.75},
+    # DeepSeek lineup (DeepSeek-V3 / R1 / V4)
+    "deepseek-chat": {"input": 0.27, "output": 1.10, "cache_read": 0.07, "cache_write": 0.27},
+    "deepseek-reasoner": {"input": 0.55, "output": 2.19, "cache_read": 0.14, "cache_write": 0.55},
+    "deepseek-v4": {"input": 0.27, "output": 1.10, "cache_read": 0.07, "cache_write": 0.27},
+    "deepseek-v4-chat": {"input": 0.27, "output": 1.10, "cache_read": 0.07, "cache_write": 0.27},
+    "deepseek-v4-reasoner": {"input": 0.55, "output": 2.19, "cache_read": 0.14, "cache_write": 0.55},
+    "deepseek-v4-pro": {"input": 0.55, "output": 2.19, "cache_read": 0.14, "cache_write": 0.55},
     # Fallback for unknown models
     "_default": {"input": 3.00, "output": 15.00, "cache_read": 0.30, "cache_write": 3.75},
 }

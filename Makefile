@@ -28,10 +28,10 @@ launch:
 	fi
 
 launch-browser:
-	@./scripts/launch-terminus-browser.sh
+	@./scripts/launch-terminus-web.sh
 
 mirror: verify
-	@STARTUP_PROMPT=CREATOR_MIRROR ./scripts/launch-terminus-browser.sh --prompt CREATOR_MIRROR
+	@STARTUP_PROMPT=CREATOR_MIRROR ./scripts/launch-terminus-web.sh --prompt CREATOR_MIRROR
 
 sync-context:
 	@./scripts/sync_context.sh

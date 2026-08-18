@@ -15,11 +15,12 @@ export function updateSendButtonLLM(primary, model = '') {
     if (indicator) indicator.classList.remove('cloud');
 
     // Cloud providers
-    const cloudProviders = ['claude', 'openai', 'fireworks', 'other'];
+    const cloudProviders = ['claude', 'deepseek', 'openai', 'fireworks', 'other', 'gemini', 'grok', 'featherless'];
     const isCloud = cloudProviders.includes(primary);
 
     // Build display name - capitalize first letter
     const displayName = primary === 'lmstudio' ? 'LM Studio' :
+                       primary === 'deepseek' ? 'DeepSeek' :
                        primary === 'none' ? 'Off' :
                        primary ? primary.charAt(0).toUpperCase() + primary.slice(1) : 'Local';
 

@@ -8,6 +8,9 @@
         },
         {
             "path": "../Shipyard"
+        },
+        {
+            "path": "../Computer"
         }
     ],
     "settings": {}

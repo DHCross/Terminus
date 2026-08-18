@@ -9,7 +9,7 @@ export default {
     description: 'Theme, spacing, and font settings',
 
     render(ctx) {
-        const theme = localStorage.getItem('terminus-theme') || 'dark';
+        const theme = localStorage.getItem('terminus-theme') || 'terminus';
         const density = localStorage.getItem('terminus-density') || 'default';
         const font = localStorage.getItem('terminus-font') || 'system';
         const avatars = ctx.settings.AVATARS_IN_CHAT ?? true;

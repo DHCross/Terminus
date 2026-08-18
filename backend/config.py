@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     # API Keys
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
+    DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
     ELEVENLABS_API_KEY: str = os.getenv("ELEVENLABS_API_KEY", "")
 
     # Server
@@ -21,6 +23,7 @@ class Settings(BaseSettings):
     # LLM Model
     # Current Anthropic lineup: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5
     LLM_MODEL: str = "claude-sonnet-4-6"
+    DEEPSEEK_MODEL: str = "deepseek-v4-flash"
     LLM_MAX_TOKENS: int = 4096
 
     # Voice (ElevenLabs)
@@ -31,6 +34,14 @@ class Settings(BaseSettings):
     # Paths
     BACKEND_DIR: Path = Path(__file__).parent
     DATA_DIR: Path = Path.home() / ".terminus" / "data"
+
+    # Long-term memory (Phase 3)
+    # Default: local SSD for M1 speed (the rebuild goal is to move OFF the external drive).
+    # Override via .env to point at an external drive if needed, e.g.
+    #   VECTOR_DB_PATH=/Volumes/My Passport/terminus-vector
+    VECTOR_DB_PATH: Path = Path.home() / ".terminus" / "data" / "vector"
+    MEMORY_EMBED_MODEL: str = "all-MiniLM-L6-v2"
+    AUTO_MEMORY_INDEX: bool = True  # auto-index memorable content after each assistant turn
 
     class Config:
         # .env lives at the repo root, one level above backend/

@@ -11,6 +11,19 @@
       "minLength": 1,
       "description": "Human-readable label for the feature or task being planned."
     },
+    "provenance": {
+      "type": "object",
+      "description": "Provenance-typed declaration. Every field carries a state of 'verified', 'assumed', or 'unknown'. Required by the unverified_declaration rule in lint-plan.js. Absent provenance → verdict 'rejected'.",
+      "properties": {
+        "base_sha": { "$ref": "#/$defs/provenanceField" },
+        "zone": { "$ref": "#/$defs/provenanceField" },
+        "reused_symbols": { "$ref": "#/$defs/provenanceField" },
+        "new_symbols": { "$ref": "#/$defs/provenanceField" },
+        "failure_layer": { "$ref": "#/$defs/provenanceField" },
+        "red_first_test": { "$ref": "#/$defs/provenanceField" }
+      },
+      "additionalProperties": true
+    },
     "steps": {
       "type": "array",
       "minItems": 1,
@@ -43,5 +56,27 @@
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "provenanceField": {
+      "type": "object",
+      "description": "A provenance-typed declaration field. state is a closed enum: 'verified', 'assumed', or 'unknown'. An absent field is treated as 'unknown', never 'verified'. 'verified' without a non-empty 'source' is a schema error.",
+      "required": ["state"],
+      "properties": {
+        "value": {
+          "description": "The declared value. Type varies by field (string, array, object)."
+        },
+        "state": {
+          "type": "string",
+          "enum": ["verified", "assumed", "unknown"],
+          "description": "verified = Sherlog measured it; assumed = agent stated it, Sherlog couldn't verify; unknown = agent couldn't fill it."
+        },
+        "source": {
+          "type": "string",
+          "description": "How the value was checked. Required and non-empty when state is 'verified'."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
 }

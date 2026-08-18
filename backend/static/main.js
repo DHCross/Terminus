@@ -22,6 +22,11 @@ import { getInitData } from './shared/init-data.js';
 import { registerView, initRouter } from './core/router.js';
 import { initNavRail, setChatHeaderName } from './core/nav-rail.js';
 
+// Apply reasoning visibility preference immediately on boot
+if (localStorage.getItem('terminus-show-reasoning') === 'false') {
+    document.body.classList.add('hide-reasoning');
+}
+
 // View modules loaded dynamically — a broken view cannot kill the app
 const _v = window.__v ? `?v=${window.__v}` : '';
 const VIEW_MODULES = {
@@ -31,6 +36,7 @@ const VIEW_MODULES = {
     toolsets: `./views/toolsets.js${_v}`,
     spices:   `./views/spices.js${_v}`,
     schedule: `./views/schedule.js${_v}`,
+    watchdogs: `./views/watchdogs.js${_v}`,
     mind:     `./views/mind.js${_v}`,
     journal:  `./views/journal.js${_v}`,
     settings: `./views/settings.js${_v}`,

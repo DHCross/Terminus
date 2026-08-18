@@ -471,7 +471,7 @@ function checkOperationalWiring(context) {
   const archiveDirs = discoverArchiveLikeDirs(repoRoot);
   if (archiveDirs.length > 0) {
     const uncovered = archiveDirs.filter((dir) => {
-      if (ignored.includes(dir)) return false;
+      if (ignored.some(i => dir === i || dir.startsWith(i + '/'))) return false;
       const base = path.basename(dir).toLowerCase();
       return !DEFAULT_GAP_SCAN_IGNORES.has(base);
     });
@@ -493,7 +493,57 @@ function checkOperationalWiring(context) {
   const inflation = checkBranchInflation(repoRoot);
   if (inflation) checks.push(inflation);
 
+  const redFirst = checkPreflightRedFirst(context.repoRoot);
+  if (redFirst) checks.push(redFirst);
+
   return checks;
+}
+
+function checkPreflightRedFirst(repoRoot) {
+  const declPath = path.join(repoRoot, '.sherlog', 'preflight.json');
+  if (!fs.existsSync(declPath)) return null;
+
+  let declaration;
+  try { declaration = JSON.parse(fs.readFileSync(declPath, 'utf8')); }
+  catch {
+    return {
+      id: 'preflight_red_first', status: 'warn',
+      message: 'Declaration artifact exists but cannot be parsed.',
+      fix: `Delete ${declPath} and re-declare.`,
+      evidence: { declaration_path: declPath },
+    };
+  }
+
+  if (declaration.red_first_test) {
+    return {
+      id: 'preflight_red_first', status: 'pass',
+      message: `Red-first test declared: ${declaration.red_first_test}`,
+      fix: null,
+      evidence: { declaration_path: declPath, red_first_test: declaration.red_first_test, base_sha: declaration.base_sha },
+    };
+  }
+
+  const ackPath = path.join(repoRoot, 'sherlog.acknowledgements.json');
+  const ackDoc = readJson(ackPath, null);
+  const acks = Array.isArray(ackDoc?.acks) ? ackDoc.acks : [];
+  const today = new Date().toISOString().slice(0, 10);
+  const hasActiveAck = acks.some(ack => ack.gap === 'no_red_first_test' && (!ack.expires_on || ack.expires_on >= today));
+
+  if (hasActiveAck) {
+    return {
+      id: 'preflight_red_first', status: 'warn',
+      message: 'No red-first test declared, but active acknowledgement exists for no_red_first_test.',
+      fix: null,
+      evidence: { declaration_path: declPath, ack_gap: 'no_red_first_test' },
+    };
+  }
+
+  return {
+    id: 'preflight_red_first', status: 'warn',
+    message: 'No red-first test declared and no active acknowledgement. Add a red-first test to the plan provenance, or acknowledge with `sherlog:ack add --gap no_red_first_test --reason "..." --expires YYYY-MM-DD`.',
+    fix: 'Declare a red-first test in the plan provenance, or add an acknowledgement with expiry.',
+    evidence: { declaration_path: declPath },
+  };
 }
 
 function summarize(checks) {

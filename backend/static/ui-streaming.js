@@ -408,7 +408,7 @@ export const appendStream = (chunk, scrollCallback) => {
             const label = type === 'seed:think' ? 'Seed Think' : 'Reasoning\u2026';
             const { acc, content } = createAccordion('think', label, '');
             acc.classList.add('streaming');
-            acc.open = true;
+            acc.open = false;
             state.thinkAcc = content;
             state.thinkAccEl = acc;
             

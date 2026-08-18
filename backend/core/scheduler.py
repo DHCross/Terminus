@@ -253,6 +253,265 @@ class TerminusScheduler:
 
         self._scheduler.start()
         logger.info("[scheduler] Started — daily_brief@07:00, journal@21:00, compact@03:00, ping/30m")
+        self._restore_custom_tasks()
+
+    def _get_custom_tasks_file(self) -> Path:
+        p = Path.home() / ".terminus" / "data" / "custom_tasks.json"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return p
+
+    def _load_custom_tasks(self) -> dict:
+        f = self._get_custom_tasks_file()
+        if not f.exists():
+            return {}
+        try:
+            import json
+            return json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+    def _save_custom_tasks(self, tasks: dict):
+        f = self._get_custom_tasks_file()
+        try:
+            import json
+            f.write_text(json.dumps(tasks, indent=2), encoding="utf-8")
+        except Exception as e:
+            logger.warning(f"[scheduler] Failed saving custom tasks: {e}")
+
+    def _restore_custom_tasks(self):
+        tasks = self._load_custom_tasks()
+        for task_id, t in tasks.items():
+            try:
+                self._schedule_task_job(
+                    task_id=task_id,
+                    name=t.get("name", task_id),
+                    interval_minutes=t.get("interval_minutes"),
+                    cron_hour=t.get("cron_hour"),
+                    cron_minute=t.get("cron_minute"),
+                    instruction=t.get("instruction", ""),
+                    # Backwards compatibility: old tasks lack the 'watchdog' field —
+                    # default to False so they keep behaving as single-shot LLM calls.
+                    watchdog=bool(t.get("watchdog", False)),
+                    persist=False
+                )
+            except Exception as e:
+                logger.warning(f"[scheduler] Error restoring custom task {task_id}: {e}")
+
+    def _execute_custom_task(self, task_id: str, name: str, instruction: str,
+                             watchdog: bool = False):
+        """
+        Execute a scheduled background task and notify user if noteworthy.
+
+        When watchdog=True, the task runs with full tool access (browser, memory,
+        desktop — the generate_fn routes through a tooled LLM client) and uses
+        long-term memory for de-duplication: the last-seen findings are injected
+        into the prompt and the new findings are compared to them, so the user
+        is only notified when something actually changed.
+        """
+        logger.info(f"[scheduler] Executing custom background task '{name}' ({task_id}) watchdog={watchdog}")
+        if not self.generate_fn:
+            logger.warning(f"[scheduler] Cannot execute '{name}': no generate_fn configured")
+            return
+
+        # Memory-backed de-dup collection for this task
+        dedup_collection = f"watchdog_{task_id}" if watchdog else None
+        last_seen = ""
+        if dedup_collection:
+            try:
+                from core.memory import get_memory
+                mem = get_memory()
+                if mem.available:
+                    recall = mem.query(dedup_collection, instruction, n_results=1)
+                    # Extract just the stored finding text from the recall response
+                    if "No memories found" not in recall and "not available" not in recall.lower():
+                        last_seen = recall
+            except Exception as e:
+                logger.debug(f"[scheduler] watchdog last-seen recall skipped: {e}")
+
+        if watchdog:
+            prompt = (
+                f"You are Terminus running a background WATCHDOG task: '{name}'.\n"
+                f"Task Instruction: {instruction}\n\n"
+                f"You have full tool access: browser_open, browser_read_page, browser_extract_form, "
+                f"browser_fill_form, browser_click, browser_screenshot, memory_remember, memory_recall, "
+                f"desktop_screenshot, web_search, and all other registered tools. USE THEM to actually "
+                f"perform the task — open the page, read it, compare to what you've seen before.\n\n"
+            )
+            if last_seen:
+                prompt += (
+                    f"--- LAST-SEEN STATE (from your previous run of this watchdog) ---\n"
+                    f"{last_seen}\n"
+                    f"--- END LAST-SEEN ---\n\n"
+                    f"Compare what you find NOW to the last-seen state. Only report what is NEW or CHANGED. "
+                    f"If nothing changed since last-seen, return exactly: NO_ACTION\n\n"
+                )
+            else:
+                prompt += (
+                    f"This is the first run of this watchdog — there is no last-seen state. "
+                    f"Report what you find as the baseline. If there is genuinely nothing to report, "
+                    f"return exactly: NO_ACTION\n\n"
+                )
+            prompt += (
+                f"When you DO find something new or changed, provide a clear concise summary for Dan "
+                f"(what changed, why it matters, any link or detail he'd want). Then store the new "
+                f"state by calling memory_remember with collection='{dedup_collection}' so the next "
+                f"run can de-duplicate against it."
+            )
+        else:
+            prompt = (
+                f"You are Terminus running a background scheduled task: '{name}'.\n"
+                f"Task Instruction: {instruction}\n\n"
+                f"Execute any necessary analysis or actions. If you find important updates or results for Dan, "
+                f"provide a clear concise summary. If there is nothing new, return 'NO_ACTION'."
+            )
+
+        try:
+            response = self.generate_fn(prompt)
+            is_no_action = bool(response) and "NO_ACTION" in response
+
+            # Watchdog de-dup: store the new findings so the next run can compare.
+            # Skip storing on NO_ACTION so last-seen stays at the last meaningful finding.
+            if watchdog and not is_no_action and dedup_collection:
+                try:
+                    from core.memory import get_memory
+                    mem = get_memory()
+                    if mem.available:
+                        mem.add(
+                            collection=dedup_collection,
+                            content=f"Run @ {datetime.now().isoformat()[:19]}: {response[:1000]}",
+                            metadata={"task_id": task_id, "task_name": name, "type": "watchdog_snapshot"},
+                        )
+                except Exception as e:
+                    logger.debug(f"[scheduler] watchdog snapshot store skipped: {e}")
+
+            if response and not is_no_action:
+                # Send macOS system notification
+                try:
+                    from core.macos_controller import macos_controller
+                    clean_msg = response.strip().replace("\n", " ")[:120]
+                    macos_controller.system_notify(f"Terminus: {name}", clean_msg)
+                except Exception as ex:
+                    logger.debug(f"[scheduler] Failed to send notification: {ex}")
+
+                # Save output to journal
+                now_str = datetime.now().strftime("%Y-%m-%d")
+                task_log = JOURNAL_DIR / f"{now_str}-tasks.md"
+                with task_log.open("a", encoding="utf-8") as f:
+                    f.write(f"\n\n### [{datetime.now().strftime('%H:%M')}] Scheduled Task: {name}\n{response}\n")
+
+            # Always log the run (including NO_ACTION) to the per-task watchdog log
+            if watchdog:
+                try:
+                    now_str = datetime.now().strftime("%Y-%m-%d")
+                    wd_log = JOURNAL_DIR / f"{now_str}-watchdog.md"
+                    status = "NO_ACTION" if is_no_action else "NOTIFIED"
+                    with wd_log.open("a", encoding="utf-8") as f:
+                        f.write(
+                            f"\n### [{datetime.now().strftime('%H:%M')}] {name} ({task_id}) — {status}\n"
+                            f"{(response or '(empty)')[:600]}\n"
+                        )
+                except Exception as e:
+                    logger.debug(f"[scheduler] watchdog log write skipped: {e}")
+
+        except Exception as e:
+            logger.error(f"[scheduler] Custom task execution '{name}' failed: {e}")
+
+    def add_custom_task(
+        self,
+        name: str,
+        instruction: str,
+        interval_minutes: Optional[int] = None,
+        cron_hour: Optional[int] = None,
+        cron_minute: Optional[int] = None,
+        watchdog: bool = False,
+    ) -> str:
+        """Schedule a new recurring background task with persistence."""
+        import re
+        import uuid
+        task_id = f"task_{re.sub(r'[^a-zA-Z0-9_]', '_', name).lower()[:20]}_{str(uuid.uuid4())[:6]}"
+        return self._schedule_task_job(
+            task_id=task_id,
+            name=name,
+            interval_minutes=interval_minutes,
+            cron_hour=cron_hour,
+            cron_minute=cron_minute,
+            instruction=instruction,
+            watchdog=watchdog,
+            persist=True
+        )
+
+    def _schedule_task_job(
+        self,
+        task_id: str,
+        name: str,
+        instruction: str,
+        interval_minutes: Optional[int] = None,
+        cron_hour: Optional[int] = None,
+        cron_minute: Optional[int] = None,
+        persist: bool = True,
+        watchdog: bool = False,
+    ) -> str:
+        if not self._scheduler or not self._scheduler.running:
+            self.start()
+
+        if not self._scheduler:
+            return "APScheduler is not available on this system."
+
+        trigger = None
+        schedule_desc = ""
+        if interval_minutes and interval_minutes > 0:
+            trigger = IntervalTrigger(minutes=interval_minutes)
+            schedule_desc = f"every {interval_minutes} minutes"
+        elif cron_hour is not None:
+            minute = cron_minute if cron_minute is not None else 0
+            trigger = CronTrigger(hour=cron_hour, minute=minute)
+            schedule_desc = f"daily at {cron_hour:02d}:{minute:02d} UTC"
+        else:
+            trigger = IntervalTrigger(hours=1)
+            schedule_desc = "every 1 hour (default)"
+
+        self._scheduler.add_job(
+            lambda: self._execute_custom_task(task_id, name, instruction, watchdog=watchdog),
+            trigger,
+            id=task_id,
+            name=f"Task: {name}",
+            replace_existing=True,
+        )
+
+        if persist:
+            tasks = self._load_custom_tasks()
+            tasks[task_id] = {
+                "id": task_id,
+                "name": name,
+                "instruction": instruction,
+                "interval_minutes": interval_minutes,
+                "cron_hour": cron_hour,
+                "cron_minute": cron_minute,
+                "watchdog": watchdog,
+                "schedule": schedule_desc,
+                "created_at": datetime.now().isoformat()
+            }
+            self._save_custom_tasks(tasks)
+
+        logger.info(f"[scheduler] Scheduled custom task '{name}' ({task_id}) {schedule_desc} watchdog={watchdog}")
+        return f"Successfully scheduled task '{name}' (ID: {task_id}) running {schedule_desc}."
+
+    def cancel_task(self, task_id: str) -> str:
+        """Cancel a scheduled custom task."""
+        if self._scheduler and self._scheduler.running:
+            try:
+                self._scheduler.remove_job(task_id)
+            except Exception:
+                pass
+
+        # Remove from persistence
+        tasks = self._load_custom_tasks()
+        if task_id in tasks:
+            del tasks[task_id]
+            self._save_custom_tasks(tasks)
+            return f"Task '{task_id}' has been cancelled and removed."
+
+        return f"Task '{task_id}' removed from active schedule."
 
     def stop(self):
         """Stop the scheduler cleanly."""
@@ -282,14 +541,27 @@ class TerminusScheduler:
             "trace_compact": trace_compact,
             "health_ping": lambda: health_ping(self.db),
         }
-        if job_id not in job_map:
-            return False
-        try:
-            job_map[job_id]()
+        if job_id in job_map:
+            try:
+                job_map[job_id]()
+                return True
+            except Exception as e:
+                logger.error(f"[scheduler] Manual trigger {job_id} failed: {e}")
+                return False
+
+        # Check custom jobs
+        tasks = self._load_custom_tasks()
+        if job_id in tasks:
+            t = tasks[job_id]
+            self._execute_custom_task(
+                job_id,
+                t.get("name", job_id),
+                t.get("instruction", ""),
+                watchdog=bool(t.get("watchdog", False)),
+            )
             return True
-        except Exception as e:
-            logger.error(f"[scheduler] Manual trigger {job_id} failed: {e}")
-            return False
+
+        return False
 
 
 # Global singleton
