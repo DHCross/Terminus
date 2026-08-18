@@ -257,6 +257,19 @@ class ClaudeClient:
 
             # Final text response
             final_text = "".join(b.text for b in text_blocks) if text_blocks else ""
+            # Record token usage for cost tracking
+            try:
+                from core.usage_tracker import record_usage
+                u = response.usage
+                record_usage(
+                    self.model,
+                    prompt_tokens=getattr(u, "input_tokens", 0),
+                    completion_tokens=getattr(u, "output_tokens", 0),
+                    cache_read_tokens=getattr(u, "cache_read_input_tokens", 0),
+                    cache_write_tokens=getattr(u, "cache_creation_input_tokens", 0),
+                )
+            except Exception:
+                pass
             break
 
         self.conversation_history.append({"role": "assistant", "content": final_text})
@@ -369,6 +382,19 @@ class ClaudeClient:
             full_text += final_text
             if final_text:
                 yield {"type": "text", "content": final_text}
+            # Record token usage for cost tracking
+            try:
+                from core.usage_tracker import record_usage
+                u = response.usage
+                record_usage(
+                    self.model,
+                    prompt_tokens=getattr(u, "input_tokens", 0),
+                    completion_tokens=getattr(u, "output_tokens", 0),
+                    cache_read_tokens=getattr(u, "cache_read_input_tokens", 0),
+                    cache_write_tokens=getattr(u, "cache_creation_input_tokens", 0),
+                )
+            except Exception:
+                pass
             break
 
         assistant_content = full_text or ""

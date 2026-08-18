@@ -29,17 +29,34 @@ const updateCreditBalance = (balance) => {
     const sessionSpent = Number(balance.session_spent ?? 0);
     const trackerPath = String(balance.tracker_path || '').trim();
 
-    el.textContent = `~$${sessionSpent.toFixed(2)}`;
+    // Show remaining credit. If no starting balance set, fall back to session spend.
+    const hasManualBalance = starting > 0;
+    if (hasManualBalance) {
+        el.textContent = `$${remaining.toFixed(2)}`;
+    } else {
+        el.textContent = `~$${sessionSpent.toFixed(2)} spent`;
+    }
+
     el.title = [
-        `Shared local API spend estimate: $${sessionSpent.toFixed(4)} since last reset`,
-        `Shared tracked total across local projects using this tracker: $${totalSpent.toFixed(4)}`,
-        `Manual account reference: $${remaining.toFixed(2)} remaining of $${starting.toFixed(2)}`,
-        trackerPath ? `Tracker file: ${trackerPath}` : null,
-        'Still does not include Claude usage from other sites or tools unless they write to the same tracker.'
+        hasManualBalance
+            ? `Remaining credit: $${remaining.toFixed(2)} of $${starting.toFixed(2)}`
+            : 'No balance set — click to enter your current Anthropic credit',
+        `Session spend: $${sessionSpent.toFixed(4)}`,
+        `Total tracked spend: $${totalSpent.toFixed(4)}`,
+        trackerPath ? `Tracker: ${trackerPath}` : null,
+        'Click to update your current credit balance.',
     ].filter(Boolean).join('\n');
+
     el.classList.remove('low', 'critical');
-    if (sessionSpent >= 1) el.classList.add('critical');
-    else if (sessionSpent >= 0.25) el.classList.add('low');
+    if (hasManualBalance) {
+        // Warn when ≤20% remaining or ≤$2, critical when ≤$0.50
+        const pctLeft = starting > 0 ? remaining / starting : 1;
+        if (remaining <= 0.50 || pctLeft <= 0.05) el.classList.add('critical');
+        else if (remaining <= 2.00 || pctLeft <= 0.20) el.classList.add('low');
+    } else {
+        if (sessionSpent >= 5) el.classList.add('critical');
+        else if (sessionSpent >= 2) el.classList.add('low');
+    }
 };
 export { updateCreditBalance };
 
