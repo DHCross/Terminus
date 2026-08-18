@@ -701,7 +701,7 @@ export function showPrompt(message, defaultValue = '') {
 
         const label = document.createElement('label');
         label.textContent = message;
-        label.style.cssText = 'font-size:14px;color:var(--text,#cdd6f4);font-weight:600;';
+        label.style.cssText = 'font-size:14px;color:var(--text,#cdd6f4);font-weight:600;white-space:pre-line;';
 
         const input = document.createElement('input');
         input.type = 'text';

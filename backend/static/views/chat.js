@@ -497,7 +497,7 @@ export default {
             await saveTopicFolder(container);
         });
         container.querySelector('#topic-new-chat')?.addEventListener('click', async () => {
-            await handleNewChat();
+            await handleNewChat(_selectedTopic);
             await loadSidebar();
             await loadTopicChatList(container, { topic: _selectedTopic });
         });
@@ -747,7 +747,7 @@ export default {
         // Sidebar new/delete chat
         container.querySelector('#sb-new-chat')?.addEventListener('click', async () => {
             try {
-                await handleNewChat();
+                await handleNewChat(_selectedTopic);
                 await loadSidebar();
             } catch (e) {
                 console.error('[NewChat] Unexpected error:', e);
@@ -1520,6 +1520,15 @@ async function loadSidebar() {
         setVal(container, '#sb-spice-turns', settings.spice_turns || 3);
         setVal(container, '#sb-custom-context', settings.custom_context || '');
         setVal(container, '#topic-folder-input', settings.topic_folder || '');
+        const folderLabelEl = container.querySelector('#sb-chat-folder-label');
+        const folderBadgeEl = container.querySelector('#sb-chat-folder');
+        if (folderLabelEl) {
+            const routedFolder = normalizeTopicFolder(settings.topic_folder);
+            folderLabelEl.textContent = routedFolder || 'Unfiled';
+        }
+        if (folderBadgeEl) {
+            folderBadgeEl.classList.toggle('routed', !!normalizeTopicFolder(settings.topic_folder));
+        }
         if (!_selectedTopic || chatName !== chatSelect?.dataset?.topicChat) {
             _selectedTopic = settings.topic_folder || '';
         }
